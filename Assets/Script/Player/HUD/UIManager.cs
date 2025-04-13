@@ -1,0 +1,88 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI; // For the health slider
+using TMPro; // For TextMeshPro
+
+public class UIManager : MonoBehaviour
+{
+    [Header("Health UI")]
+    public Slider healthSlider; // Slider for displaying health
+
+    [Header("Ammo UI")]
+    public TMP_Text currentAmmoText; // Text for current ammo in the magazine
+    public TMP_Text reservedAmmoText; // Text for reserved ammo
+
+    [Header("Weapon UI")]
+    public TMP_Text weaponNameText; // Text for displaying the weapon name
+    public Slider soundSlider; // Slider for weapon sound level
+
+    // Method to update the health slider
+    public void UpdateHealth(int currentHealth, int maxHealth)
+    {
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
+    }
+
+    // Method to update the ammo text
+    public void UpdateAmmo(int currentAmmo, int reservedAmmo, Weapon.AmmoType ammoType)
+    {
+        if (currentAmmoText != null)
+        {
+            currentAmmoText.text = currentAmmo.ToString();
+            Debug.Log($"Updated Current Ammo: {currentAmmo}");
+        }
+        else
+        {
+            Debug.LogError("Current Ammo Text is null.");
+        }
+
+        if (reservedAmmoText != null)
+        {
+            reservedAmmoText.text = reservedAmmo.ToString();
+            Debug.Log($"Updated Reserved Ammo: {reservedAmmo}");
+        }
+        else
+        {
+            Debug.LogError("Reserved Ammo Text is null.");
+        }
+    }
+
+    // Method to update the weapon name and sound
+    public void UpdateWeaponUI(string weaponName, int soundLevel, Weapon.AmmoType ammoType)
+    {
+        if (weaponNameText != null)
+        {
+            weaponNameText.text = weaponName;
+
+            // Change weapon name outline color based on sound level
+            Color outlineColor = soundLevel <= 2 ? Color.white : Color.black; // White for low sound, Black for high sound
+            var outline = weaponNameText.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.effectColor = outlineColor;
+            }
+
+            Debug.Log($"Updated Weapon Name: {weaponName}, Sound Level: {soundLevel}");
+        }
+
+        if (soundSlider != null)
+        {
+            soundSlider.maxValue = 5;
+            soundSlider.value = soundLevel;
+        }
+    }
+
+    // Method to update the sound slider dynamically
+    public void UpdateSoundSlider(float soundLevel)
+    {
+        if (soundSlider != null)
+        {
+            soundSlider.maxValue = 5.0f; // Set the max value to 5
+            soundSlider.value = soundLevel; // Update the slider value
+        }
+    }
+}
