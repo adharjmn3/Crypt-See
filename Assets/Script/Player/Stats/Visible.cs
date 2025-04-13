@@ -8,11 +8,14 @@ namespace Player.Stats
 {
     public class Visible : MonoBehaviour
     {
-        [SerializeField] private float lightLevel = 0.0f;
-        [SerializeField] private float soundLevel = 0.0f; // Placeholder for sound level
+        [SerializeField] public float lightLevel = 0.0f;
+        [SerializeField] public float soundLevel = 0.0f; // Placeholder for sound level
         [SerializeField] private List<Light2D> excludedLights; // List of lights to exclude from detection
         [SerializeField, Range(0.1f, 2.0f)] private float lightSensitivity = 1.0f; // Slider for light sensitivity
         [SerializeField, Range(0.1f, 1.0f)] private float soundDecayRate = 0.2f; // Rate at which sound level decreases over time
+        [SerializeField] private AudioClip lightOffSound; // Audio clip to play when lights are turned off
+        [SerializeField] private AudioClip lightOnSound; // Audio clip to play when lights are turned on
+        private AudioSource audioSource; // Reference to the AudioSource component
 
         private PlayerMovement playerMovement; // Reference to PlayerMovement
 
@@ -32,26 +35,42 @@ namespace Player.Stats
         {
             // Get the PlayerMovement component
             playerMovement = GetComponent<PlayerMovement>();
+
+            // Add or get the AudioSource component
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
         }
 
         private void Update()
         {
             DetectLightSources();
 
-            // Gradually decrease sound level over time
-            if (soundLevel > 0.0f)
+            // Check if the player is pressing the move button
+            if (playerMovement != null && playerMovement.CurrentSpeed > 0.0f && IsMoving())
             {
-                soundLevel -= soundDecayRate * Time.deltaTime; // Decrease sound level
-                soundLevel = Mathf.Clamp(soundLevel, 0.0f, 5.0f); // Ensure it doesn't go below 0
-            }
-
-            // Dynamically scale sound level based on player movement
-            if (playerMovement != null)
-            {
+                // Dynamically scale sound level based on player movement
                 float movementSound = playerMovement.CalculateVolume(playerMovement.CurrentSpeed);
-                soundLevel += movementSound;
+                soundLevel = movementSound;
                 soundLevel = Mathf.Clamp(soundLevel, 0.0f, 5.0f); // Ensure it doesn't exceed max
             }
+            else
+            {
+                // Gradually decrease sound level over time when not moving
+                if (soundLevel > 0.0f)
+                {
+                    soundLevel -= soundDecayRate * Time.deltaTime; // Decrease sound level
+                    soundLevel = Mathf.Clamp(soundLevel, 0.0f, 5.0f); // Ensure it doesn't go below 0
+                }
+            }
+        }
+
+        // Helper method to check if the player is moving
+        private bool IsMoving()
+        {
+            return Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0;
         }
 
         // Method to add weapon sound to the current sound level
@@ -91,6 +110,18 @@ namespace Player.Stats
 
             // Update the light level (clamped between 0 and 1)
             LightLevel = Mathf.Clamp(totalIntensity, 0.0f, 1.0f);
+
+            // Disable or enable excluded lights based on LightLevel
+            if (LightLevel == 1.0f)
+            {
+                DisableExcludedLights();
+                Debug.Log("All lights are on, disabling excluded lights.");
+            }
+            else
+            {
+                EnableExcludedLights();
+                Debug.Log("Not all lights are on, enabling excluded lights.");
+            }
         }
 
         private void DisableExcludedLights()
@@ -100,6 +131,12 @@ namespace Player.Stats
                 if (excludedLight != null && excludedLight.enabled)
                 {
                     excludedLight.enabled = false; // Disable the excluded light
+
+                    // Play the light-off sound
+                    if (lightOffSound != null && audioSource != null)
+                    {
+                        audioSource.PlayOneShot(lightOffSound);
+                    }
                 }
             }
         }
@@ -110,9 +147,35 @@ namespace Player.Stats
             {
                 if (excludedLight != null && !excludedLight.enabled)
                 {
-                    excludedLight.enabled = true; // Re-enable the excluded light
+                    excludedLight.enabled = true; // Enable the light
+                    StartCoroutine(GraduallyTurnOnLight(excludedLight)); // Gradually increase intensity
+
+                    // Play the light-on sound
+                    if (lightOnSound != null && audioSource != null)
+                    {
+                        audioSource.PlayOneShot(lightOnSound);
+                    }
                 }
             }
+        }
+
+        // Coroutine to gradually increase the intensity of a light
+        private IEnumerator GraduallyTurnOnLight(Light2D light)
+        {
+            float targetIntensity = light.intensity; // Store the target intensity
+            light.intensity = 0.0f; // Start from 0 intensity
+
+            float duration = 1.0f; // Duration of the effect in seconds
+            float elapsedTime = 0.0f;
+
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                light.intensity = Mathf.Lerp(0.0f, targetIntensity, elapsedTime / duration); // Gradually increase intensity
+                yield return null; // Wait for the next frame
+            }
+
+            light.intensity = targetIntensity; // Ensure the final intensity is set
         }
     }
 }

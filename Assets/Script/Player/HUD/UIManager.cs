@@ -81,8 +81,15 @@ public class UIManager : MonoBehaviour
     {
         if (soundSlider != null)
         {
-            soundSlider.maxValue = 5.0f; // Set the max value to 5
-            soundSlider.value = soundLevel; // Update the slider value
+            soundSlider.maxValue = 5.0f; // Set the max value to 10
+        float roundedSoundLevel = Mathf.Round(soundLevel * 10f) / 10f;
+
+        // Update the slider value only if the rounded value is valid
+        soundSlider.value = Mathf.Clamp(roundedSoundLevel * 5.0f, 0.0f, 5.0f);
+        }
+        else
+        {
+            Debug.LogError("Sound slider is not assigned in the UIManager.");
         }
     }
 }

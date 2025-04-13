@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Player.Stats;
 using TopDown.CameraController;
+using TopDown.Movement;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -12,12 +13,17 @@ public class PlayerManager : MonoBehaviour
     public Stats stats; // Reference to the Stats script
     public Inventory inventory; // Reference to the Inventory script
     public Visible visibility; // Reference to the Visible script
+    public PlayerMovement playerMovement; // Reference to the PlayerMovement script
     public CameraController cameraController; // Reference to the CameraController script
 
     [Header("UI and Managers")]
     public UIManager uiManager; // Reference to the UI Manager
 
     private PlayerInput playerInput;
+
+    // Public readonly properties for lightLevel and soundLevel
+    public float LightLevel => visibility != null ? visibility.LightLevel : 0.0f;
+    public float SoundLevel => visibility != null ? visibility.soundLevel : 0.0f; // Initialize sound level from Visible script;
 
     void Awake()
     {
@@ -37,11 +43,15 @@ public class PlayerManager : MonoBehaviour
 
     void Update()
     {
-        // Dynamically update the sound slider in the UI
-        if (visibility != null && uiManager != null)
-        {
-            uiManager.UpdateSoundSlider(visibility.SoundLevel);
+        // Update the sound slider in the UI based on SoundLevel
+        if (uiManager != null)
+        {   
+            
+            uiManager.UpdateSoundSlider(SoundLevel);
         }
+
+        // Optionally log light and sound levels for debugging
+        Debug.Log($"Light Level: {LightLevel}, Sound Level: {SoundLevel}");
     }
 
     public void OnShoot(InputAction.CallbackContext context)
@@ -135,32 +145,5 @@ public class PlayerManager : MonoBehaviour
             stats.AddKill();
             Debug.Log($"Player kills: {stats.GetKills()}");
         }
-    }
-
-    public void UpdateVisibility()
-    {
-        if (visibility != null)
-        {
-            float lightLevel = visibility.LightLevel;
-            float soundLevel = visibility.SoundLevel;
-            Debug.Log($"Light Level: {lightLevel}, Sound Level: {soundLevel}");
-            // Additional logic for visibility (e.g., alert AI)
-        }
-    }
-
-    // Expose Visible stats for other elements
-    public float GetLightLevel()
-    {
-        return visibility != null ? visibility.LightLevel : 0.0f;
-    }
-
-    public float GetSoundLevel()
-    {
-        return visibility != null ? visibility.SoundLevel : 0.0f;
-    }
-
-    public Visible GetVisibility()
-    {
-        return visibility;
     }
 }

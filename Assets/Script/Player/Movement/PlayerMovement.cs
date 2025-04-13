@@ -14,6 +14,15 @@ namespace TopDown.Movement
         [SerializeField] private float minVolume = 0.1f; // Minimum volume
         [SerializeField] private float maxVolume = 1.0f; // Maximum volume
 
+        public float CurrentSpeed
+        {
+            get { return baseSpeed; }
+        }
+
+        // Expose minSpeed and maxSpeed as public properties
+        public float MinSpeed => minSpeed;
+        public float MaxSpeed => maxSpeed;
+
         private void OnMove(InputValue value)
         {
             Vector3 playerInput = new Vector3(value.Get<Vector2>().x, value.Get<Vector2>().y, 0);
@@ -46,6 +55,5 @@ namespace TopDown.Movement
 
             return volume;
         }
-        
     }
 }
