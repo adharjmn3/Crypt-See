@@ -2,11 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TopDown.Movement; // Add this line to fix the namespace issue
+using TopDown.Movement;
 
 public class Shoot : MonoBehaviour
 {
     public bool isShooting = false;
+
+    [Header("Effects")]
+    public ParticleSystem muzzleFlash; // Particle effect for muzzle flash
+    public Transform casingEjectPoint; // Transform for bullet casing ejection
+    public GameObject casingPrefab; // Prefab for bullet casing
+    public AudioSource audioSource; // AudioSource for weapon sounds
+
+    [Header("Weapon Sounds")]
+    public AudioClip kineticSound; // Sound for kinetic weapons
+    public AudioClip empSound; // Sound for EMP weapons
+    public AudioClip punchSound; // Sound for punching
+
     private PlayerInput playerInput;
     private Inventory inventory;
     private UIManager uiManager;
@@ -41,13 +53,16 @@ public class Shoot : MonoBehaviour
         if (!isShooting && playerMovement.CanMove) // Only shoot if not already shooting and player can move
         {
             WeaponInstance currentWeapon = inventory.CurrentWeapon;
-                UpdateWeaponUI();
             if (currentWeapon != null && currentWeapon.Fire())
             {
                 isShooting = true;
                 playerMovement.CanMove = false; // Disable movement while shooting
                 TriggerShootAnimation(true); // Set the shooting animation
+                PlayMuzzleFlash(); // Play particle effect
+                EjectCasing(); // Eject bullet casing
+                PlayWeaponSound(currentWeapon); // Play weapon sound
                 Debug.Log($"Fired {currentWeapon.weaponName}");
+                UpdateWeaponUI();
             }
             else
             {
@@ -74,6 +89,51 @@ public class Shoot : MonoBehaviour
             currentWeapon.Reload(); // Reload the weapon
             Debug.Log($"Reloaded {currentWeapon.weaponName}");
             UpdateWeaponUI(); // Update the UI immediately after reloading
+        }
+    }
+
+    private void PlayMuzzleFlash()
+    {
+        if (muzzleFlash != null)
+        {
+            muzzleFlash.Play(); // Play the muzzle flash particle effect
+        }
+    }
+
+    private void EjectCasing()
+    {
+        if (casingPrefab != null && casingEjectPoint != null)
+        {
+            Instantiate(casingPrefab, casingEjectPoint.position, casingEjectPoint.rotation); // Instantiate bullet casing
+        }
+    }
+
+    private void PlayWeaponSound(WeaponInstance currentWeapon)
+    {
+        if (audioSource != null)
+        {
+            AudioClip clipToPlay = null;
+
+            // Determine the sound based on the weapon type
+            switch (currentWeapon.ammoType)
+            {
+                case Weapon.AmmoType.Kinetic:
+                    clipToPlay = kineticSound;
+                    break;
+                case Weapon.AmmoType.EMP:
+                    clipToPlay = empSound;
+                    break;
+                case Weapon.AmmoType.Unarmed:
+                    clipToPlay = punchSound;
+                    break;
+            }
+
+            if (clipToPlay != null)
+            {
+                audioSource.clip = clipToPlay;
+                audioSource.volume = Mathf.Clamp01(currentWeapon.sound / 5f); // Adjust volume based on weapon sound level (0-5)
+                audioSource.Play(); // Play the sound
+            }
         }
     }
 
