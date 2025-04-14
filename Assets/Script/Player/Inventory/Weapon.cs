@@ -17,6 +17,8 @@ public class Weapon : ScriptableObject
 
     private float lastFireTime; // Tracks the last time the weapon was fired
 
+    private int originalBulletsInMagazine; // Store the original bullets in magazine for reloading
+    private int originalTotalAmmo; // Store the original total ammo for reloading
     // Method to reload the weapon
     public void Reload()
     {
@@ -65,4 +67,13 @@ public class Weapon : ScriptableObject
         totalAmmo += amount;
         Debug.Log($"Added {amount} ammo to {weaponName}. Total ammo: {totalAmmo}");
     }
+
+    public void Initialize()
+    {
+        originalBulletsInMagazine = magazineSize; // Set to max size initially
+        originalTotalAmmo = totalAmmo; // Store the initial total ammo
+        bulletsInMagazine = magazineSize; // Start with a full magazine
+    }
+
+
 }

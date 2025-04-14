@@ -84,4 +84,26 @@ public class Inventory : MonoBehaviour
             Debug.Log("No weapon equipped to add ammo.");
         }
     }
+
+    // Method to change to a specific weapon by index
+    public void ChangeWeapon(int weaponIndex)
+    {
+        if (weaponIndex >= 0 && weaponIndex < weapons.Count)
+        {
+            currentWeaponIndex = weaponIndex;
+            Debug.Log($"Changed to weapon: {weapons[currentWeaponIndex].weaponName}");
+        }
+        else
+        {
+            Debug.Log("Invalid weapon index. Cannot change weapon.");
+        }
+    }
+
+    public void RestartAmmo()
+    {
+        foreach (var weapon in weapons)
+        {
+            weapon.Initialize(); // Reset the weapon to its initial state
+        }
+    }
 }

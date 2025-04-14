@@ -38,7 +38,10 @@ public class PlayerManager : MonoBehaviour
             health.currentHealth = health.maxHealth;
         }
 
+        
+        inventory.RestartAmmo(); // Initialize ammo for all weapons in the inventory
         UpdateAmmoUI();
+        UpdateWeaponUI();
     }
 
     void Update()
@@ -49,9 +52,6 @@ public class PlayerManager : MonoBehaviour
             
             uiManager.UpdateSoundSlider(SoundLevel);
         }
-
-        // Optionally log light and sound levels for debugging
-        Debug.Log($"Light Level: {LightLevel}, Sound Level: {SoundLevel}");
     }
 
     public void OnShoot(InputAction.CallbackContext context)
@@ -95,6 +95,17 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void OnChangeWeapon(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            int weaponIndex = Mathf.RoundToInt(context.ReadValue<float>()); // Assuming the input system provides a float value
+            inventory.ChangeWeapon(weaponIndex);
+            UpdateWeaponUI();
+            UpdateAmmoUI();
+        }
+    }
+
     private void UpdateAmmoUI()
     {
         Weapon currentWeapon = inventory.CurrentWeapon;
@@ -102,6 +113,15 @@ public class PlayerManager : MonoBehaviour
         {
             // Pass the ammoType to the UpdateAmmo method
             uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
+        }
+    }
+
+    private void UpdateWeaponUI()
+    {
+        Weapon currentWeapon = inventory.CurrentWeapon;
+        if (uiManager != null && currentWeapon != null)
+        {
+            uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
         }
     }
 
