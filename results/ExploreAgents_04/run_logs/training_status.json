@@ -1,0 +1,41 @@
+{
+    "difficulty": {
+        "lesson_num": 2
+    },
+    "ExploreAgent": {
+        "checkpoints": [
+            {
+                "steps": 499952,
+                "file_path": "results\\ExploreAgents_04\\ExploreAgent\\ExploreAgent-499952.onnx",
+                "reward": 1.385659486536732,
+                "creation_time": 1744624582.583652,
+                "auxillary_file_paths": [
+                    "results\\ExploreAgents_04\\ExploreAgent\\ExploreAgent-499952.pt"
+                ]
+            },
+            {
+                "steps": 672166,
+                "file_path": "results\\ExploreAgents_04\\ExploreAgent\\ExploreAgent-672166.onnx",
+                "reward": 1.5571955887303837,
+                "creation_time": 1744625063.3448913,
+                "auxillary_file_paths": [
+                    "results\\ExploreAgents_04\\ExploreAgent\\ExploreAgent-672166.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 672166,
+            "file_path": "results\\ExploreAgents_04\\ExploreAgent.onnx",
+            "reward": 1.5571955887303837,
+            "creation_time": 1744625063.3448913,
+            "auxillary_file_paths": [
+                "results\\ExploreAgents_04\\ExploreAgent\\ExploreAgent-672166.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu126"
+    }
+}

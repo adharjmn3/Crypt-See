@@ -11,25 +11,53 @@ public class ExploreAgents : Agent
     [SerializeField] float moveSpeed;
     [SerializeField] float rotateSpeed;
     [SerializeField] Light2D[] lights;
+    [SerializeField] LayerMask obstacleMask;
+    [SerializeField] Transform[] points;
+
     private Rigidbody2D rb;
     private Vector3 startPos;
+    private Vector3 playerPos;
     private float difficulty;
+    private int steps;
+    private float previousDistance;
 
     public override void Initialize()
     {
         rb = GetComponent<Rigidbody2D>();
-        startPos = transform.localPosition;
-        difficulty = Academy.Instance.EnvironmentParameters.GetWithDefault("difficulty", 0f);
+        startPos =points[0].localPosition;
     }
 
     public override void OnEpisodeBegin()
     {
+        if (steps >= MaxStep && difficulty >= 2)
+        {
+            AddReward(-1f);
+        }
+
+        steps = 0;
+        difficulty = Academy.Instance.EnvironmentParameters.GetWithDefault("difficulty", 0f);
+
+        if (difficulty == 1.0f)
+        {
+            playerPos = lights[0].transform.localPosition;
+            startPos = points[0].localPosition;
+        }
+        else if (difficulty == 2.0f)
+        {
+            playerPos = lights[Random.Range(0, 1)].transform.localPosition;
+            startPos = points[Random.Range(0,1)].localPosition;
+        }
+        else
+        {
+            playerPos = lights[Random.Range(0, lights.Length)].transform.localPosition;
+            startPos = points[Random.Range(0,points.Length)].localPosition;
+        }
+
         transform.localPosition = startPos + new Vector3(Random.Range(-3, 3), Random.Range(0, 2), 0);
         rb.velocity = Vector3.zero;
-        
-        Vector3 playerPos = lights[Random.Range(0, lights.Length)].transform.position;
-        float maxOffset = Mathf.Lerp(1f, 6f, difficulty); // player moves further away at higher difficulty
-        player.transform.localPosition = playerPos + new Vector3(Random.Range(-maxOffset, maxOffset), Random.Range(0, maxOffset), 0);
+
+        player.transform.localPosition = playerPos + new Vector3(Random.Range(1, 1), Random.Range(0, 1), 0);
+        previousDistance = Vector3.Distance(transform.localPosition, player.transform.localPosition);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -38,14 +66,11 @@ public class ExploreAgents : Agent
         sensor.AddObservation(player.transform.localPosition);
         sensor.AddObservation(Vector3.Distance(transform.localPosition, player.transform.localPosition));
 
-        float playerNearLight = IsPlayerNearLight() ? 1f : 0f;
-        sensor.AddObservation(playerNearLight);
-    }
+        float playerInLight = IsPlayerInLight() ? 1f : 0f;
+        float playerVisible = CanSeePlayer() ? 1f : 0f;
 
-    private bool IsPlayerNearLight()
-    {
-        float lightLevel = player.GetComponent<Visible>().LightLevel;
-        return lightLevel == 1;
+        sensor.AddObservation(playerInLight);
+        sensor.AddObservation(playerVisible);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -55,26 +80,40 @@ public class ExploreAgents : Agent
 
         Vector2 move = transform.up * moveAction * moveSpeed * Time.deltaTime;
         rb.MovePosition(rb.position + move);
-
         rb.MoveRotation(rb.rotation + lookAction * rotateSpeed * Time.deltaTime);
 
         float dist = Vector3.Distance(transform.localPosition, player.transform.localPosition);
+        bool canSee = CanSeePlayer();
+        bool isInLight = IsPlayerInLight();
 
-        // Reward if caught
-        if (dist < 1.5f && IsPlayerNearLight())
+        // Fokus hanya saat player terlihat & dalam cahaya
+        if (canSee && isInLight)
         {
-            SetReward(1.0f);
-            EndEpisode();
+            if (dist < 1.5f)
+            {
+                AddReward(1.0f);
+                EndEpisode();
+            }
+            else
+            {
+                if (dist < previousDistance)
+                {
+                    AddReward(0.005f); // reward kecil saat makin dekat
+                }
+                else
+                {
+                    AddReward(-0.005f); // penalti saat menjauh
+                }
+            }
+        }
+        else
+        {
+            // Eksplorasi → reward netral (bisa ubah jadi 0.0001f jika perlu)
+            AddReward(0.0001f);
         }
 
-        // Small reward for exploring when player is not near light
-        if (!IsPlayerNearLight())
-        {
-            AddReward(0.001f);
-        }
-
-        // Small penalty to encourage efficiency
-        AddReward(-0.001f);
+        previousDistance = dist;
+        steps++;
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -84,15 +123,35 @@ public class ExploreAgents : Agent
         cont[1] = Input.GetKey(KeyCode.A) ? 1f : Input.GetKey(KeyCode.D) ? -1f : 0f;
     }
 
+    private bool IsPlayerInLight()
+    {
+        if (player.TryGetComponent(out Visible visible))
+        {
+            return visible.LightLevel == 1;
+        }
+        return false;
+    }
+
+    private bool CanSeePlayer()
+    {
+        Vector2 dir = player.transform.position - transform.position;
+        float dist = dir.magnitude;
+
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir.normalized, dist, obstacleMask);
+        return hit.collider == null;
+    }
+
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.CompareTag("Wall")){
-            SetReward(-0.5f);
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            AddReward(-0.5f);
             EndEpisode();
         }
 
-        if(collision.gameObject.CompareTag("Player")){
-            SetReward(1f);
+        if (collision.gameObject.CompareTag("Player") && CanSeePlayer())
+        {
+            AddReward(1f);
             EndEpisode();
         }
     }

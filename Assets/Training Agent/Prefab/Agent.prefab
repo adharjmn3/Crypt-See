@@ -323,9 +323,10 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 5000
-  playerTransform: {fileID: 0}
-  playerAudioSource: {fileID: 0}
-  maxHearingDistance: 8
+  player: {fileID: 0}
   moveSpeed: 10
   rotateSpeed: 180
-  spawnPoints: []
+  lights: []
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 128
