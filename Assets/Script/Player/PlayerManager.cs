@@ -19,16 +19,11 @@ public class PlayerManager : MonoBehaviour
     [Header("UI and Managers")]
     public UIManager uiManager; // Reference to the UI Manager
 
-    private PlayerInput playerInput;
+    public PlayerInput playerInput;
 
     // Public readonly properties for lightLevel and soundLevel
     public float LightLevel => visibility != null ? visibility.LightLevel : 0.0f;
     public float SoundLevel => visibility != null ? visibility.soundLevel : 0.0f; // Initialize sound level from Visible script;
-
-    void Awake()
-    {
-        playerInput = GetComponent<PlayerInput>();
-    }
 
     void Start()
     {
@@ -38,7 +33,6 @@ public class PlayerManager : MonoBehaviour
             health.currentHealth = health.maxHealth;
         }
 
-        
         inventory.RestartAmmo(); // Initialize ammo for all weapons in the inventory
         UpdateAmmoUI();
         UpdateWeaponUI();
@@ -49,7 +43,6 @@ public class PlayerManager : MonoBehaviour
         // Update the sound slider in the UI based on SoundLevel
         if (uiManager != null)
         {   
-            
             uiManager.UpdateSoundSlider(SoundLevel);
         }
     }
@@ -64,7 +57,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Shoot()
     {
-        Weapon currentWeapon = inventory.CurrentWeapon;
+        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (currentWeapon != null && currentWeapon.Fire())
         {
             Debug.Log($"Fired {currentWeapon.weaponName}");
@@ -86,7 +79,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Reload()
     {
-        Weapon currentWeapon = inventory.CurrentWeapon;
+        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (currentWeapon != null)
         {
             currentWeapon.Reload();
@@ -99,26 +92,34 @@ public class PlayerManager : MonoBehaviour
     {
         if (context.performed)
         {
-            int weaponIndex = Mathf.RoundToInt(context.ReadValue<float>()); // Assuming the input system provides a float value
-            inventory.ChangeWeapon(weaponIndex);
-            UpdateWeaponUI();
-            UpdateAmmoUI();
+            // Read the input value (1 or 2) and map it to weapon slots
+            int weaponSlot = Mathf.RoundToInt(context.ReadValue<float>()) - 1; // Convert 1-based input to 0-based index
+
+            if (weaponSlot >= 0 && weaponSlot < inventory.weaponReferences.Count)
+            {
+                inventory.ChangeWeapon(weaponSlot); // Change to the selected weapon slot
+                UpdateWeaponUI();
+                UpdateAmmoUI();
+            }
+            else
+            {
+                Debug.Log("Invalid weapon slot selected.");
+            }
         }
     }
 
     private void UpdateAmmoUI()
     {
-        Weapon currentWeapon = inventory.CurrentWeapon;
+        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (uiManager != null && currentWeapon != null)
         {
-            // Pass the ammoType to the UpdateAmmo method
             uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
         }
     }
 
     private void UpdateWeaponUI()
     {
-        Weapon currentWeapon = inventory.CurrentWeapon;
+        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (uiManager != null && currentWeapon != null)
         {
             uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
@@ -147,10 +148,9 @@ public class PlayerManager : MonoBehaviour
 
     public void AddAmmo(int amount)
     {
-        Weapon currentWeapon = inventory.CurrentWeapon;
+        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (currentWeapon != null)
         {
-            // Add ammo to totalAmmo but ensure it does not exceed maxAmmo
             currentWeapon.totalAmmo += amount;
             currentWeapon.totalAmmo = Mathf.Clamp(currentWeapon.totalAmmo, 0, currentWeapon.magazineSize * 4); // Example: maxAmmo = 4x magazineSize
             Debug.Log($"Added {amount} ammo to {currentWeapon.weaponName}. Current ammo: {currentWeapon.totalAmmo}/{currentWeapon.magazineSize * 4}");

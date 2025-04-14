@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Lugma
   ammoType: 0
-  magazineSize: 30
-  bulletsInMagazine: 25
-  totalAmmo: 99
+  magazineSize: 10
+  bulletsInMagazine: 10
+  totalAmmo: 88
   damage: 4
   fireRate: 5
   range: 5
