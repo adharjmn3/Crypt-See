@@ -31,30 +31,30 @@ behaviors:
 environment_parameters:
   difficulty:
     curriculum:
-      - name: Easy
+      - name: Level 1
         completion_criteria:
           measure: reward
           behavior: ExploreAgent
           signal_smoothing: true
           min_lesson_length: 200
           threshold: 0.4
-        value: 0.0
+        value: 1.0
 
-      - name: Medium
+      - name: Level 2
         completion_criteria:
           measure: reward
           behavior: ExploreAgent
           signal_smoothing: true
           min_lesson_length: 200
-          threshold: 0.6
-        value: 0.5
+          threshold: 0.7
+        value: 2.0
 
-      - name: Hard
+      - name: Level 3
         completion_criteria:
           measure: reward
           behavior: ExploreAgent
           signal_smoothing: true
           min_lesson_length: 200
           threshold: 0.9
-        value: 1.0
+        value: 3.0
 
