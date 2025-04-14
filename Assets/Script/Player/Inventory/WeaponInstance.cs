@@ -38,14 +38,14 @@ public class WeaponInstance
 
         if (bulletsInMagazine > 0)
         {
-            bulletsInMagazine--;
+            bulletsInMagazine--; // Decrease bullets in the magazine
             lastFireTime = Time.time;
-            Debug.Log($"Fired a {ammoType} bullet from {weaponName}! Bullets left in magazine: {bulletsInMagazine}");
+            Debug.Log($"Fired a bullet! Bullets left in magazine: {bulletsInMagazine}");
             return true; // Successfully fired
         }
         else
         {
-            Debug.Log($"{weaponName} is out of bullets in the magazine! Reload required.");
+            Debug.Log("Out of bullets in the magazine! Reload required.");
             return false; // Failed to fire
         }
     }
@@ -57,14 +57,14 @@ public class WeaponInstance
             int bulletsNeeded = magazineSize - bulletsInMagazine;
             int bulletsToReload = Mathf.Min(bulletsNeeded, totalAmmo);
 
-            bulletsInMagazine += bulletsToReload;
-            totalAmmo -= bulletsToReload;
+            bulletsInMagazine += bulletsToReload; // Add bullets to the magazine
+            totalAmmo -= bulletsToReload; // Decrease total ammo
 
-            Debug.Log($"{weaponName} reloaded. Bullets in magazine: {bulletsInMagazine}, Total ammo: {totalAmmo}");
+            Debug.Log($"Reloaded weapon. Bullets in magazine: {bulletsInMagazine}, Total ammo: {totalAmmo}");
         }
         else
         {
-            Debug.Log($"{weaponName} has no ammo left to reload.");
+            Debug.Log("No ammo left to reload.");
         }
     }
 }

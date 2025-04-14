@@ -9,21 +9,24 @@ using TopDown.Movement;
 public class PlayerManager : MonoBehaviour
 {
     [Header("Player Components")]
-    public Health health; // Reference to the Health script
-    public Stats stats; // Reference to the Stats script
-    public Inventory inventory; // Reference to the Inventory script
-    public Visible visibility; // Reference to the Visible script
-    public PlayerMovement playerMovement; // Reference to the PlayerMovement script
-    public CameraController cameraController; // Reference to the CameraController script
+    public Health health;
+    public Stats stats;
+    public Inventory inventory;
+    public Visible visibility;
+    public PlayerMovement playerMovement;
+    public CameraController cameraController;
+    public Shoot shoot;
 
     [Header("UI and Managers")]
-    public UIManager uiManager; // Reference to the UI Manager
+    public UIManager uiManager;
 
     public PlayerInput playerInput;
 
     // Public readonly properties for lightLevel and soundLevel
     public float LightLevel => visibility != null ? visibility.LightLevel : 0.0f;
-    public float SoundLevel => visibility != null ? visibility.soundLevel : 0.0f; // Initialize sound level from Visible script;
+    public float SoundLevel => visibility != null ? visibility.soundLevel : 0.0f;
+
+    private bool isShooting = false;
 
     void Start()
     {
@@ -42,31 +45,47 @@ public class PlayerManager : MonoBehaviour
     {
         // Update the sound slider in the UI based on SoundLevel
         if (uiManager != null)
-        {   
+        {
             uiManager.UpdateSoundSlider(SoundLevel);
         }
     }
 
     public void OnShoot(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && !isShooting && playerMovement.CanMove)
         {
-            Shoot();
+            StartShooting();
         }
     }
 
-    private void Shoot()
+    private void StartShooting()
     {
         WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (currentWeapon != null && currentWeapon.Fire())
         {
+            isShooting = true;
+            playerMovement.CanMove = false; // Disable movement while shooting
+            shoot.isShooting = true; // Notify Shoot script
+            shoot.TriggerShootAnimation(true); // Trigger shooting animation
             Debug.Log($"Fired {currentWeapon.weaponName}");
             UpdateAmmoUI();
+
+            // Reset shooting state after a short delay
+            StartCoroutine(ResetShooting());
         }
         else
         {
             Debug.Log("Cannot shoot: No weapon or out of ammo.");
         }
+    }
+
+    private IEnumerator ResetShooting()
+    {
+        yield return new WaitForSeconds(0.1f); // Adjust delay as needed for animation timing
+        isShooting = false;
+        playerMovement.CanMove = true; // Re-enable movement
+        shoot.isShooting = false; // Notify Shoot script
+        shoot.TriggerShootAnimation(false); // Reset shooting animation
     }
 
     public void OnReload(InputAction.CallbackContext context)
@@ -92,7 +111,6 @@ public class PlayerManager : MonoBehaviour
     {
         if (context.performed)
         {
-            // Read the input value (1 or 2) and map it to weapon slots
             int weaponSlot = Mathf.RoundToInt(context.ReadValue<float>()) - 1; // Convert 1-based input to 0-based index
 
             if (weaponSlot >= 0 && weaponSlot < inventory.weaponReferences.Count)
