@@ -17,6 +17,8 @@ public class UIManager : MonoBehaviour
     public TMP_Text weaponNameText; // Text for displaying the weapon name
     public Slider soundSlider; // Slider for weapon sound level
 
+
+    
     // Method to update the health slider
     public void UpdateHealth(int currentHealth, int maxHealth)
     {

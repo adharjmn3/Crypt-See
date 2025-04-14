@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Weapon", menuName = "Weapon")]
 public class Weapon : ScriptableObject
 {
-    public enum AmmoType { Kinetic, EMP }
+    public enum AmmoType { Kinetic, EMP, Unarmed }
 
     public string weaponName; // Name of the weapon
     public AmmoType ammoType; // Type of ammo
