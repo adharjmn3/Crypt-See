@@ -13,6 +13,7 @@ public class Weapon : ScriptableObject
     public int damage;        // Damage dealt by the weapon
     public float fireRate;    // Rate of fire (shots per second)
     public float range;       // Range of the weapon
+    public float bulletSpeed; // New property for bullet speed
     [Range(0, 5)] public int sound; // Sound level (0 = silent, 5 = very loud)
 
     private float lastFireTime; // Tracks the last time the weapon was fired

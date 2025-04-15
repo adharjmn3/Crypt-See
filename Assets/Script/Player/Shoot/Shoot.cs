@@ -22,6 +22,10 @@ public class Shoot : MonoBehaviour
     public AudioClip empSound; // Sound for EMP weapons
     public AudioClip punchSound; // Sound for punching
 
+    [Header("Bullet Settings")]
+    public GameObject bulletPrefab; // Prefab for the bullet
+    public Transform bulletSpawnPoint; // Transform for bullet spawn
+
     private Inventory inventory;
     private PlayerMovement playerMovement;
     private Animator animator;
@@ -87,6 +91,9 @@ public class Shoot : MonoBehaviour
             EjectCasing();
         }
 
+        // Spawn bullet
+        SpawnBullet(currentWeapon);
+
         // Play weapon sound
         PlayWeaponSound(currentWeapon);
 
@@ -147,19 +154,28 @@ public class Shoot : MonoBehaviour
         }
     }
 
-    // private IEnumerator ApplyCasingForce(GameObject casing)
-    // {
-    //     yield return null; // Wait for one frame to ensure the casing is fully initialized
+    private void SpawnBullet(WeaponInstance currentWeapon)
+    {
+        if (bulletPrefab != null && bulletSpawnPoint != null)
+        {
+            // Instantiate the bullet
+            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
 
-    //     Rigidbody2D rb = casing.GetComponent<Rigidbody2D>();
-    //     if (rb != null)
-    //     {
-    //         // Apply force to simulate ejection
-    //         Vector2 ejectionForce = (Vector2)casingEjectPoint.right * Random.Range(ejectionForceMin, ejectionForceMax)
-    //                                 + Vector2.up * Random.Range(0.5f, 1.0f);
-    //         rb.AddForce(ejectionForce, ForceMode2D.Impulse);
-    //     }
-    // }
+            // Get the Bullet script and initialize it
+            Bullet bulletScript = bullet.GetComponent<Bullet>();
+            if (bulletScript != null)
+            {
+                bulletScript.Initialize(currentWeapon.range, currentWeapon.damage);
+            }
+
+            // Apply velocity to the bullet
+            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.velocity = bulletSpawnPoint.right * currentWeapon.bulletSpeed; // Set bullet velocity
+            }
+        }
+    }
 
     private void PlayWeaponSound(WeaponInstance currentWeapon)
     {

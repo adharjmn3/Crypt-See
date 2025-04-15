@@ -10,6 +10,7 @@ public class WeaponInstance
     public int damage;
     public float fireRate;
     public float range;
+    public float bulletSpeed; // New property for bullet speed
     public int sound;
 
     private float lastFireTime;
@@ -19,11 +20,12 @@ public class WeaponInstance
         weaponName = weapon.weaponName;
         ammoType = weapon.ammoType;
         magazineSize = weapon.magazineSize;
-        bulletsInMagazine = weapon.magazineSize; // Start with a full magazine
+        bulletsInMagazine = weapon.bulletsInMagazine;
         totalAmmo = weapon.totalAmmo;
         damage = weapon.damage;
         fireRate = weapon.fireRate;
         range = weapon.range;
+        bulletSpeed = weapon.bulletSpeed; // Initialize bullet speed
         sound = weapon.sound;
         lastFireTime = 0f;
     }
