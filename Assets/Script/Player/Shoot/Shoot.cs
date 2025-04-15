@@ -14,6 +14,7 @@ public class Shoot : MonoBehaviour
     public AudioSource audioSource; // AudioSource for weapon sounds
 
     [Header("Casing Ejection Settings")]
+ // Transform for casing ejection
     public float ejectionForceMin = 1.5f; // Minimum force applied to the casing
     public float ejectionForceMax = 2.5f; // Maximum force applied to the casing
 
@@ -137,20 +138,12 @@ public class Shoot : MonoBehaviour
             // Instantiate the casing
             GameObject casing = Instantiate(casingPrefab, casingEjectPoint.position, casingEjectPoint.rotation);
 
-            // Parent the casing to the container
-            if (casingContainer != null)
+            // Assign the ejection direction
+            CasingBehavior casingBehavior = casing.GetComponent<CasingBehavior>();
+            if (casingBehavior != null)
             {
-                casing.transform.SetParent(casingContainer.transform);
+                casingBehavior.ejectionDirection = casingEjectPoint; // Use the casingEjectPoint as the ejection direction
             }
-
-            // Add the casing to the queue
-            casingQueue.Enqueue(casing);
-            if (casingQueue.Count > maxCasings)
-            {
-                GameObject oldestCasing = casingQueue.Dequeue();
-                Destroy(oldestCasing); // Destroy the oldest casing
-            }
-            
         }
     }
 
