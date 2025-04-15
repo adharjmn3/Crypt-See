@@ -4,6 +4,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine.Rendering.Universal;
 using Player.Stats;
+using UnityEditor;
 
 public class ExploreAgents : Agent
 {
@@ -13,6 +14,8 @@ public class ExploreAgents : Agent
     [SerializeField] Light2D[] lights;
     [SerializeField] LayerMask obstacleMask;
     [SerializeField] Transform[] points;
+    [SerializeField] Transform[] pointsWithoutLight;
+    [SerializeField] float hearingRadius = 1.5f;
 
     private Rigidbody2D rb;
     private Vector3 startPos;
@@ -20,11 +23,13 @@ public class ExploreAgents : Agent
     private float difficulty;
     private int steps;
     private float previousDistance;
+    private AudioSource playerAudioSource;
 
     public override void Initialize()
     {
         rb = GetComponent<Rigidbody2D>();
         startPos =points[0].localPosition;
+        playerAudioSource = player.GetComponent<AudioSource>();
     }
 
     public override void OnEpisodeBegin()
@@ -36,7 +41,7 @@ public class ExploreAgents : Agent
 
         steps = 0;
         difficulty = Academy.Instance.EnvironmentParameters.GetWithDefault("difficulty", 0f);
-
+        //difficulty = 3;
         if (difficulty == 1.0f)
         {
             playerPos = lights[0].transform.localPosition;
@@ -44,12 +49,12 @@ public class ExploreAgents : Agent
         }
         else if (difficulty == 2.0f)
         {
-            playerPos = lights[Random.Range(0, 1)].transform.localPosition;
+            playerPos = lights[Random.Range(0, lights.Length)].transform.localPosition;
             startPos = points[Random.Range(0,1)].localPosition;
         }
         else
         {
-            playerPos = lights[Random.Range(0, lights.Length)].transform.localPosition;
+            playerPos = pointsWithoutLight[Random.Range(0, pointsWithoutLight.Length)].transform.localPosition;
             startPos = points[Random.Range(0,points.Length)].localPosition;
         }
 
@@ -68,7 +73,9 @@ public class ExploreAgents : Agent
 
         float playerInLight = IsPlayerInLight() ? 1f : 0f;
         float playerVisible = CanSeePlayer() ? 1f : 0f;
+        float canHear = CanHearPlayer() ? 1f : 0f;
 
+        sensor.AddObservation(canHear);
         sensor.AddObservation(playerInLight);
         sensor.AddObservation(playerVisible);
     }
@@ -85,10 +92,12 @@ public class ExploreAgents : Agent
         float dist = Vector3.Distance(transform.localPosition, player.transform.localPosition);
         bool canSee = CanSeePlayer();
         bool isInLight = IsPlayerInLight();
+        bool canHear = CanHearPlayer();
 
         // Fokus hanya saat player terlihat & dalam cahaya
         if (canSee && isInLight)
         {
+            Debug.Log("Agent See Player");
             if (dist < 1.5f)
             {
                 AddReward(1.0f);
@@ -105,6 +114,13 @@ public class ExploreAgents : Agent
                     AddReward(-0.005f); // penalti saat menjauh
                 }
             }
+        }
+        else if(canHear){
+            Debug.Log("Agent Hear Player");
+            if (dist < previousDistance)
+                AddReward(0.0025f);
+            else
+                AddReward(-0.001f);
         }
         else
         {
@@ -134,11 +150,20 @@ public class ExploreAgents : Agent
 
     private bool CanSeePlayer()
     {
-        Vector2 dir = player.transform.position - transform.position;
+        Vector2 dir = player.transform.localPosition - transform.localPosition;
         float dist = dir.magnitude;
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir.normalized, dist, obstacleMask);
+        RaycastHit2D hit = Physics2D.Raycast(transform.localPosition, dir.normalized, dist, obstacleMask);
         return hit.collider == null;
+    }
+
+    private bool CanHearPlayer(){
+        float distance = Vector3.Distance(transform.localPosition, player.transform.localPosition);
+
+        if (playerAudioSource == null)
+            return false;
+
+        return playerAudioSource.isPlaying && distance <= hearingRadius && playerAudioSource.volume > 0.01f;
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -155,4 +180,15 @@ public class ExploreAgents : Agent
             EndEpisode();
         }
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (Application.isPlaying)
+        {
+            // Warna radius pendengaran
+            Gizmos.color = new Color(0f, 0.5f, 1f, 0.25f); // Biru transparan
+            Gizmos.DrawSphere(transform.localPosition, hearingRadius);
+        }
+    }
+
 }
