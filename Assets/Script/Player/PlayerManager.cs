@@ -66,7 +66,7 @@ public class PlayerManager : MonoBehaviour
             isShooting = true;
             playerMovement.CanMove = false; // Disable movement while shooting
             shoot.isShooting = true; // Notify Shoot script
-            shoot.TriggerShootAnimation(true); // Trigger shooting animation
+            // shoot.TriggerShootAnimation(true); // Trigger shooting animation
             Debug.Log($"Fired {currentWeapon.weaponName}");
             UpdateAmmoUI();
 
@@ -85,7 +85,7 @@ public class PlayerManager : MonoBehaviour
         isShooting = false;
         playerMovement.CanMove = true; // Re-enable movement
         shoot.isShooting = false; // Notify Shoot script
-        shoot.TriggerShootAnimation(false); // Reset shooting animation
+        //shoot.TriggerShootAnimation(false); // Reset shooting animation
     }
 
     public void OnReload(InputAction.CallbackContext context)
