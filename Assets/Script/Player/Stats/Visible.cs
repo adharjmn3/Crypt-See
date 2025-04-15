@@ -48,17 +48,17 @@ namespace Player.Stats
         {
             DetectLightSources();
 
-            // Check if the player is pressing the move button
-            if (playerMovement != null && playerMovement.CurrentSpeed > 0.0f && IsMoving())
+            // Check if the player is moving or shooting
+            if ((playerMovement != null && playerMovement.CurrentSpeed > 0.0f && IsMoving()) || IsShooting())
             {
-                // Dynamically scale sound level based on player movement
+                // Dynamically scale sound level based on player movement or shooting
                 float movementSound = playerMovement.CalculateVolume(playerMovement.CurrentSpeed);
-                soundLevel = movementSound;
+                soundLevel = Mathf.Max(soundLevel, movementSound); // Use the higher value
                 soundLevel = Mathf.Clamp(soundLevel, 0.0f, 5.0f); // Ensure it doesn't exceed max
             }
             else
             {
-                // Gradually decrease sound level over time when not moving
+                // Gradually decrease sound level over time when not moving or shooting
                 if (soundLevel > 0.0f)
                 {
                     soundLevel -= soundDecayRate * Time.deltaTime; // Decrease sound level
@@ -71,6 +71,13 @@ namespace Player.Stats
         private bool IsMoving()
         {
             return Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0;
+        }
+
+        // Helper method to check if the player is shooting
+        private bool IsShooting()
+        {
+            Shoot shoot = GetComponent<Shoot>();
+            return shoot != null && shoot.isShooting;
         }
 
         // Method to add weapon sound to the current sound level

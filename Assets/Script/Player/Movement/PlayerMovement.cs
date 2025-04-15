@@ -14,6 +14,8 @@ namespace TopDown.Movement
         [SerializeField] private float minVolume = 0.1f; // Minimum volume
         [SerializeField] private float maxVolume = 1.0f; // Maximum volume
 
+        public bool CanMove { get; set; } = true; // New property to control movement
+
         public float CurrentSpeed
         {
             get { return baseSpeed; }
@@ -25,8 +27,15 @@ namespace TopDown.Movement
 
         private void OnMove(InputValue value)
         {
-            Vector3 playerInput = new Vector3(value.Get<Vector2>().x, value.Get<Vector2>().y, 0);
-            currInput = playerInput;
+            if (CanMove) // Only process movement input if CanMove is true
+            {
+                Vector3 playerInput = new Vector3(value.Get<Vector2>().x, value.Get<Vector2>().y, 0);
+                currInput = playerInput;
+            }
+            else
+            {
+                currInput = Vector3.zero; // Stop movement if CanMove is false
+            }
         }
 
         private void OnScroll(InputValue value)
