@@ -31,7 +31,7 @@ behaviors:
 environment_parameters:
   difficulty:
     curriculum:
-      - name: Level 1
+      - name: Level 1 - Pemain Selalu Terlihat
         completion_criteria:
           measure: reward
           behavior: ExploreAgent
@@ -40,7 +40,7 @@ environment_parameters:
           threshold: 0.4
         value: 1.0
 
-      - name: Level 2
+      - name: Level 2 - Lokasi Acak Tapi Dalam Cahaya
         completion_criteria:
           measure: reward
           behavior: ExploreAgent
@@ -49,12 +49,12 @@ environment_parameters:
           threshold: 0.7
         value: 2.0
 
-      - name: Level 3
+      - name: Level 3 - Gunakan Pendengaran & Cahaya
         completion_criteria:
           measure: reward
           behavior: ExploreAgent
           signal_smoothing: true
           min_lesson_length: 200
-          threshold: 0.9
+          threshold: 0.85
         value: 3.0
 
