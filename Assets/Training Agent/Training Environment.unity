@@ -2515,6 +2515,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4158019444946954824, guid: ac0ebf7d60b013941a97f057fbc5d2cb, type: 3}
+      propertyPath: obstacleMask.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     - target: {fileID: 6532247082241080457, guid: ac0ebf7d60b013941a97f057fbc5d2cb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
