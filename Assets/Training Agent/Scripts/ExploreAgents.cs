@@ -9,15 +9,14 @@ using UnityEditor;
 public class ExploreAgents : Agent
 {
     [SerializeField] GameObject player;
-    [SerializeField] float moveSpeed;
-    [SerializeField] float rotateSpeed;
     [SerializeField] Light2D[] lights;
     [SerializeField] LayerMask obstacleMask;
     [SerializeField] Transform[] points;
     [SerializeField] Transform[] pointsWithoutLight;
     [SerializeField] float hearingRadius = 1.5f;
 
-    private Rigidbody2D rb;
+    private EnemyMovement movement;
+
     private Vector3 startPos;
     private Vector3 playerPos;
     private float difficulty;
@@ -27,8 +26,8 @@ public class ExploreAgents : Agent
 
     public override void Initialize()
     {
-        rb = GetComponent<Rigidbody2D>();
-        startPos =points[0].localPosition;
+        movement = GetComponent<EnemyMovement>();
+        startPos = points[0].localPosition;
         playerAudioSource = player.GetComponent<AudioSource>();
     }
 
@@ -59,7 +58,6 @@ public class ExploreAgents : Agent
         }
 
         transform.localPosition = startPos + new Vector3(Random.Range(-3, 3), Random.Range(0, 2), 0);
-        rb.velocity = Vector3.zero;
 
         player.transform.localPosition = playerPos + new Vector3(Random.Range(1, 1), Random.Range(0, 1), 0);
         previousDistance = Vector3.Distance(transform.localPosition, player.transform.localPosition);
@@ -85,9 +83,7 @@ public class ExploreAgents : Agent
         float moveAction = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
-        Vector2 move = transform.up * moveAction * moveSpeed * Time.deltaTime;
-        rb.MovePosition(rb.position + move);
-        rb.MoveRotation(rb.rotation + lookAction * rotateSpeed * Time.deltaTime);
+        movement.Move(moveAction, lookAction);
 
         float dist = Vector3.Distance(transform.localPosition, player.transform.localPosition);
         bool canSee = CanSeePlayer();

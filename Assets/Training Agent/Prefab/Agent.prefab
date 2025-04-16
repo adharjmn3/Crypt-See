@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 4228052011151081639}
   - component: {fileID: 8147349526262888588}
   - component: {fileID: 1761623407775195621}
+  - component: {fileID: 8009832494332996022}
   m_Layer: 6
   m_Name: Agent
   m_TagString: Untagged
@@ -261,8 +262,6 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 5000
   player: {fileID: 0}
-  moveSpeed: 10
-  rotateSpeed: 180
   lights: []
   obstacleMask:
     serializedVersion: 2
@@ -270,3 +269,17 @@ MonoBehaviour:
   points: []
   pointsWithoutLight: []
   hearingRadius: 1.5
+--- !u!114 &8009832494332996022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765458329065383543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50911e09d1d884d4284ed69e6f505369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  lookSpeed: 180
