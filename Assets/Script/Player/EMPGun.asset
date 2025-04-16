@@ -15,9 +15,10 @@ MonoBehaviour:
   weaponName: EMP
   ammoType: 1
   magazineSize: 10
-  bulletsInMagazine: 2
-  totalAmmo: 0
+  bulletsInMagazine: 10
+  totalAmmo: 50
   damage: 3
   fireRate: 1
-  range: 1
-  sound: 0
+  range: 3.4
+  bulletSpeed: 1.6
+  sound: 2

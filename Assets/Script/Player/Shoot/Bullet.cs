@@ -5,11 +5,13 @@ public class Bullet : MonoBehaviour
     private float range;
     private int damage;
     private Vector3 startPosition;
+    public Weapon.AmmoType ammoType; // Variable to store the weapon type
 
-    public void Initialize(float range, int damage)
+    public void Initialize(float range, int damage, Weapon.AmmoType ammoType)
     {
         this.range = range;
         this.damage = damage;
+        this.ammoType = ammoType; // Assign the weapon type
         startPosition = transform.position;
     }
 
@@ -24,8 +26,8 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision) // Use OnTriggerEnter for 3D
     {
-        // Log the object the bullet hit
-        Debug.Log($"Bullet hit: {collision.gameObject.name}");
+        // Log the object the bullet hit and its weapon type
+        Debug.Log($"Bullet hit: {collision.gameObject.name}, Ammo Type: {ammoType}");
 
         // Destroy the bullet upon collision
         Destroy(gameObject);

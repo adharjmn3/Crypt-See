@@ -122,12 +122,12 @@ namespace Player.Stats
             if (LightLevel == 1.0f)
             {
                 DisableExcludedLights();
-                Debug.Log("All lights are on, disabling excluded lights.");
+
             }
             else
             {
                 EnableExcludedLights();
-                Debug.Log("Not all lights are on, enabling excluded lights.");
+
             }
         }
 
