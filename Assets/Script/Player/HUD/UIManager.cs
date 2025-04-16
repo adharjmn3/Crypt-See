@@ -29,12 +29,17 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void UpdateMag(int currentAmmo){
+        currentAmmoText.text = currentAmmo.ToString(); // Display the actual bullets left in the magazine
+    }
+
     // Method to update the ammo text
     public void UpdateAmmo(int currentAmmo, int reservedAmmo, Weapon.AmmoType ammoType)
     {
+        // Update the current ammo text (bullets left in the magazine)
         if (currentAmmoText != null)
         {
-            currentAmmoText.text = currentAmmo.ToString();
+            currentAmmoText.text = currentAmmo.ToString(); // Display the actual bullets left in the magazine
             Debug.Log($"Updated Current Ammo: {currentAmmo}");
         }
         else
@@ -42,9 +47,10 @@ public class UIManager : MonoBehaviour
             Debug.LogError("Current Ammo Text is null.");
         }
 
+        // Update the reserved ammo text (total ammo outside the magazine)
         if (reservedAmmoText != null)
         {
-            reservedAmmoText.text = reservedAmmo.ToString();
+            reservedAmmoText.text = reservedAmmo.ToString(); // Display the total reserved ammo
             Debug.Log($"Updated Reserved Ammo: {reservedAmmo}");
         }
         else

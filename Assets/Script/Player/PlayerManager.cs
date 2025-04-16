@@ -16,7 +16,6 @@ public class PlayerManager : MonoBehaviour
     public PlayerMovement playerMovement;
     public CameraController cameraController;
     public Shoot shoot;
-    
 
     [Header("UI and Managers")]
     public UIManager uiManager;
@@ -37,17 +36,30 @@ public class PlayerManager : MonoBehaviour
             health.currentHealth = health.maxHealth;
         }
 
-        inventory.RestartAmmo(); // Initialize ammo for all weapons in the inventory
+        // Initialize inventory and UI
+        inventory.RestartAmmo();
         UpdateAmmoUI();
         UpdateWeaponUI();
     }
 
     void Update()
     {
-        // Handle weapon switching with Tab key
+        // Handle weapon switching
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             SwitchWeapon();
+        }
+
+        // Handle firing
+        if (Input.GetButtonDown("Fire1"))
+        {
+            StartShooting();
+        }
+
+        // Handle reloading
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Reload();
         }
     }
 
@@ -68,25 +80,19 @@ public class PlayerManager : MonoBehaviour
         UpdateAmmoUI();
     }
 
-    public void OnShoot(InputAction.CallbackContext context)
-    {
-        if (context.performed && !isShooting && playerMovement.CanMove)
-        {
-            StartShooting();
-        }
-    }
-
     private void StartShooting()
     {
         WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
-        if (currentWeapon != null && currentWeapon.Fire())
+        if (currentWeapon != null)
         {
+            // Update the UI after firing
+            UpdateAmmoUI();
+            UpdateMagUI();
+
             isShooting = true;
             playerMovement.CanMove = false; // Disable movement while shooting
             shoot.isShooting = true; // Notify Shoot script
-            // shoot.TriggerShootAnimation(true); // Trigger shooting animation
             Debug.Log($"Fired {currentWeapon.weaponName}");
-            UpdateAmmoUI();
 
             // Reset shooting state after a short delay
             StartCoroutine(ResetShooting());
@@ -103,15 +109,6 @@ public class PlayerManager : MonoBehaviour
         isShooting = false;
         playerMovement.CanMove = true; // Re-enable movement
         shoot.isShooting = false; // Notify Shoot script
-        //shoot.TriggerShootAnimation(false); // Reset shooting animation
-    }
-
-    public void OnReload(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-        {
-            Reload();
-        }
     }
 
     private void Reload()
@@ -125,43 +122,24 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public void OnChangeWeapon(InputAction.CallbackContext context)
-    {
-        Debug.Log("OnChangeWeapon triggered."); // Add this log
-        if (context.performed)
-        {
-            Debug.Log($"Change weapon input received from: {context.control.name}");
-
-            int weaponSlot = -1;
-
-            // Determine the weapon slot based on the button pressed
-            if (context.control.name == "1") // Button "1"
-            {
-                weaponSlot = 0; // Primary weapon
-            }
-            else if (context.control.name == "2") // Button "2"
-            {
-                weaponSlot = 1; // Secondary weapon
-            }
-
-            if (weaponSlot == 0 || weaponSlot == 1)
-            {
-                inventory.ChangeWeapon(weaponSlot); // Switch between primary and secondary weapons
-                Debug.Log($"Weapon slot {weaponSlot} selected.");
-            }
-            else
-            {
-                Debug.Log("Invalid weapon slot selected.");
-            }
-        }
-    }
-
     private void UpdateAmmoUI()
     {
         WeaponInstance currentWeapon = inventory.CurrentWeapon;
         if (uiManager != null && currentWeapon != null)
         {
+            // Pass the actual bullets left in the magazine and the total reserved ammo
             uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
+        }
+    }
+
+    private void UpdateMagUI()
+    {
+        WeaponInstance currentWeapon = inventory.CurrentWeapon;
+        Debug.Log($"Mags Current Weapon: {currentWeapon.weaponName}, Bullets in Magazine: {currentWeapon.bulletsInMagazine}");
+        // Update the UI without modifying the actual bullet count
+        if (uiManager != null && currentWeapon != null)
+        {
+            uiManager.UpdateMag(currentWeapon.bulletsInMagazine);
         }
     }
 

@@ -9,6 +9,8 @@ public class Inventory : MonoBehaviour
 
     private WeaponInstance primaryWeapon; // Primary weapon instance
     private WeaponInstance secondaryWeapon; // Secondary weapon instance
+
+    [SerializeField, Tooltip("Currently equipped weapon (read-only)")]
     private WeaponInstance currentWeapon; // Currently equipped weapon
 
     public WeaponInstance CurrentWeapon => currentWeapon;
@@ -57,8 +59,7 @@ public class Inventory : MonoBehaviour
     {
         return secondaryWeapon;
     }
-    
-    
+
     public void RestartAmmo()
     {
         primaryWeapon?.Reload();

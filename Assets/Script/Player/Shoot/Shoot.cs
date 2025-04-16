@@ -76,6 +76,7 @@ public class Shoot : MonoBehaviour
 
     private void StartShooting(WeaponInstance currentWeapon)
     {
+        
         Debug.Log("StartShooting called");
         isShooting = true;
         playerMovement.CanMove = false; // Disable movement while shooting
@@ -99,6 +100,8 @@ public class Shoot : MonoBehaviour
 
         // Spawn bullet
         SpawnBullet(currentWeapon);
+
+        
 
         // Play weapon sound
         PlayWeaponSound(currentWeapon);
@@ -127,12 +130,15 @@ public class Shoot : MonoBehaviour
 
     public void OnReload(InputAction.CallbackContext context)
     {
-        WeaponInstance currentWeapon = inventory.CurrentWeapon;
-        if (currentWeapon != null)
+        if (context.performed)
         {
-            currentWeapon.Reload(); // Reload the weapon
-            Debug.Log($"Reloaded {currentWeapon.weaponName}");
-            UpdateWeaponUI(); // Update the UI immediately after reloading
+            WeaponInstance currentWeapon = inventory.CurrentWeapon;
+            if (currentWeapon != null)
+            {
+                currentWeapon.Reload(); // Reload the weapon
+                Debug.Log($"Reloaded {currentWeapon.weaponName}");
+                UpdateWeaponUI(); // Update the UI immediately after reloading
+            }
         }
     }
 
