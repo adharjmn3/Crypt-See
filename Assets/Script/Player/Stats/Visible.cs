@@ -20,6 +20,9 @@ namespace Player.Stats
 
         private PlayerMovement playerMovement; // Reference to PlayerMovement
 
+        private Dictionary<Light2D, float> lightCooldowns = new Dictionary<Light2D, float>(); // Cooldown tracker for lights
+        [SerializeField] private float lightToggleCooldown = 0.5f; // Cooldown duration in seconds
+
         public float LightLevel
         {
             get { return lightLevel; }
@@ -100,18 +103,40 @@ namespace Player.Stats
                 if (excludedLights.Contains(light) || functionalExcludedLights.Contains(light)) continue;
 
                 // Calculate the distance to the light source
-                float distanceToLight = Vector2.Distance(transform.position, light.transform.position);
+                Vector2 lightPosition = light.transform.position;
+                Vector2 playerPosition = transform.position;
+                float distanceToLight = Vector2.Distance(playerPosition, lightPosition);
 
                 // Check if the player is within the light's outer radius
                 if (distanceToLight <= light.pointLightOuterRadius)
                 {
                     // Calculate the angle between the player and the light's forward direction
-                    Vector2 directionToPlayer = (transform.position - light.transform.position).normalized;
+                    Vector2 directionToPlayer = (playerPosition - lightPosition).normalized;
                     float angleToPlayer = Vector2.Angle(light.transform.up, directionToPlayer);
 
                     // Check if the player is within the light's outer angle
                     if (angleToPlayer <= light.pointLightOuterAngle / 2)
                     {
+                        // Perform multiple raycasts to check for obstacles
+                        int rayCount = 5; // Number of rays to cast
+                        float angleStep = light.pointLightOuterAngle / (rayCount - 1);
+                        bool hasObstacle = false;
+
+                        for (int i = 0; i < rayCount; i++)
+                        {
+                            // Calculate the direction for each ray
+                            float rayAngle = -light.pointLightOuterAngle / 2 + angleStep * i;
+                            Vector2 rayDirection = Quaternion.Euler(0, 0, rayAngle) * directionToPlayer;
+
+                            // Perform the raycast
+                            RaycastHit2D hit = Physics2D.Raycast(playerPosition, rayDirection, distanceToLight);
+                            if (hit.collider != null && hit.collider.gameObject != light.gameObject)
+                            {
+                                hasObstacle = true;
+                                break; // Stop checking further rays if an obstacle is found
+                            }
+                        }
+
                         // Determine if the player is within the inner radius and angle
                         bool isInInnerRadius = distanceToLight <= light.pointLightInnerRadius;
                         bool isInInnerAngle = angleToPlayer <= light.pointLightInnerAngle / 2;
@@ -131,6 +156,12 @@ namespace Player.Stats
 
                         // Apply the light sensitivity multiplier
                         intensity *= lightSensitivity;
+
+                        // If there is an obstacle, reduce the intensity
+                        if (hasObstacle)
+                        {
+                            intensity *= 0.5f; // Reduce intensity by 50% if an obstacle is present
+                        }
 
                         totalIntensity += intensity;
                     }
@@ -219,9 +250,28 @@ namespace Player.Stats
             }
             else
             {
+                // Check if the light is already excluded or on cooldown
                 if (!excludedLights.Contains(light))
                 {
-                    excludedLights.Add(light);
+                    if (lightCooldowns.ContainsKey(light) && Time.time < lightCooldowns[light])
+                    {
+                        return; // Skip if the light is still on cooldown
+                    }
+
+                    // Perform a raycast to ensure the light is actually blocked before excluding it
+                    Vector2 lightPosition = light.transform.position;
+                    Vector2 playerPosition = transform.position;
+                    float distanceToLight = Vector2.Distance(playerPosition, lightPosition);
+                    Vector2 directionToLight = (lightPosition - playerPosition).normalized;
+
+                    RaycastHit2D hit = Physics2D.Raycast(playerPosition, directionToLight, distanceToLight);
+
+                    // Only exclude the light if there is a collider blocking the light source
+                    if (hit.collider != null && hit.collider.gameObject != light.gameObject)
+                    {
+                        excludedLights.Add(light);
+                        lightCooldowns[light] = Time.time + lightToggleCooldown; // Set cooldown for this light
+                    }
                 }
             }
         }
