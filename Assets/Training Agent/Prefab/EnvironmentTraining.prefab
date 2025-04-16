@@ -8669,6 +8669,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6433389256284646427, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
+      propertyPath: m_InstanceId
+      value: -50660
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6965022715788980801, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
     m_RemovedGameObjects: []
@@ -8784,6 +8788,18 @@ PrefabInstance:
       propertyPath: pointsWithoutLight.Array.data[1]
       value: 
       objectReference: {fileID: 1020725533785117838}
+    - target: {fileID: 2564871895495904247, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564871895495904247, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564871895495904247, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4242786529295833361, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
       propertyPath: m_Model
       value: 
@@ -8798,11 +8814,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6354010888659866937, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6354010888659866937, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.17924458
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6354010888659866937, guid: 2098d697214e98845962693f0bc0ec7b, type: 3}
       propertyPath: m_LocalPosition.z
