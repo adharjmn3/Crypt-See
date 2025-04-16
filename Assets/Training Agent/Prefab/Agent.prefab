@@ -18,6 +18,8 @@ GameObject:
   - component: {fileID: 8147349526262888588}
   - component: {fileID: 1761623407775195621}
   - component: {fileID: 8009832494332996022}
+  - component: {fileID: 4624623082222681950}
+  - component: {fileID: 6027041372970846053}
   m_Layer: 6
   m_Name: Agent
   m_TagString: Untagged
@@ -283,3 +285,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   lookSpeed: 180
+--- !u!114 &4624623082222681950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765458329065383543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d74f5ef1c75944cafa352ed77165c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6027041372970846053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765458329065383543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c6b2d8acc5d13e4695f3397131f9aab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  positionMode: 0
