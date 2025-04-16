@@ -18,6 +18,7 @@ MonoBehaviour:
   bulletsInMagazine: 10
   totalAmmo: 88
   damage: 4
-  fireRate: 5
-  range: 5
+  fireRate: 2.35
+  range: 16.14
+  bulletSpeed: 30
   sound: 5

@@ -14,6 +14,7 @@ public class Shoot : MonoBehaviour
     public AudioSource audioSource; // AudioSource for weapon sounds
 
     [Header("Casing Ejection Settings")]
+ // Transform for casing ejection
     public float ejectionForceMin = 1.5f; // Minimum force applied to the casing
     public float ejectionForceMax = 2.5f; // Maximum force applied to the casing
 
@@ -59,11 +60,13 @@ public class Shoot : MonoBehaviour
 
     public void OnFire(InputAction.CallbackContext context)
     {
+        Debug.Log($"OnFire called: performed={context.performed}, isShooting={isShooting}, CanMove={playerMovement.CanMove}");
         if (context.performed && !isShooting && playerMovement.CanMove)
         {
             WeaponInstance currentWeapon = inventory.CurrentWeapon;
             if (currentWeapon != null && currentWeapon.Fire())
             {
+                Debug.Log("Weapon fired");
                 StartShooting(currentWeapon);
             }
             else
@@ -75,6 +78,7 @@ public class Shoot : MonoBehaviour
 
     private void StartShooting(WeaponInstance currentWeapon)
     {
+        Debug.Log("StartShooting called");
         isShooting = true;
         playerMovement.CanMove = false; // Disable movement while shooting
         animator.SetBool("isShoot", true); // Trigger shooting animation
@@ -84,8 +88,12 @@ public class Shoot : MonoBehaviour
         {
             muzzleFlash.Play();
         }
+        else
+        {
+            Debug.LogWarning("Muzzle flash is null");
+        }
 
-        // Eject casing (only for kinetic and EMP weapons)
+        // Eject casing
         if (currentWeapon.ammoType == Weapon.AmmoType.Kinetic || currentWeapon.ammoType == Weapon.AmmoType.EMP)
         {
             EjectCasing();
@@ -137,20 +145,12 @@ public class Shoot : MonoBehaviour
             // Instantiate the casing
             GameObject casing = Instantiate(casingPrefab, casingEjectPoint.position, casingEjectPoint.rotation);
 
-            // Parent the casing to the container
-            if (casingContainer != null)
+            // Assign the ejection direction
+            CasingBehavior casingBehavior = casing.GetComponent<CasingBehavior>();
+            if (casingBehavior != null)
             {
-                casing.transform.SetParent(casingContainer.transform);
+                casingBehavior.ejectionDirection = casingEjectPoint; // Use the casingEjectPoint as the ejection direction
             }
-
-            // Add the casing to the queue
-            casingQueue.Enqueue(casing);
-            if (casingQueue.Count > maxCasings)
-            {
-                GameObject oldestCasing = casingQueue.Dequeue();
-                Destroy(oldestCasing); // Destroy the oldest casing
-            }
-            
         }
     }
 
@@ -165,7 +165,7 @@ public class Shoot : MonoBehaviour
             Bullet bulletScript = bullet.GetComponent<Bullet>();
             if (bulletScript != null)
             {
-                bulletScript.Initialize(currentWeapon.range, currentWeapon.damage);
+                bulletScript.Initialize(currentWeapon.range, currentWeapon.damage, currentWeapon.ammoType);
             }
 
             // Apply velocity to the bullet

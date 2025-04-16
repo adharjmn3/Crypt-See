@@ -10,7 +10,8 @@ namespace Player.Stats
     {
         [SerializeField] public float lightLevel = 0.0f;
         [SerializeField] public float soundLevel = 0.0f; // Placeholder for sound level
-        [SerializeField] private List<Light2D> excludedLights; // List of lights to exclude from detection
+        [SerializeField] private List<Light2D> excludedLights; // Cosmetic excluded lights (for player visuals)
+        [SerializeField] private List<Light2D> functionalExcludedLights; // Functional excluded lights (for LightBehaviour logic)
         [SerializeField, Range(0.1f, 2.0f)] private float lightSensitivity = 1.0f; // Slider for light sensitivity
         [SerializeField, Range(0.1f, 1.0f)] private float soundDecayRate = 0.2f; // Rate at which sound level decreases over time
         [SerializeField] private AudioClip lightOffSound; // Audio clip to play when lights are turned off
@@ -95,8 +96,8 @@ namespace Player.Stats
 
             foreach (Light2D light in lights)
             {
-                // Skip excluded lights
-                if (excludedLights.Contains(light)) continue;
+                // Skip lights in either excluded list
+                if (excludedLights.Contains(light) || functionalExcludedLights.Contains(light)) continue;
 
                 // Calculate the distance to the light source
                 float distanceToLight = Vector2.Distance(transform.position, light.transform.position);
@@ -122,12 +123,10 @@ namespace Player.Stats
             if (LightLevel == 1.0f)
             {
                 DisableExcludedLights();
-                Debug.Log("All lights are on, disabling excluded lights.");
             }
             else
             {
                 EnableExcludedLights();
-                Debug.Log("Not all lights are on, enabling excluded lights.");
             }
         }
 
@@ -169,6 +168,8 @@ namespace Player.Stats
         // Coroutine to gradually increase the intensity of a light
         private IEnumerator GraduallyTurnOnLight(Light2D light)
         {
+            if (!excludedLights.Contains(light)) yield break;
+
             float targetIntensity = light.intensity; // Store the target intensity
             light.intensity = 0.0f; // Start from 0 intensity
 
@@ -183,6 +184,44 @@ namespace Player.Stats
             }
 
             light.intensity = targetIntensity; // Ensure the final intensity is set
+        }
+
+        // Exclude a light for cosmetic purposes
+        public void ExcludeLight(Light2D light, bool isFunctional = false)
+        {
+            if (isFunctional)
+            {
+                if (!functionalExcludedLights.Contains(light))
+                {
+                    functionalExcludedLights.Add(light);
+                }
+            }
+            else
+            {
+                if (!excludedLights.Contains(light))
+                {
+                    excludedLights.Add(light);
+                }
+            }
+        }
+
+        // Include a light back for cosmetic purposes
+        public void IncludeLight(Light2D light, bool isFunctional = false)
+        {
+            if (isFunctional)
+            {
+                if (functionalExcludedLights.Contains(light))
+                {
+                    functionalExcludedLights.Remove(light);
+                }
+            }
+            else
+            {
+                if (excludedLights.Contains(light))
+                {
+                    excludedLights.Remove(light);
+                }
+            }
         }
     }
 }
