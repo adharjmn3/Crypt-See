@@ -10,11 +10,11 @@ public class Shoot : MonoBehaviour
     public ParticleSystem muzzleFlash; // Particle effect for muzzle flash
     public Transform casingEjectPoint; // Transform for bullet casing ejection
     public GameObject casingPrefab; // Prefab for bullet casing
+    public GameObject magazinePrefab; // Prefab for magazine eject object
     public GameObject casingContainer; // Empty GameObject to hold casings
     public AudioSource audioSource; // AudioSource for weapon sounds
 
     [Header("Casing Ejection Settings")]
- // Transform for casing ejection
     public float ejectionForceMin = 1.5f; // Minimum force applied to the casing
     public float ejectionForceMax = 2.5f; // Maximum force applied to the casing
 
@@ -22,6 +22,10 @@ public class Shoot : MonoBehaviour
     public AudioClip kineticSound; // Sound for kinetic weapons
     public AudioClip empSound; // Sound for EMP weapons
     public AudioClip punchSound; // Sound for punching
+    public AudioClip reloadSound; // Sound for normal reload
+    public AudioClip emptyReloadSound; // Sound for empty reload
+    public AudioClip changeMagazineSound; // Sound for changing the magazine
+    public AudioClip gunRackingSound; // Sound for racking the gun
 
     [Header("Bullet Settings")]
     public GameObject bulletPrefab; // Prefab for the bullet
@@ -31,6 +35,7 @@ public class Shoot : MonoBehaviour
     private PlayerMovement playerMovement;
     private Animator animator;
     public bool isShooting = false;
+    private bool isReloading = false; // Prevent shooting during reload
 
     private Queue<GameObject> casingQueue = new Queue<GameObject>(); // Queue to manage casings
     private const int maxCasings = 25; // Maximum number of casings allowed
@@ -60,7 +65,7 @@ public class Shoot : MonoBehaviour
 
     public void OnFire(InputAction.CallbackContext context)
     {
-        if (context.performed && !isShooting && playerMovement.CanMove)
+        if (context.performed && !isShooting && !isReloading && playerMovement.CanMove)
         {
             WeaponInstance currentWeapon = inventory.CurrentWeapon;
             if (currentWeapon != null && currentWeapon.Fire())
@@ -74,9 +79,17 @@ public class Shoot : MonoBehaviour
         }
     }
 
+    private void OnFireCanceled(InputAction.CallbackContext context)
+    {
+        // Reset shooting state when the fire button is released
+        isShooting = false;
+        playerMovement.CanMove = true; // Re-enable movement
+        animator.SetBool("isShoot", false); // Reset shooting animation
+        Debug.Log("Fire action canceled.");
+    }
+
     private void StartShooting(WeaponInstance currentWeapon)
     {
-        
         Debug.Log("StartShooting called");
         isShooting = true;
         playerMovement.CanMove = false; // Disable movement while shooting
@@ -101,8 +114,6 @@ public class Shoot : MonoBehaviour
         // Spawn bullet
         SpawnBullet(currentWeapon);
 
-        
-
         // Play weapon sound
         PlayWeaponSound(currentWeapon);
 
@@ -118,27 +129,70 @@ public class Shoot : MonoBehaviour
         animator.SetBool("isShoot", false); // Reset shooting animation
     }
 
-    public void OnFireCanceled(InputAction.CallbackContext context)
+    public void OnReload(InputAction.CallbackContext context)
     {
-        if (isShooting)
+        if (context.performed && !isReloading)
         {
-            isShooting = false;
-            playerMovement.CanMove = true; // Re-enable movement
-            animator.SetBool("isShoot", false); // Reset shooting animation
+            StartCoroutine(ReloadWeapon());
         }
     }
 
-    public void OnReload(InputAction.CallbackContext context)
+    private IEnumerator ReloadWeapon()
     {
-        if (context.performed)
+        WeaponInstance currentWeapon = inventory.CurrentWeapon;
+        if (currentWeapon != null)
         {
-            WeaponInstance currentWeapon = inventory.CurrentWeapon;
-            if (currentWeapon != null)
+            isReloading = true; // Prevent shooting during reload
+
+            if (currentWeapon.bulletsInMagazine > 0)
             {
-                currentWeapon.Reload(); // Reload the weapon
-                Debug.Log($"Reloaded {currentWeapon.weaponName}");
-                UpdateWeaponUI(); // Update the UI immediately after reloading
+                // Normal reload with +1 bullet
+                Debug.Log("Reloading with bullets in magazine...");
+                PlayReloadSound(reloadSound);
+                yield return new WaitForSeconds(1.5f); // Shorter reload time
+                int bulletsToReload = currentWeapon.magazineSize - currentWeapon.bulletsInMagazine;
+                int totalReload = Mathf.Min(bulletsToReload, currentWeapon.totalAmmo);
+                currentWeapon.bulletsInMagazine += totalReload + 1; // Add +1 bullet
+                currentWeapon.totalAmmo -= totalReload;
             }
+            else
+            {
+                // Empty reload
+                Debug.Log("Reloading from empty...");
+                PlayReloadSound(changeMagazineSound); // Play change magazine sound
+                yield return new WaitForSeconds(1.5f); // Time for changing the magazine
+
+                PlayReloadSound(gunRackingSound); // Play gun racking sound
+                yield return new WaitForSeconds(1.0f); // Time for racking the gun
+
+                int bulletsToReload = Mathf.Min(currentWeapon.magazineSize, currentWeapon.totalAmmo);
+                currentWeapon.bulletsInMagazine = bulletsToReload;
+                currentWeapon.totalAmmo -= bulletsToReload;
+
+                // Spawn magazine eject object (commented for now)
+                if (casingEjectPoint != null)
+                {
+                    GameObject magazine = Instantiate(magazinePrefab, casingEjectPoint.position, casingEjectPoint.rotation);
+                    Rigidbody rb = magazine.GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        rb.AddForce(casingEjectPoint.right * Random.Range(ejectionForceMin, ejectionForceMax), ForceMode.Impulse);
+                    }
+                }
+            }
+
+            Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
+            UpdateWeaponUI(); // Update the UI after reload
+            isReloading = false; // Allow shooting again
+        }
+    }
+
+    private void PlayReloadSound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.clip = clip;
+            audioSource.Play();
         }
     }
 
@@ -150,10 +204,10 @@ public class Shoot : MonoBehaviour
             GameObject casing = Instantiate(casingPrefab, casingEjectPoint.position, casingEjectPoint.rotation);
 
             // Assign the ejection direction
-            CasingBehavior casingBehavior = casing.GetComponent<CasingBehavior>();
-            if (casingBehavior != null)
+            Rigidbody rb = casing.GetComponent<Rigidbody>();
+            if (rb != null)
             {
-                casingBehavior.ejectionDirection = casingEjectPoint; // Use the casingEjectPoint as the ejection direction
+                rb.AddForce(casingEjectPoint.right * Random.Range(ejectionForceMin, ejectionForceMax), ForceMode.Impulse);
             }
         }
     }
@@ -176,7 +230,7 @@ public class Shoot : MonoBehaviour
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.velocity = (bulletSpawnPoint.right * currentWeapon.bulletSpeed) ; // Set bullet velocity
+                rb.velocity = (bulletSpawnPoint.right * currentWeapon.bulletSpeed); // Set bullet velocity
             }
         }
     }
@@ -221,3 +275,5 @@ public class Shoot : MonoBehaviour
         }
     }
 }
+
+

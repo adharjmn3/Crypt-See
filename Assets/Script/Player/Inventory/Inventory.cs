@@ -48,6 +48,10 @@ public class Inventory : MonoBehaviour
         {
             Debug.Log("Invalid weapon slot or weapon not equipped.");
         }
+
+        // Update the UI after switching weapons
+        UpdateWeaponUI();
+        UpdateAmmoUI();
     }
 
     public WeaponInstance GetPrimaryWeapon()
@@ -62,8 +66,43 @@ public class Inventory : MonoBehaviour
 
     public void RestartAmmo()
     {
-        primaryWeapon?.Reload();
-        secondaryWeapon?.Reload();
+        // Restart ammo for both weapons
+        if (primaryWeapon != null)
+        {
+            primaryWeapon.bulletsInMagazine = primaryWeapon.magazineSize;
+            primaryWeapon.totalAmmo = primaryWeapon.magazineSize * 4; // Example: max ammo = 4x magazine size
+        }
+
+        if (secondaryWeapon != null)
+        {
+            secondaryWeapon.bulletsInMagazine = secondaryWeapon.magazineSize;
+            secondaryWeapon.totalAmmo = secondaryWeapon.magazineSize * 4; // Example: max ammo = 4x magazine size
+        }
+
         Debug.Log("Ammo has been restarted for both weapons.");
+    }
+
+    private void UpdateWeaponUI()
+    {
+        if (currentWeapon != null)
+        {
+            UIManager uiManager = FindObjectOfType<UIManager>();
+            if (uiManager != null)
+            {
+                uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
+            }
+        }
+    }
+
+    private void UpdateAmmoUI()
+    {
+        if (currentWeapon != null)
+        {
+            UIManager uiManager = FindObjectOfType<UIManager>();
+            if (uiManager != null)
+            {
+                uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
+            }
+        }
     }
 }

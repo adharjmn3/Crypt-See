@@ -52,17 +52,27 @@ public class WeaponInstance
         }
     }
 
-    public void Reload()
+    public void Reload(bool isEmptyReload)
     {
         if (totalAmmo > 0)
         {
-            int bulletsNeeded = magazineSize - bulletsInMagazine;
-            int bulletsToReload = Mathf.Min(bulletsNeeded, totalAmmo);
-
-            bulletsInMagazine += bulletsToReload; // Add bullets to the magazine
-            totalAmmo -= bulletsToReload; // Decrease total ammo
-
-            Debug.Log($"Reloaded weapon. Bullets in magazine: {bulletsInMagazine}, Total ammo: {totalAmmo}");
+            if (isEmptyReload)
+            {
+                // Empty reload: Reload only up to the magazine size
+                int bulletsToReload = Mathf.Min(magazineSize, totalAmmo);
+                bulletsInMagazine = bulletsToReload; // Fill the magazine
+                totalAmmo -= bulletsToReload; // Decrease total ammo
+                Debug.Log($"Empty reload completed. Bullets in magazine: {bulletsInMagazine}, Total ammo: {totalAmmo}");
+            }
+            else
+            {
+                // Non-empty reload: Reload with +1 bullet
+                int bulletsNeeded = magazineSize - bulletsInMagazine;
+                int bulletsToReload = Mathf.Min(bulletsNeeded, totalAmmo);
+                bulletsInMagazine += bulletsToReload + 1; // Add bullets and +1
+                totalAmmo -= bulletsToReload; // Decrease total ammo
+                Debug.Log($"Normal reload completed (+1). Bullets in magazine: {bulletsInMagazine}, Total ammo: {totalAmmo}");
+            }
         }
         else
         {

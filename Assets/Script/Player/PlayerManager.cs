@@ -27,6 +27,7 @@ public class PlayerManager : MonoBehaviour
     public float SoundLevel => visibility != null ? visibility.soundLevel : 0.0f;
 
     private bool isShooting = false;
+    private bool isReloading = false; // Prevent shooting during reload
 
     void Start()
     {
@@ -51,15 +52,15 @@ public class PlayerManager : MonoBehaviour
         }
 
         // Handle firing
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Fire1") && !isReloading)
         {
             StartShooting();
         }
 
         // Handle reloading
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && !isReloading)
         {
-            Reload();
+            StartCoroutine(Reload());
         }
     }
 
@@ -111,14 +112,33 @@ public class PlayerManager : MonoBehaviour
         shoot.isShooting = false; // Notify Shoot script
     }
 
-    private void Reload()
+    private IEnumerator Reload()
     {
         WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
         if (currentWeapon != null)
         {
-            currentWeapon.Reload();
-            Debug.Log($"Reloaded {currentWeapon.weaponName}");
-            UpdateAmmoUI();
+            isReloading = true; // Prevent shooting during reload
+
+            if (currentWeapon.bulletsInMagazine > 0)
+            {
+                // Normal reload
+                Debug.Log("Performing normal reload...");
+                yield return new WaitForSeconds(1.5f); // Shorter reload time
+                currentWeapon.Reload(false); // Pass false for non-empty reload
+            }
+            else
+            {
+                // Empty reload
+                Debug.Log("Performing empty reload...");
+                yield return new WaitForSeconds(1.5f); // Time for changing the magazine
+                yield return new WaitForSeconds(1.0f); // Time for racking the gun
+                currentWeapon.Reload(true); // Pass true for empty reload
+            }
+
+            Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
+            UpdateAmmoUI(); // Update the UI after reload
+            UpdateWeaponUI(); // Update weapon UI
+            isReloading = false; // Allow shooting again
         }
     }
 
