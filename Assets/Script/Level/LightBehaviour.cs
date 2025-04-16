@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal; // For Light2D
+using Player.Stats; // Import the namespace for Visible
 
 public class LightBehaviour : MonoBehaviour
 {
@@ -17,10 +18,9 @@ public class LightBehaviour : MonoBehaviour
     public AudioSource audioSource; // AudioSource to play the sounds
 
     private bool isFlickering = false; // To track if the light is currently flickering
-    private PlayerManager playerManager; // Reference to the PlayerManager for light level adjustments
+    private Visible visible; // Reference to the Visible script for managing light detection
 
     // Variables to store the initial light properties
-    private float initialIntensity;
     private float initialInnerRadius;
     private float initialOuterRadius;
     private float initialFalloffIntensity;
@@ -29,8 +29,8 @@ public class LightBehaviour : MonoBehaviour
 
     void Start()
     {
-        // Get the PlayerManager from the scene
-        playerManager = FindObjectOfType<PlayerManager>();
+        // Get the Visible script from the player
+        visible = FindObjectOfType<Visible>();
 
         if (light2D == null)
         {
@@ -50,7 +50,7 @@ public class LightBehaviour : MonoBehaviour
         // Store the initial light properties
         if (light2D != null)
         {
-            initialIntensity = light2D.intensity;
+
             initialInnerRadius = light2D.pointLightInnerRadius;
             initialOuterRadius = light2D.pointLightOuterRadius;
             initialFalloffIntensity = light2D.falloffIntensity;
@@ -72,6 +72,7 @@ public class LightBehaviour : MonoBehaviour
             else if (bullet.ammoType == Weapon.AmmoType.EMP)
             {
                 StartCoroutine(FlickerLight()); // Handle EMP bullet behavior
+                InitialLightProperties(); // Restore initial light properties
             }
         }
     }
@@ -80,24 +81,22 @@ public class LightBehaviour : MonoBehaviour
     {
         if (light2D != null)
         {
-            light2D.enabled = false; // Disable the light
+            light2D.enabled = false;
         }
 
         if (spriteRenderer != null && brokenLightSprite != null)
         {
-            spriteRenderer.sprite = brokenLightSprite; // Change the sprite to the broken light sprite
+            spriteRenderer.sprite = brokenLightSprite;
         }
 
-        // Play the broken sound
         if (audioSource != null && brokenSound != null)
         {
             audioSource.PlayOneShot(brokenSound);
         }
 
-        // Reduce the light level in the PlayerManager
-        if (playerManager != null)
+        if (visible != null)
         {
-            playerManager.visibility.LightLevel -= 0.2f; // Adjust the light level (example value)
+            visible.ExcludeLight(light2D, isFunctional: true); // Use functional exclusion
         }
     }
 
@@ -106,8 +105,14 @@ public class LightBehaviour : MonoBehaviour
         if (isFlickering) yield break; // Prevent multiple flicker effects from stacking
         isFlickering = true;
 
+        // Notify the Visible script to exclude this light
+        if (visible != null && light2D != null)
+        {
+            visible.ExcludeLight(light2D, isFunctional: true); // Use functional exclusion
+        }
+
         float elapsedTime = 0f;
-        float flickerInterval = 0.5f; // Initial flicker interval
+        float flickerInterval = 0.2f; // Initial flicker interval
 
         // Play the EMP sound
         if (audioSource != null && empSound != null)
@@ -119,31 +124,20 @@ public class LightBehaviour : MonoBehaviour
         {
             elapsedTime += flickerInterval;
 
-            // Toggle the light on and off
             if (light2D != null)
             {
+                // Toggle the light on and off
                 light2D.enabled = !light2D.enabled;
 
                 if (light2D.enabled)
                 {
-                    // Randomize light properties when the light is on
-                    light2D.intensity = Random.Range(initialIntensity * 0.5f, initialIntensity); // Reduce intensity to half with randomness
-                    light2D.pointLightInnerRadius = Random.Range(initialInnerRadius * 0.5f, initialInnerRadius); // Randomize inner radius
-                    light2D.pointLightOuterRadius = Random.Range(initialOuterRadius * 0.5f, initialOuterRadius); // Randomize outer radius
-                    light2D.falloffIntensity = 1f; // Set falloff strength to 1
-                    light2D.pointLightInnerAngle = Random.Range(initialInnerSpotAngle * 0.5f, initialInnerSpotAngle); // Randomize inner spot angle
-                    light2D.pointLightOuterAngle = Random.Range(initialOuterSpotAngle * 0.5f, initialOuterSpotAngle); // Randomize outer spot angle
+                    // Randomize the intensity for a chaotic flicker effect
+                    light2D.intensity = Random.Range(0.5f, 2.0f); // Flicker between dim and bright
                 }
             }
 
             // Gradually decrease the flicker interval to make it flicker faster
-            flickerInterval = Mathf.Lerp(0.5f, 0.05f, elapsedTime / flickerDuration);
-
-            // Reduce the light level in the PlayerManager while flickering
-            if (playerManager != null)
-            {
-                playerManager.visibility.LightLevel = Mathf.Clamp(playerManager.visibility.LightLevel - 0.5f, 0f, 1f);
-            }
+            flickerInterval = Mathf.Lerp(0.2f, 0.05f, elapsedTime / flickerDuration);
 
             yield return new WaitForSeconds(flickerInterval);
         }
@@ -152,20 +146,36 @@ public class LightBehaviour : MonoBehaviour
         if (light2D != null)
         {
             light2D.enabled = true;
-            light2D.intensity = initialIntensity; // Restore intensity
-            light2D.pointLightInnerRadius = initialInnerRadius; // Restore inner radius
-            light2D.pointLightOuterRadius = initialOuterRadius; // Restore outer radius
-            light2D.falloffIntensity = initialFalloffIntensity; // Restore falloff strength
-            light2D.pointLightInnerAngle = initialInnerSpotAngle; // Restore inner spot angle
-            light2D.pointLightOuterAngle = initialOuterSpotAngle; // Restore outer spot angle
+
+            // Restore the light's original properties
+            light2D.intensity = 10f; // Restore intensity to its original value
+            light2D.pointLightInnerRadius = initialInnerRadius;
+            light2D.pointLightOuterRadius = initialOuterRadius;
+            light2D.falloffIntensity = initialFalloffIntensity;
+            light2D.pointLightInnerAngle = initialInnerSpotAngle;
+            light2D.pointLightOuterAngle = initialOuterSpotAngle;
         }
 
-        // Restore the light level in the PlayerManager
-        if (playerManager != null)
+        // Notify the Visible script to include this light again
+        if (visible != null && light2D != null)
         {
-            playerManager.visibility.LightLevel = Mathf.Clamp(playerManager.visibility.LightLevel + 0.5f, 0f, 1f);
+            visible.IncludeLight(light2D, isFunctional: true); // Use functional inclusion
         }
 
         isFlickering = false;
+    }
+
+    private void InitialLightProperties()
+    {
+        if (light2D != null)
+        {
+            // Force the intensity to 10
+
+            light2D.pointLightInnerRadius = initialInnerRadius;
+            light2D.pointLightOuterRadius = initialOuterRadius;
+            light2D.falloffIntensity = initialFalloffIntensity;
+            light2D.pointLightInnerAngle = initialInnerSpotAngle;
+            light2D.pointLightOuterAngle = initialOuterSpotAngle;
+        }
     }
 }
