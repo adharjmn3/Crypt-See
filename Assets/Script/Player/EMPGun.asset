@@ -20,5 +20,5 @@ MonoBehaviour:
   damage: 3
   fireRate: 1
   range: 3.4
-  bulletSpeed: 1.6
+  bulletSpeed: 3.27
   sound: 2
