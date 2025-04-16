@@ -18,6 +18,7 @@ public class LightBehaviour : MonoBehaviour
     public AudioSource audioSource; // AudioSource to play the sounds
 
     private bool isFlickering = false; // To track if the light is currently flickering
+    private bool isBroken = false; // Flag to track if the light is already broken
     private Visible visible; // Reference to the Visible script for managing light detection
 
     // Variables to store the initial light properties
@@ -50,13 +51,15 @@ public class LightBehaviour : MonoBehaviour
         // Store the initial light properties
         if (light2D != null)
         {
-
             initialInnerRadius = light2D.pointLightInnerRadius;
             initialOuterRadius = light2D.pointLightOuterRadius;
             initialFalloffIntensity = light2D.falloffIntensity;
             initialInnerSpotAngle = light2D.pointLightInnerAngle;
             initialOuterSpotAngle = light2D.pointLightOuterAngle;
         }
+
+        // Start the subtle flicker effect
+        StartCoroutine(SubtleFlicker());
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -67,9 +70,13 @@ public class LightBehaviour : MonoBehaviour
         {
             if (bullet.ammoType == Weapon.AmmoType.Kinetic)
             {
-                DestroyLight(); // Handle kinetic bullet behavior
+                if (!isBroken) // Only play the sound and handle breaking once
+                {
+                    DestroyLight(); // Handle kinetic bullet behavior
+                    isBroken = true; // Mark the light as broken
+                }
             }
-            else if (bullet.ammoType == Weapon.AmmoType.EMP)
+            else if (bullet.ammoType == Weapon.AmmoType.EMP && !isBroken && !isFlickering)
             {
                 StartCoroutine(FlickerLight()); // Handle EMP bullet behavior
                 InitialLightProperties(); // Restore initial light properties
@@ -88,10 +95,16 @@ public class LightBehaviour : MonoBehaviour
         {
             spriteRenderer.sprite = brokenLightSprite;
         }
+        // disable the collider to prevent further interactions
+        Collider2D collider = GetComponent<Collider2D>();
+        if (collider != null)
+        {
+            collider.enabled = false;
+        }
 
         if (audioSource != null && brokenSound != null)
         {
-            audioSource.PlayOneShot(brokenSound);
+            audioSource.PlayOneShot(brokenSound); // Play the sound only once
         }
 
         if (visible != null)
@@ -117,7 +130,9 @@ public class LightBehaviour : MonoBehaviour
         // Play the EMP sound
         if (audioSource != null && empSound != null)
         {
-            audioSource.PlayOneShot(empSound);
+            audioSource.clip = empSound;
+            audioSource.loop = true;
+            audioSource.Play();
         }
 
         while (elapsedTime < flickerDuration)
@@ -136,8 +151,27 @@ public class LightBehaviour : MonoBehaviour
                 }
             }
 
+            // Randomize the volume for each flicker
+            if (audioSource != null)
+            {
+                audioSource.volume = Random.Range(0.3f, 1.0f); // Random volume between 30% and 100%
+            }
+
             // Gradually decrease the flicker interval to make it flicker faster
             flickerInterval = Mathf.Lerp(0.2f, 0.05f, elapsedTime / flickerDuration);
+
+            // Gradually increase the pitch to make the sound faster as the effect progresses
+            if (audioSource != null)
+            {
+                audioSource.pitch = Mathf.Lerp(1.0f, 1.5f, elapsedTime / flickerDuration); // Pitch increases from 1.0 to 1.5
+            }
+
+            // Fade in and fade out effect
+            if (audioSource != null)
+            {
+                float fadeFactor = Mathf.PingPong(elapsedTime * 2, 1); // Oscillates between 0 and 1
+                audioSource.volume *= fadeFactor; // Apply fade effect
+            }
 
             yield return new WaitForSeconds(flickerInterval);
         }
@@ -156,6 +190,15 @@ public class LightBehaviour : MonoBehaviour
             light2D.pointLightOuterAngle = initialOuterSpotAngle;
         }
 
+        // Stop the EMP sound and reset the loop property
+        if (audioSource != null)
+        {
+            audioSource.loop = false;
+            audioSource.Stop();
+            audioSource.pitch = 1.0f; // Reset pitch to default
+            audioSource.volume = 1.0f; // Reset volume to default
+        }
+
         // Notify the Visible script to include this light again
         if (visible != null && light2D != null)
         {
@@ -163,6 +206,9 @@ public class LightBehaviour : MonoBehaviour
         }
 
         isFlickering = false;
+
+        // Restart the subtle flicker effect
+        StartCoroutine(SubtleFlicker());
     }
 
     private void InitialLightProperties()
@@ -176,6 +222,28 @@ public class LightBehaviour : MonoBehaviour
             light2D.falloffIntensity = initialFalloffIntensity;
             light2D.pointLightInnerAngle = initialInnerSpotAngle;
             light2D.pointLightOuterAngle = initialOuterSpotAngle;
+        }
+    }
+
+    private IEnumerator SubtleFlicker()
+    {
+        while (!isBroken && !isFlickering) // Only flicker if the light is not broken or flickering
+        {
+            if (light2D != null)
+            {
+                // Randomly adjust the intensity slightly for a subtle flicker effect
+                light2D.intensity = Random.Range(9.1f, 10.3f); // Flicker between 90% and 110% of the original intensity
+
+                // Randomly toggle the light off briefly for a very subtle effect
+                if (Random.value > 0.95f) // 5% chance to briefly turn off
+                {
+                    light2D.enabled = false;
+                    yield return new WaitForSeconds(0.005f); // Briefly turn off for 50ms
+                    light2D.enabled = true;
+                }
+            }
+
+            yield return new WaitForSeconds(Random.Range(0.1f, 0.3f)); // Wait for a random interval before the next flicker
         }
     }
 }
