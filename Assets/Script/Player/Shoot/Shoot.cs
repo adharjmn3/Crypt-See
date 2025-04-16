@@ -170,7 +170,7 @@ public class Shoot : MonoBehaviour
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.velocity = (bulletSpawnPoint.right * currentWeapon.bulletSpeed * 200) * Time.deltaTime; // Set bullet velocity
+                rb.velocity = (bulletSpawnPoint.right * currentWeapon.bulletSpeed) ; // Set bullet velocity
             }
         }
     }

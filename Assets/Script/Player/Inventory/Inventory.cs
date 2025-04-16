@@ -30,26 +30,6 @@ public class Inventory : MonoBehaviour
         currentWeapon = primaryWeapon;
     }
 
-    public void AddWeapon(Weapon weapon)
-    {
-        WeaponInstance newWeapon = new WeaponInstance(weapon);
-
-        if (primaryWeapon == null)
-        {
-            primaryWeapon = newWeapon;
-            Debug.Log($"Added {weapon.weaponName} as Primary Weapon.");
-        }
-        else if (secondaryWeapon == null)
-        {
-            secondaryWeapon = newWeapon;
-            Debug.Log($"Added {weapon.weaponName} as Secondary Weapon.");
-        }
-        else
-        {
-            Debug.Log("Both weapon slots are full. Cannot add more weapons.");
-        }
-    }
-
     public void ChangeWeapon(int weaponSlot)
     {
         if (weaponSlot == 0 && primaryWeapon != null)
@@ -68,6 +48,17 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public WeaponInstance GetPrimaryWeapon()
+    {
+        return primaryWeapon;
+    }
+
+    public WeaponInstance GetSecondaryWeapon()
+    {
+        return secondaryWeapon;
+    }
+    
+    
     public void RestartAmmo()
     {
         primaryWeapon?.Reload();

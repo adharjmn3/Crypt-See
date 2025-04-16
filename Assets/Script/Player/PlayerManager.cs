@@ -44,11 +44,28 @@ public class PlayerManager : MonoBehaviour
 
     void Update()
     {
-        // Update the sound slider in the UI based on SoundLevel
-        // if (uiManager != null)
-        // {
-        //     uiManager.UpdateSoundSlider(SoundLevel);
-        // }
+        // Handle weapon switching with Tab key
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            SwitchWeapon();
+        }
+    }
+
+    private void SwitchWeapon()
+    {
+        // Toggle between primary and secondary weapons
+        if (inventory.CurrentWeapon == inventory.GetPrimaryWeapon())
+        {
+            inventory.ChangeWeapon(1); // Switch to secondary weapon
+        }
+        else
+        {
+            inventory.ChangeWeapon(0); // Switch to primary weapon
+        }
+
+        // Update the UI to reflect the new weapon
+        UpdateWeaponUI();
+        UpdateAmmoUI();
     }
 
     public void OnShoot(InputAction.CallbackContext context)
@@ -110,7 +127,7 @@ public class PlayerManager : MonoBehaviour
 
     public void OnChangeWeapon(InputAction.CallbackContext context)
     {
-        Debug.Log("Try Change Weapon.");
+        Debug.Log("OnChangeWeapon triggered."); // Add this log
         if (context.performed)
         {
             Debug.Log($"Change weapon input received from: {context.control.name}");
@@ -130,10 +147,7 @@ public class PlayerManager : MonoBehaviour
             if (weaponSlot == 0 || weaponSlot == 1)
             {
                 inventory.ChangeWeapon(weaponSlot); // Switch between primary and secondary weapons
-
-                // Update the UI to reflect the new weapon
-                UpdateWeaponUI();
-                UpdateAmmoUI();
+                Debug.Log($"Weapon slot {weaponSlot} selected.");
             }
             else
             {

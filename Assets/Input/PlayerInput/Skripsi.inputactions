@@ -249,18 +249,7 @@
                 {
                     "name": "",
                     "id": "6e081a21-441d-45ae-a53a-a2fb0cdcf31d",
-                    "path": "<Keyboard>/1",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "ChangeWeapon",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "85ed9a87-d2bb-4bcf-baf3-4523d4565da0",
-                    "path": "<Keyboard>/2",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
