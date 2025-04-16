@@ -9,15 +9,16 @@ using UnityEditor;
 public class ExploreAgents : Agent
 {
     [SerializeField] GameObject player;
-    [SerializeField] float moveSpeed;
-    [SerializeField] float rotateSpeed;
     [SerializeField] Light2D[] lights;
-    [SerializeField] LayerMask obstacleMask;
     [SerializeField] Transform[] points;
     [SerializeField] Transform[] pointsWithoutLight;
     [SerializeField] float hearingRadius = 1.5f;
 
-    private Rigidbody2D rb;
+    private EnemyMovement movement;
+    private PositionHandler agentPositionHandler;
+    private PositionHandler playerPositionHandler;
+    private EnemyVision enemyVision;
+
     private Vector3 startPos;
     private Vector3 playerPos;
     private float difficulty;
@@ -27,8 +28,14 @@ public class ExploreAgents : Agent
 
     public override void Initialize()
     {
-        rb = GetComponent<Rigidbody2D>();
-        startPos =points[0].localPosition;
+        movement = GetComponent<EnemyMovement>();
+        agentPositionHandler = GetComponent<PositionHandler>();
+        playerPositionHandler = player.GetComponent<PositionHandler>();
+
+        enemyVision = GetComponent<EnemyVision>();
+        enemyVision.SetTarget(player);
+
+        startPos = points[0].localPosition;
         playerAudioSource = player.GetComponent<AudioSource>();
     }
 
@@ -41,38 +48,18 @@ public class ExploreAgents : Agent
 
         steps = 0;
         difficulty = Academy.Instance.EnvironmentParameters.GetWithDefault("difficulty", 0f);
-        //difficulty = 3;
-        if (difficulty == 1.0f)
-        {
-            playerPos = lights[0].transform.localPosition;
-            startPos = points[0].localPosition;
-        }
-        else if (difficulty == 2.0f)
-        {
-            playerPos = lights[Random.Range(0, lights.Length)].transform.localPosition;
-            startPos = points[Random.Range(0,1)].localPosition;
-        }
-        else
-        {
-            playerPos = pointsWithoutLight[Random.Range(0, pointsWithoutLight.Length)].transform.localPosition;
-            startPos = points[Random.Range(0,points.Length)].localPosition;
-        }
 
-        transform.localPosition = startPos + new Vector3(Random.Range(-3, 3), Random.Range(0, 2), 0);
-        rb.velocity = Vector3.zero;
-
-        player.transform.localPosition = playerPos + new Vector3(Random.Range(1, 1), Random.Range(0, 1), 0);
-        previousDistance = Vector3.Distance(transform.localPosition, player.transform.localPosition);
+        PositionManagement();
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(transform.localPosition);
+        sensor.AddObservation(agentPositionHandler.GetPosition());
         sensor.AddObservation(player.transform.localPosition);
         sensor.AddObservation(Vector3.Distance(transform.localPosition, player.transform.localPosition));
 
         float playerInLight = IsPlayerInLight() ? 1f : 0f;
-        float playerVisible = CanSeePlayer() ? 1f : 0f;
+        float playerVisible = enemyVision.CanSeeTarget() ? 1f : 0f;
         float canHear = CanHearPlayer() ? 1f : 0f;
 
         sensor.AddObservation(canHear);
@@ -85,12 +72,10 @@ public class ExploreAgents : Agent
         float moveAction = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
-        Vector2 move = transform.up * moveAction * moveSpeed * Time.deltaTime;
-        rb.MovePosition(rb.position + move);
-        rb.MoveRotation(rb.rotation + lookAction * rotateSpeed * Time.deltaTime);
+        movement.Move(moveAction, lookAction);
 
         float dist = Vector3.Distance(transform.localPosition, player.transform.localPosition);
-        bool canSee = CanSeePlayer();
+        bool canSee = enemyVision.CanSeeTarget();
         bool isInLight = IsPlayerInLight();
         bool canHear = CanHearPlayer();
 
@@ -139,6 +124,30 @@ public class ExploreAgents : Agent
         cont[1] = Input.GetKey(KeyCode.A) ? 1f : Input.GetKey(KeyCode.D) ? -1f : 0f;
     }
 
+    private void PositionManagement(){
+        if (difficulty == 1.0f)
+        {
+            playerPos = lights[0].transform.localPosition;
+            startPos = points[0].localPosition;
+        }
+        else if (difficulty == 2.0f)
+        {
+            playerPos = lights[Random.Range(0, lights.Length)].transform.localPosition;
+            startPos = points[Random.Range(0,1)].localPosition;
+        }
+        else
+        {
+            playerPos = pointsWithoutLight[Random.Range(0, pointsWithoutLight.Length)].transform.localPosition;
+            startPos = points[Random.Range(0,points.Length)].localPosition;
+        }
+
+        agentPositionHandler.SetPosition(startPos + new Vector3(Random.Range(-3, 3), Random.Range(0, 2), 0));
+
+        playerPositionHandler.SetPosition(playerPos + new Vector3(Random.Range(1, 1), Random.Range(0, 1), 0));
+
+        previousDistance = Vector3.Distance(agentPositionHandler.GetPosition(), playerPositionHandler.GetPosition());
+    }
+
     private bool IsPlayerInLight()
     {
         if (player.TryGetComponent(out Visible visible))
@@ -146,15 +155,6 @@ public class ExploreAgents : Agent
             return visible.LightLevel == 1;
         }
         return false;
-    }
-
-    private bool CanSeePlayer()
-    {
-        Vector2 dir = player.transform.localPosition - transform.localPosition;
-        float dist = dir.magnitude;
-
-        RaycastHit2D hit = Physics2D.Raycast(transform.localPosition, dir.normalized, dist, obstacleMask);
-        return hit.collider == null;
     }
 
     private bool CanHearPlayer(){
@@ -174,7 +174,7 @@ public class ExploreAgents : Agent
             EndEpisode();
         }
 
-        if (collision.gameObject.CompareTag("Player") && CanSeePlayer())
+        if (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget())
         {
             AddReward(1f);
             EndEpisode();
