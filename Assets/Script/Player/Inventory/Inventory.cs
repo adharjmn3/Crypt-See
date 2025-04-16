@@ -3,68 +3,75 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    public List<Weapon> weaponReferences = new List<Weapon>(); // Reference to ScriptableObjects
-    private List<WeaponInstance> weaponInstances = new List<WeaponInstance>(); // Runtime weapon instances
-    private int currentWeaponIndex = 0; // Index of the currently equipped weapon
-    private const int weaponLimit = 2; // Limit for the number of weapons
+    [Header("Weapon Slots")]
+    public Weapon primaryWeaponData; // Assignable in the Unity Editor
+    public Weapon secondaryWeaponData; // Assignable in the Unity Editor
 
-    public WeaponInstance CurrentWeapon => weaponInstances.Count > 0 ? weaponInstances[currentWeaponIndex] : null;
+    private WeaponInstance primaryWeapon; // Primary weapon instance
+    private WeaponInstance secondaryWeapon; // Secondary weapon instance
+    private WeaponInstance currentWeapon; // Currently equipped weapon
+
+    public WeaponInstance CurrentWeapon => currentWeapon;
 
     void Start()
     {
-        // Initialize weapon instances from references
-        foreach (var weapon in weaponReferences)
+        // Initialize weapon instances from the assigned Weapon ScriptableObjects
+        if (primaryWeaponData != null)
         {
-            weaponInstances.Add(new WeaponInstance(weapon));
+            primaryWeapon = new WeaponInstance(primaryWeaponData);
         }
+
+        if (secondaryWeaponData != null)
+        {
+            secondaryWeapon = new WeaponInstance(secondaryWeaponData);
+        }
+
+        // Set the current weapon to the primary weapon by default
+        currentWeapon = primaryWeapon;
     }
 
     public void AddWeapon(Weapon weapon)
     {
-        if (weaponInstances.Count < weaponLimit)
+        WeaponInstance newWeapon = new WeaponInstance(weapon);
+
+        if (primaryWeapon == null)
         {
-            weaponInstances.Add(new WeaponInstance(weapon));
-            Debug.Log($"Added weapon: {weapon.weaponName} to inventory.");
+            primaryWeapon = newWeapon;
+            Debug.Log($"Added {weapon.weaponName} as Primary Weapon.");
+        }
+        else if (secondaryWeapon == null)
+        {
+            secondaryWeapon = newWeapon;
+            Debug.Log($"Added {weapon.weaponName} as Secondary Weapon.");
         }
         else
         {
-            Debug.Log("Weapon inventory is full. Cannot add more weapons.");
+            Debug.Log("Both weapon slots are full. Cannot add more weapons.");
         }
     }
 
-    public void SwitchWeapon()
+    public void ChangeWeapon(int weaponSlot)
     {
-        if (weaponInstances.Count > 1)
+        if (weaponSlot == 0 && primaryWeapon != null)
         {
-            currentWeaponIndex = (currentWeaponIndex + 1) % weaponInstances.Count;
-            Debug.Log($"Switched to weapon: {weaponInstances[currentWeaponIndex].weaponName}");
+            currentWeapon = primaryWeapon;
+            Debug.Log($"Switched to Primary Weapon: {primaryWeapon.weaponName}");
+        }
+        else if (weaponSlot == 1 && secondaryWeapon != null)
+        {
+            currentWeapon = secondaryWeapon;
+            Debug.Log($"Switched to Secondary Weapon: {secondaryWeapon.weaponName}");
         }
         else
         {
-            Debug.Log("Not enough weapons to switch.");
-        }
-    }
-
-    public void ChangeWeapon(int weaponIndex)
-    {
-        if (weaponIndex >= 0 && weaponIndex < weaponInstances.Count)
-        {
-            currentWeaponIndex = weaponIndex;
-            Debug.Log($"Changed to weapon: {weaponInstances[currentWeaponIndex].weaponName}");
-        }
-        else
-        {
-            Debug.Log("Invalid weapon index. Cannot change weapon.");
+            Debug.Log("Invalid weapon slot or weapon not equipped.");
         }
     }
 
     public void RestartAmmo()
     {
-        foreach (var weaponInstance in weaponInstances)
-        {
-            weaponInstance.bulletsInMagazine = weaponInstance.magazineSize; // Reset to full magazine
-            weaponInstance.totalAmmo = weaponInstance.magazineSize * 4; // Example: max ammo = 4x magazine size
-        }
-        Debug.Log("Ammo has been restarted for all weapons.");
+        primaryWeapon?.Reload();
+        secondaryWeapon?.Reload();
+        Debug.Log("Ammo has been restarted for both weapons.");
     }
 }

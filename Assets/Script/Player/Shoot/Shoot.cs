@@ -60,13 +60,11 @@ public class Shoot : MonoBehaviour
 
     public void OnFire(InputAction.CallbackContext context)
     {
-        Debug.Log($"OnFire called: performed={context.performed}, isShooting={isShooting}, CanMove={playerMovement.CanMove}");
         if (context.performed && !isShooting && playerMovement.CanMove)
         {
             WeaponInstance currentWeapon = inventory.CurrentWeapon;
             if (currentWeapon != null && currentWeapon.Fire())
             {
-                Debug.Log("Weapon fired");
                 StartShooting(currentWeapon);
             }
             else
@@ -172,7 +170,7 @@ public class Shoot : MonoBehaviour
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.velocity = bulletSpawnPoint.right * currentWeapon.bulletSpeed; // Set bullet velocity
+                rb.velocity = (bulletSpawnPoint.right * currentWeapon.bulletSpeed * 200) * Time.deltaTime; // Set bullet velocity
             }
         }
     }
@@ -212,7 +210,6 @@ public class Shoot : MonoBehaviour
         UIManager uiManager = FindObjectOfType<UIManager>();
         if (uiManager != null && currentWeapon != null)
         {
-            Debug.Log($"Updating UI: Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
             uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
             uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
         }

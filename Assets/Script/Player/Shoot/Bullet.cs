@@ -26,10 +26,8 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision) // Use OnTriggerEnter for 3D
     {
-        // Log the object the bullet hit and its weapon type
-        Debug.Log($"Bullet hit: {collision.gameObject.name}, Ammo Type: {ammoType}");
-
         // Destroy the bullet upon collision
+        Debug.Log($"Bullet hit: {collision.gameObject.name}, Ammo Type: {ammoType}");
         Destroy(gameObject);
     }
 }

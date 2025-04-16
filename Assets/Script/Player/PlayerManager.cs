@@ -16,6 +16,7 @@ public class PlayerManager : MonoBehaviour
     public PlayerMovement playerMovement;
     public CameraController cameraController;
     public Shoot shoot;
+    
 
     [Header("UI and Managers")]
     public UIManager uiManager;
@@ -44,10 +45,10 @@ public class PlayerManager : MonoBehaviour
     void Update()
     {
         // Update the sound slider in the UI based on SoundLevel
-        if (uiManager != null)
-        {
-            uiManager.UpdateSoundSlider(SoundLevel);
-        }
+        // if (uiManager != null)
+        // {
+        //     uiManager.UpdateSoundSlider(SoundLevel);
+        // }
     }
 
     public void OnShoot(InputAction.CallbackContext context)
@@ -109,13 +110,28 @@ public class PlayerManager : MonoBehaviour
 
     public void OnChangeWeapon(InputAction.CallbackContext context)
     {
+        Debug.Log("Try Change Weapon.");
         if (context.performed)
         {
-            int weaponSlot = Mathf.RoundToInt(context.ReadValue<float>()) - 1; // Convert 1-based input to 0-based index
+            Debug.Log($"Change weapon input received from: {context.control.name}");
 
-            if (weaponSlot >= 0 && weaponSlot < inventory.weaponReferences.Count)
+            int weaponSlot = -1;
+
+            // Determine the weapon slot based on the button pressed
+            if (context.control.name == "1") // Button "1"
             {
-                inventory.ChangeWeapon(weaponSlot); // Change to the selected weapon slot
+                weaponSlot = 0; // Primary weapon
+            }
+            else if (context.control.name == "2") // Button "2"
+            {
+                weaponSlot = 1; // Secondary weapon
+            }
+
+            if (weaponSlot == 0 || weaponSlot == 1)
+            {
+                inventory.ChangeWeapon(weaponSlot); // Switch between primary and secondary weapons
+
+                // Update the UI to reflect the new weapon
                 UpdateWeaponUI();
                 UpdateAmmoUI();
             }
@@ -128,7 +144,7 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateAmmoUI()
     {
-        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
+        WeaponInstance currentWeapon = inventory.CurrentWeapon;
         if (uiManager != null && currentWeapon != null)
         {
             uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
@@ -137,7 +153,7 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateWeaponUI()
     {
-        WeaponInstance currentWeapon = inventory.CurrentWeapon; // Use WeaponInstance
+        WeaponInstance currentWeapon = inventory.CurrentWeapon;
         if (uiManager != null && currentWeapon != null)
         {
             uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
