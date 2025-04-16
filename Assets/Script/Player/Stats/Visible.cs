@@ -102,17 +102,38 @@ namespace Player.Stats
                 // Calculate the distance to the light source
                 float distanceToLight = Vector2.Distance(transform.position, light.transform.position);
 
-                // Check if the player is within the light's range
+                // Check if the player is within the light's outer radius
                 if (distanceToLight <= light.pointLightOuterRadius)
                 {
-                    // Calculate the intensity based on distance and light properties
-                    float distanceFactor = 1.0f - (distanceToLight / light.pointLightOuterRadius); // Linear falloff
-                    float intensity = light.intensity * distanceFactor;
+                    // Calculate the angle between the player and the light's forward direction
+                    Vector2 directionToPlayer = (transform.position - light.transform.position).normalized;
+                    float angleToPlayer = Vector2.Angle(light.transform.up, directionToPlayer);
 
-                    // Apply the light sensitivity multiplier
-                    intensity *= lightSensitivity;
+                    // Check if the player is within the light's outer angle
+                    if (angleToPlayer <= light.pointLightOuterAngle / 2)
+                    {
+                        // Determine if the player is within the inner radius and angle
+                        bool isInInnerRadius = distanceToLight <= light.pointLightInnerRadius;
+                        bool isInInnerAngle = angleToPlayer <= light.pointLightInnerAngle / 2;
 
-                    totalIntensity += intensity;
+                        // Calculate the intensity based on distance and angle
+                        float distanceFactor = isInInnerRadius
+                            ? 1.0f
+                            : 1.0f - ((distanceToLight - light.pointLightInnerRadius) /
+                                      (light.pointLightOuterRadius - light.pointLightInnerRadius));
+
+                        float angleFactor = isInInnerAngle
+                            ? 1.0f
+                            : 1.0f - ((angleToPlayer - light.pointLightInnerAngle / 2) /
+                                      (light.pointLightOuterAngle / 2 - light.pointLightInnerAngle / 2));
+
+                        float intensity = light.intensity * distanceFactor * angleFactor;
+
+                        // Apply the light sensitivity multiplier
+                        intensity *= lightSensitivity;
+
+                        totalIntensity += intensity;
+                    }
                 }
             }
 
