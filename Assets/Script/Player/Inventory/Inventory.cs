@@ -89,7 +89,11 @@ public class Inventory : MonoBehaviour
             UIManager uiManager = FindObjectOfType<UIManager>();
             if (uiManager != null)
             {
-                uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
+                // Get the weapon color based on the weapon type
+                Color weaponColor = uiManager.GetWeaponColor(currentWeapon.weaponType);
+
+                // Update the UI with the weapon name and color
+                uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType, weaponColor);
             }
         }
     }

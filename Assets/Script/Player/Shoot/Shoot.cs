@@ -162,14 +162,6 @@ public class Shoot : MonoBehaviour
                 PlayReloadSound(changeMagazineSound); // Play change magazine sound
                 yield return new WaitForSeconds(1.5f); // Time for changing the magazine
 
-                PlayReloadSound(gunRackingSound); // Play gun racking sound
-                yield return new WaitForSeconds(1.0f); // Time for racking the gun
-
-                int bulletsToReload = Mathf.Min(currentWeapon.magazineSize, currentWeapon.totalAmmo);
-                currentWeapon.bulletsInMagazine = bulletsToReload;
-                currentWeapon.totalAmmo -= bulletsToReload;
-
-                // Spawn magazine eject object (commented for now)
                 if (casingEjectPoint != null)
                 {
                     GameObject magazine = Instantiate(magazinePrefab, casingEjectPoint.position, casingEjectPoint.rotation);
@@ -179,6 +171,14 @@ public class Shoot : MonoBehaviour
                         rb.AddForce(casingEjectPoint.right * Random.Range(ejectionForceMin, ejectionForceMax), ForceMode.Impulse);
                     }
                 }
+                PlayReloadSound(gunRackingSound); // Play gun racking sound
+                yield return new WaitForSeconds(1.0f); // Time for racking the gun
+
+                int bulletsToReload = Mathf.Min(currentWeapon.magazineSize, currentWeapon.totalAmmo);
+                currentWeapon.bulletsInMagazine = bulletsToReload;
+                currentWeapon.totalAmmo -= bulletsToReload;
+
+                // Spawn magazine eject object (commented for now)
             }
 
             Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
@@ -270,8 +270,11 @@ public class Shoot : MonoBehaviour
         UIManager uiManager = FindObjectOfType<UIManager>();
         if (uiManager != null && currentWeapon != null)
         {
-            uiManager.UpdateAmmo(currentWeapon.bulletsInMagazine, currentWeapon.totalAmmo, currentWeapon.ammoType);
-            uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
+            // Get the weapon color based on the weapon type
+            Color weaponColor = uiManager.GetWeaponColor(currentWeapon.weaponType);
+
+            // Update the UI with the weapon name and color
+            uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType, weaponColor);
         }
     }
 }

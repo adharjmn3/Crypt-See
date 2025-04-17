@@ -88,6 +88,7 @@ public class PlayerManager : MonoBehaviour
         {
             // Update the UI after firing
             UpdateAmmoUI();
+            UpdateWeaponUI(); // Update weapon name and sound
             UpdateMagUI();
 
             isShooting = true;
@@ -119,6 +120,12 @@ public class PlayerManager : MonoBehaviour
         {
             isReloading = true; // Prevent shooting during reload
 
+            // Temporarily update the weapon UI to show "Reloading"
+            if (uiManager != null)
+            {
+                uiManager.UpdateWeaponUI("Reloading", currentWeapon.sound, currentWeapon.ammoType, Color.white);
+            }
+
             if (currentWeapon.bulletsInMagazine > 0)
             {
                 // Normal reload
@@ -136,8 +143,10 @@ public class PlayerManager : MonoBehaviour
             }
 
             Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
-            UpdateAmmoUI(); // Update the UI after reload
-            UpdateWeaponUI(); // Update weapon UI
+
+            // Update the UI after reload
+            UpdateAmmoUI();
+            UpdateWeaponUI(); // Revert to the original weapon name
             isReloading = false; // Allow shooting again
         }
     }
@@ -168,7 +177,11 @@ public class PlayerManager : MonoBehaviour
         WeaponInstance currentWeapon = inventory.CurrentWeapon;
         if (uiManager != null && currentWeapon != null)
         {
-            uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType);
+            // Get the weapon color based on the ammo type
+            Color weaponColor = uiManager.GetWeaponColor(currentWeapon.ammoType);
+
+            // Update the UI with the weapon name and color
+            uiManager.UpdateWeaponUI(currentWeapon.weaponName, currentWeapon.sound, currentWeapon.ammoType, weaponColor);
         }
     }
 

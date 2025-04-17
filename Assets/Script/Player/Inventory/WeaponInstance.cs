@@ -4,6 +4,7 @@ public class WeaponInstance
 {
     public string weaponName;
     public Weapon.AmmoType ammoType;
+    public Weapon.AmmoType weaponType; // Add this property
     public int magazineSize;
     public int bulletsInMagazine;
     public int totalAmmo;
@@ -19,6 +20,7 @@ public class WeaponInstance
     {
         weaponName = weapon.weaponName;
         ammoType = weapon.ammoType;
+        weaponType = weapon.ammoType; // Initialize weaponType
         magazineSize = weapon.magazineSize;
         bulletsInMagazine = weapon.bulletsInMagazine;
         totalAmmo = weapon.totalAmmo;

@@ -17,8 +17,20 @@ public class UIManager : MonoBehaviour
     public TMP_Text weaponNameText; // Text for displaying the weapon name
     public Slider soundSlider; // Slider for weapon sound level
 
+    // Method to determine the weapon color based on the weapon type
+    public Color GetWeaponColor(Weapon.AmmoType ammoType)
+    {
+        switch (ammoType)
+        {
+            case Weapon.AmmoType.Kinetic:
+                return Color.yellow; // Yellow for kinetic weapons
+            case Weapon.AmmoType.EMP:
+                return new Color32(21, 193, 250, 255); // Blue hex color #15C1FA
+            default:
+                return Color.white; // Default color
+        }
+    }
 
-    
     // Method to update the health slider
     public void UpdateHealth(int currentHealth, int maxHealth)
     {
@@ -59,12 +71,15 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Method to update the weapon name and sound
-    public void UpdateWeaponUI(string weaponName, int soundLevel, Weapon.AmmoType ammoType)
+    // Method to update the weapon name, sound, and ammo type
+    public void UpdateWeaponUI(string weaponName, int soundLevel, Weapon.AmmoType ammoType, Color weaponColor)
     {
         if (weaponNameText != null)
         {
             weaponNameText.text = weaponName;
+
+            // Apply the weapon color to the weapon name text
+            weaponNameText.color = weaponColor;
 
             // Change weapon name outline color based on sound level
             Color outlineColor = soundLevel <= 2 ? Color.white : Color.black; // White for low sound, Black for high sound
@@ -74,7 +89,7 @@ public class UIManager : MonoBehaviour
                 outline.effectColor = outlineColor;
             }
 
-            Debug.Log($"Updated Weapon Name: {weaponName}, Sound Level: {soundLevel}");
+            Debug.Log($"Updated Weapon Name: {weaponName}, Sound Level: {soundLevel}, Weapon Color: {weaponColor}");
         }
 
         if (soundSlider != null)
