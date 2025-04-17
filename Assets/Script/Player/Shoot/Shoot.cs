@@ -68,13 +68,21 @@ public class Shoot : MonoBehaviour
         if (context.performed && !isShooting && !isReloading && playerMovement.CanMove)
         {
             WeaponInstance currentWeapon = inventory.CurrentWeapon;
-            if (currentWeapon != null && currentWeapon.Fire())
+            if (currentWeapon != null)
             {
-                StartShooting(currentWeapon);
+                if (currentWeapon.Fire())
+                {
+                    StartShooting(currentWeapon);
+                }
+                else
+                {
+                    Debug.Log("Cannot fire: Out of ammo.");
+                    PlayEmptySound(); // Play empty weapon sound
+                }
             }
             else
             {
-                Debug.Log("Cannot fire: No weapon equipped or out of ammo.");
+                Debug.Log("Cannot fire: No weapon equipped.");
             }
         }
     }
@@ -193,6 +201,14 @@ public class Shoot : MonoBehaviour
         {
             audioSource.clip = clip;
             audioSource.Play();
+        }
+    }
+
+    private void PlayEmptySound()
+    {
+        if (audioSource != null && emptyReloadSound != null)
+        {
+            audioSource.PlayOneShot(emptyReloadSound);
         }
     }
 

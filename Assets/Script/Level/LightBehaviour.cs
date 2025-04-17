@@ -30,27 +30,15 @@ public class LightBehaviour : MonoBehaviour
 
     void Start()
     {
-        // Get the Visible script from the player
+        // Cache references and initialize properties
         visible = FindObjectOfType<Visible>();
+        light2D ??= GetComponent<Light2D>();
+        spriteRenderer ??= GetComponent<SpriteRenderer>();
+        audioSource ??= GetComponent<AudioSource>();
 
-        if (light2D == null)
-        {
-            light2D = GetComponent<Light2D>();
-        }
-
-        if (spriteRenderer == null)
-        {
-            spriteRenderer = GetComponent<SpriteRenderer>();
-        }
-
-        if (audioSource == null)
-        {
-            audioSource = GetComponent<AudioSource>();
-        }
-
-        // Store the initial light properties
         if (light2D != null)
         {
+            // Store the initial light properties
             initialInnerRadius = light2D.pointLightInnerRadius;
             initialOuterRadius = light2D.pointLightOuterRadius;
             initialFalloffIntensity = light2D.falloffIntensity;
@@ -65,67 +53,61 @@ public class LightBehaviour : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Check if the object that hit the light is a bullet
-        Bullet bullet = collision.GetComponent<Bullet>();
-        if (bullet != null)
+        if (collision.TryGetComponent(out Bullet bullet))
         {
-            if (bullet.ammoType == Weapon.AmmoType.Kinetic)
+            if (bullet.ammoType == Weapon.AmmoType.Kinetic && !isBroken)
             {
-                if (!isBroken) // Only play the sound and handle breaking once
-                {
-                    DestroyLight(); // Handle kinetic bullet behavior
-                    isBroken = true; // Mark the light as broken
-                }
+                DestroyLight(); // Handle kinetic bullet behavior
             }
             else if (bullet.ammoType == Weapon.AmmoType.EMP && !isBroken && !isFlickering)
             {
                 StartCoroutine(FlickerLight()); // Handle EMP bullet behavior
-                InitialLightProperties(); // Restore initial light properties
             }
         }
     }
 
     private void DestroyLight()
     {
-        if (light2D != null)
-        {
-            light2D.enabled = false;
-        }
+        if (isBroken) return; // Prevent multiple calls
+        isBroken = true;
+
+        if (light2D != null) light2D.enabled = false;
 
         if (spriteRenderer != null && brokenLightSprite != null)
         {
             spriteRenderer.sprite = brokenLightSprite;
         }
-        // disable the collider to prevent further interactions
-        Collider2D collider = GetComponent<Collider2D>();
-        if (collider != null)
+
+        // Disable the collider to prevent further interactions
+        if (TryGetComponent(out Collider2D collider))
         {
             collider.enabled = false;
         }
 
         if (audioSource != null && brokenSound != null)
         {
-            audioSource.PlayOneShot(brokenSound); // Play the sound only once
+            audioSource.PlayOneShot(brokenSound);
         }
 
-        if (visible != null)
+        if (visible != null && light2D != null)
         {
-            visible.ExcludeLight(light2D, isFunctional: true); // Use functional exclusion
+            visible.ExcludeLight(light2D, isFunctional: true);
         }
     }
 
     private IEnumerator FlickerLight()
     {
-        if (isFlickering) yield break; // Prevent multiple flicker effects from stacking
+        if (isFlickering) yield break; // Prevent multiple flicker effects
         isFlickering = true;
 
         // Notify the Visible script to exclude this light
         if (visible != null && light2D != null)
         {
-            visible.ExcludeLight(light2D, isFunctional: true); // Use functional exclusion
+            visible.ExcludeLight(light2D, isFunctional: true);
         }
 
         float elapsedTime = 0f;
-        float flickerInterval = 0.2f; // Initial flicker interval
+        float flickerInterval = 0.2f;
 
         // Play the EMP sound
         if (audioSource != null && empSound != null)
@@ -146,63 +128,30 @@ public class LightBehaviour : MonoBehaviour
 
                 if (light2D.enabled)
                 {
-                    // Randomize the intensity for a chaotic flicker effect
-                    light2D.intensity = Random.Range(0.5f, 2.0f); // Flicker between dim and bright
+                    light2D.intensity = Random.Range(0.5f, 2.0f); // Randomize intensity
                 }
             }
 
-            // Randomize the volume for each flicker
-            if (audioSource != null)
-            {
-                audioSource.volume = Random.Range(0.3f, 1.0f); // Random volume between 30% and 100%
-            }
-
-            // Gradually decrease the flicker interval to make it flicker faster
+            // Gradually decrease the flicker interval
             flickerInterval = Mathf.Lerp(0.2f, 0.05f, elapsedTime / flickerDuration);
-
-            // Gradually increase the pitch to make the sound faster as the effect progresses
-            if (audioSource != null)
-            {
-                audioSource.pitch = Mathf.Lerp(1.0f, 1.5f, elapsedTime / flickerDuration); // Pitch increases from 1.0 to 1.5
-            }
-
-            // Fade in and fade out effect
-            if (audioSource != null)
-            {
-                float fadeFactor = Mathf.PingPong(elapsedTime * 2, 1); // Oscillates between 0 and 1
-                audioSource.volume *= fadeFactor; // Apply fade effect
-            }
 
             yield return new WaitForSeconds(flickerInterval);
         }
 
-        // Ensure the light is turned back on after flickering
-        if (light2D != null)
-        {
-            light2D.enabled = true;
+        // Restore the light's original properties
+        RestoreLightProperties();
 
-            // Restore the light's original properties
-            light2D.intensity = 10f; // Restore intensity to its original value
-            light2D.pointLightInnerRadius = initialInnerRadius;
-            light2D.pointLightOuterRadius = initialOuterRadius;
-            light2D.falloffIntensity = initialFalloffIntensity;
-            light2D.pointLightInnerAngle = initialInnerSpotAngle;
-            light2D.pointLightOuterAngle = initialOuterSpotAngle;
-        }
-
-        // Stop the EMP sound and reset the loop property
+        // Stop the EMP sound
         if (audioSource != null)
         {
             audioSource.loop = false;
             audioSource.Stop();
-            audioSource.pitch = 1.0f; // Reset pitch to default
-            audioSource.volume = 1.0f; // Reset volume to default
         }
 
         // Notify the Visible script to include this light again
         if (visible != null && light2D != null)
         {
-            visible.IncludeLight(light2D, isFunctional: true); // Use functional inclusion
+            visible.IncludeLight(light2D, isFunctional: true);
         }
 
         isFlickering = false;
@@ -211,12 +160,12 @@ public class LightBehaviour : MonoBehaviour
         StartCoroutine(SubtleFlicker());
     }
 
-    private void InitialLightProperties()
+    private void RestoreLightProperties()
     {
         if (light2D != null)
         {
-            // Force the intensity to 10
-
+            light2D.enabled = true;
+            light2D.intensity = 10f; // Restore intensity
             light2D.pointLightInnerRadius = initialInnerRadius;
             light2D.pointLightOuterRadius = initialOuterRadius;
             light2D.falloffIntensity = initialFalloffIntensity;
@@ -227,23 +176,23 @@ public class LightBehaviour : MonoBehaviour
 
     private IEnumerator SubtleFlicker()
     {
-        while (!isBroken && !isFlickering) // Only flicker if the light is not broken or flickering
+        while (!isBroken && !isFlickering)
         {
             if (light2D != null)
             {
                 // Randomly adjust the intensity slightly for a subtle flicker effect
-                light2D.intensity = Random.Range(9.1f, 10.3f); // Flicker between 90% and 110% of the original intensity
+                light2D.intensity = Random.Range(9.1f, 10.3f);
 
-                // Randomly toggle the light off briefly for a very subtle effect
-                if (Random.value > 0.95f) // 5% chance to briefly turn off
+                // Randomly toggle the light off briefly
+                if (Random.value > 0.95f)
                 {
                     light2D.enabled = false;
-                    yield return new WaitForSeconds(0.005f); // Briefly turn off for 50ms
+                    yield return new WaitForSeconds(0.005f);
                     light2D.enabled = true;
                 }
             }
 
-            yield return new WaitForSeconds(Random.Range(0.1f, 0.3f)); // Wait for a random interval before the next flicker
+            yield return new WaitForSeconds(Random.Range(0.1f, 0.3f));
         }
     }
 }
