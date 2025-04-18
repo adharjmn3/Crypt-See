@@ -2,20 +2,21 @@ using UnityEngine;
 
 public class ObjectiveBehavior : MonoBehaviour
 {
-    private ObjectiveData objectiveData;
     private MissionManager missionManager;
 
-    public void Initialize(ObjectiveData data, MissionManager manager)
+    [Header("Objective Data")]
+    public ObjectiveData objectiveData; // Reference to the ScriptableObject containing objective data
+
+    public void Initialize(MissionManager manager)
     {
-        objectiveData = data;
         missionManager = manager;
-        
-        
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (objectiveData == null || missionManager == null)
+        Debug.Log($"Trigger detected with {other.name} for objective: {gameObject.name}");
+
+        if (missionManager == null)
         {
             Debug.LogError("ObjectiveBehavior is not initialized properly! Ensure Initialize() is called.");
             return;
@@ -23,23 +24,10 @@ public class ObjectiveBehavior : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            Debug.Log($"Player interacted with objective: {objectiveData.objectiveName}");
-            missionManager.CompleteObjective(objectiveData);
-            Destroy(gameObject); // Remove the objective from the scene
-        }
-    }
+            Debug.Log($"Player interacted with objective: {gameObject.name}");
 
-    public static void SpawnObjective(ObjectiveData objective, Transform spawnPoint, MissionManager manager)
-    {
-        GameObject objectiveInstance = Instantiate(objective.objectivePrefab, spawnPoint.position, spawnPoint.rotation);
-        ObjectiveBehavior behavior = objectiveInstance.GetComponent<ObjectiveBehavior>();
-        if (behavior != null)
-        {
-            behavior.Initialize(objective, manager);
-        }
-        else
-        {
-            Debug.LogError("ObjectiveBehavior script is missing on the objective prefab!");
+            // Pass the objective data to the MissionManager
+            missionManager.CompleteObjective(gameObject, objectiveData);
         }
     }
 }

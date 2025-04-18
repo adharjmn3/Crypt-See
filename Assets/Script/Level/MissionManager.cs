@@ -1,25 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement; // For restarting the level
 
 public class MissionManager : MonoBehaviour
 {
-    public List<ObjectiveData> objectives; // List of all possible objectives
+    public List<GameObject> objectivePrefabs; // List of objective prefabs
     public List<Transform> spawnPoints; // Predetermined spawn points
     public UIManager uiManager; // Reference to the UIManager
-    public int maxObjectives = 3; // Maximum number of objectives to spawn
+    public GameObject finishTrigger; // Finish trigger GameObject
+    public int maxObjectives = 3; // Maximum number of mandatory objectives to spawn
 
-    private List<GameObject> activeObjectives = new List<GameObject>(); // Active objectives in the scene
-    private int currentObjectiveIndex = 0; // Track the current objective
+    private List<GameObject> activeMandatoryObjectives = new List<GameObject>(); // Active mandatory objectives
+    private List<GameObject> activeSideObjectives = new List<GameObject>(); // Active side objectives
+    private int completedMandatoryObjectives = 0; // Track completed mandatory objectives
 
     private void Start()
     {
         GenerateObjectives();
+        PlaceFinishTrigger();
     }
 
     private void GenerateObjectives()
     {
-        // Shuffle the objectives list to randomize selection
-        List<ObjectiveData> shuffledObjectives = new List<ObjectiveData>(objectives);
+        // Shuffle the objective prefabs list to randomize selection
+        List<GameObject> shuffledObjectives = new List<GameObject>(objectivePrefabs);
         shuffledObjectives.Sort((a, b) => Random.Range(-1, 2));
 
         // Shuffle spawn points
@@ -27,57 +31,101 @@ public class MissionManager : MonoBehaviour
         shuffledSpawnPoints.Sort((a, b) => Random.Range(-1, 2));
 
         // Spawn objectives at random spawn points
-        for (int i = 0; i < Mathf.Min(maxObjectives, shuffledObjectives.Count, shuffledSpawnPoints.Count); i++)
+        for (int i = 0; i < Mathf.Min(shuffledObjectives.Count, shuffledSpawnPoints.Count); i++)
         {
-            ObjectiveData objective = shuffledObjectives[i];
+            GameObject objectivePrefab = shuffledObjectives[i];
             Transform spawnPoint = shuffledSpawnPoints[i];
 
-            GameObject objectiveInstance = Instantiate(objective.objectivePrefab, spawnPoint.position, spawnPoint.rotation);
-            activeObjectives.Add(objectiveInstance);
+            GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
-            // Attach the ObjectiveBehavior script to handle interactions
-            ObjectiveBehavior behavior = objectiveInstance.AddComponent<ObjectiveBehavior>();
-            behavior.Initialize(objective, this);
+            // Ensure the ObjectiveBehavior script is attached
+            ObjectiveBehavior behavior = objectiveInstance.GetComponent<ObjectiveBehavior>();
+            if (behavior != null)
+            {
+                behavior.Initialize(this); // Initialize with the MissionManager reference
+
+                // Check if the objective is mandatory or a side objective
+                if (behavior.objectiveData.isMandatory)
+                {
+                    activeMandatoryObjectives.Add(objectiveInstance);
+                }
+                else
+                {
+                    activeSideObjectives.Add(objectiveInstance);
+                }
+            }
+            else
+            {
+                Debug.LogError("ObjectiveBehavior script is missing on the objective prefab!");
+            }
         }
     }
 
-    public void CompleteObjective(ObjectiveData completedObjective)
+    private void PlaceFinishTrigger()
     {
-        Debug.Log($"Completed Objective: {completedObjective.objectiveName}");
+        if (finishTrigger != null && spawnPoints.Count > 0)
+        {
+            // Place the finish trigger at the last spawn point
+            Transform finishPoint = spawnPoints[spawnPoints.Count - 1];
+            Instantiate(finishTrigger, finishPoint.position, finishPoint.rotation);
+        }
+        else
+        {
+            Debug.LogError("Finish trigger or spawn points are not set!");
+        }
+    }
+
+    public void CompleteObjective(GameObject completedObjective, ObjectiveData objectiveData)
+    {
+        Debug.Log($"Completed Objective: {objectiveData.objectiveName}");
 
         // Show dialog for the completed objective
         if (uiManager != null)
         {
             uiManager.UpdateDialog(
-                completedObjective.dialogSpeakerName,
-                completedObjective.dialogContent,
+                objectiveData.dialogSpeakerName, // Use the speaker name from ObjectiveData
+                objectiveData.dialogContent, // Use the dialog content from ObjectiveData
                 true,
-                completedObjective.typingSpeed
+                objectiveData.typingSpeed // Use the typing speed from ObjectiveData
             );
         }
-
-        // Handle rewards (optional)
-        if (completedObjective.hasReward)
+        else
         {
-            if (completedObjective.ammoReward > 0)
-            {
-                Debug.Log($"Player received {completedObjective.ammoReward} ammo.");
-                // Add ammo to the player (implement player inventory logic here)
-            }
-
-            if (completedObjective.healthReward > 0)
-            {
-                Debug.Log($"Player received {completedObjective.healthReward} health.");
-                // Add health to the player (implement player health logic here)
-            }
+            Debug.LogError("UIManager reference is not set in MissionManager!");
         }
 
-        // Remove the completed objective from the active list
-        currentObjectiveIndex++;
-        if (currentObjectiveIndex >= activeObjectives.Count)
+        // Handle mandatory and side objectives separately
+        if (objectiveData.isMandatory)
         {
-            Debug.Log("All objectives completed!");
-            // Trigger mission completion logic here
+            activeMandatoryObjectives.Remove(completedObjective);
+            completedMandatoryObjectives++;
         }
+        else
+        {
+            activeSideObjectives.Remove(completedObjective);
+        }
+
+        Destroy(completedObjective);
+
+        // Check if all mandatory objectives are completed
+        if (completedMandatoryObjectives >= maxObjectives || activeMandatoryObjectives.Count == 0)
+        {
+            Debug.Log("All mandatory objectives completed!");
+            CheckAllObjectivesCompleted();
+        }
+    }
+
+    private void CheckAllObjectivesCompleted()
+    {
+        if (activeMandatoryObjectives.Count == 0)
+        {
+            Debug.Log("All mandatory objectives completed! Restarting level...");
+            RestartLevel();
+        }
+    }
+
+    private void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Restart the current level
     }
 }

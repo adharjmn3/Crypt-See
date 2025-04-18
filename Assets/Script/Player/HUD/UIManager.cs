@@ -161,6 +161,10 @@ public class UIManager : MonoBehaviour
         if (dialogBackground != null)
         {
             dialogBackground.SetActive(false); // Hide the dialog background
+            // clear the dialog text after the duration
+            dialogText.text = ""; // Clear the dialog text
+            dialogNameText.text = ""; // Clear the dialog name text
+
         }
     }
 }
