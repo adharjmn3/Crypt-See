@@ -183,13 +183,6 @@ public class LightBehaviour : MonoBehaviour
                 // Randomly adjust the intensity slightly for a subtle flicker effect
                 light2D.intensity = Random.Range(9.1f, 10.3f);
 
-                // Randomly toggle the light off briefly
-                if (Random.value > 0.95f)
-                {
-                    light2D.enabled = false;
-                    yield return new WaitForSeconds(0.005f);
-                    light2D.enabled = true;
-                }
             }
 
             yield return new WaitForSeconds(Random.Range(0.1f, 0.3f));
