@@ -19,7 +19,7 @@ TagManager:
   - Casing
   - Bullet
   - Floor
-  - 
+  - Lights
   - 
   - 
   - 
@@ -52,4 +52,7 @@ TagManager:
     locked: 0
   - name: Wall
     uniqueID: 908778813
+    locked: 0
+  - name: Lights
+    uniqueID: 3234433379
     locked: 0
