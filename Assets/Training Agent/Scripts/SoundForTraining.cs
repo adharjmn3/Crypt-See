@@ -19,14 +19,16 @@ namespace TopDown.Movement
 
         private void Update()
         {
-            if (playerMovement.CurrentInput.magnitude > 0)
-            {
-                // Play a random sound if not already playing
+            // if (playerMovement.CurrentInput.magnitude > 0)
+            // {
+                
+            // }
+
+            // Play a random sound if not already playing
                 if (!audioSource.isPlaying)
                 {
                     PlayRandomMovementSound();
                 }
-            }
         }
 
         private void PlayRandomMovementSound()

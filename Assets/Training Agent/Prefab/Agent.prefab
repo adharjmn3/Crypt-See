@@ -16,10 +16,10 @@ GameObject:
   - component: {fileID: 4242786529295833361}
   - component: {fileID: 4228052011151081639}
   - component: {fileID: 8147349526262888588}
-  - component: {fileID: 1761623407775195621}
+  - component: {fileID: 7769816666528064889}
   - component: {fileID: 8009832494332996022}
   - component: {fileID: 4624623082222681950}
-  - component: {fileID: 6027041372970846053}
+  - component: {fileID: 5207167958867591044}
   m_Layer: 6
   m_Name: Agent
   m_TagString: Untagged
@@ -247,7 +247,7 @@ MonoBehaviour:
   m_ObservationStacks: 1
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
   rayMissColor: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &1761623407775195621
+--- !u!114 &7769816666528064889
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -256,21 +256,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 5765458329065383543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3801cfa01cfbcc04a8ed25045e9b7538, type: 3}
+  m_Script: {fileID: 11500000, guid: 7ba2aea1672eeff4e975e1dd22e1f8bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
-  player: {fileID: 0}
-  lights: []
-  obstacleMask:
-    serializedVersion: 2
-    m_Bits: 128
-  points: []
-  pointsWithoutLight: []
-  hearingRadius: 1.5
+  MaxStep: 0
+  trainingManager: {fileID: 0}
 --- !u!114 &8009832494332996022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,7 +290,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7d74f5ef1c75944cafa352ed77165c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6027041372970846053
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 128
+  viewAngle: 70
+  viewDirectionSource: {fileID: 6354010888659866937}
+--- !u!114 &5207167958867591044
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -306,7 +304,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 5765458329065383543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c6b2d8acc5d13e4695f3397131f9aab, type: 3}
+  m_Script: {fileID: 11500000, guid: 18378d54072caec4596f5017da958281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  positionMode: 0
+  playerAudioSource: {fileID: 0}
+  hearingRadius: 10
