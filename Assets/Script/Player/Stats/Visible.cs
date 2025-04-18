@@ -17,6 +17,7 @@ namespace Player.Stats
         [SerializeField] private AudioClip lightOffSound; // Audio clip to play when lights are turned off
         [SerializeField] private AudioClip lightOnSound; // Audio clip to play when lights are turned on
         [SerializeField] private float movementSpeedThreshold = 0.5f; // Minimum speed to affect LightLevel
+        [SerializeField] private Camera minimapCamera; // Reference to the minimap camera
         private AudioSource audioSource; // Reference to the AudioSource component
 
         private PlayerMovement playerMovement; // Reference to PlayerMovement
@@ -25,6 +26,9 @@ namespace Player.Stats
         [SerializeField] private float lightToggleCooldown = 0.5f; // Cooldown duration in seconds
 
         private bool isGraduallyTurningOnLight = false; // Flag to track if GraduallyTurnOnLight is running
+
+private readonly Color minimapBlue = new Color(0f, 193f / 255f, 253f / 255f, 0.07f); // Blue color (00c1fd) with 27% transparency
+private readonly Color minimapRed = new Color(149f / 255f, 0f, 13f / 255f, 0.07f);   // Red color (95000D)
 
         public float LightLevel
         {
@@ -207,6 +211,12 @@ namespace Player.Stats
                     }
                 }
             }
+
+            // Change the minimap camera environment background to blue
+            if (minimapCamera != null)
+            {
+                minimapCamera.backgroundColor = minimapBlue;
+            }
         }
 
         private void EnableExcludedLights()
@@ -224,6 +234,12 @@ namespace Player.Stats
                         audioSource.PlayOneShot(lightOnSound);
                     }
                 }
+            }
+
+            // Change the minimap camera environment background back to red
+            if (minimapCamera != null)
+            {
+                minimapCamera.backgroundColor = minimapRed;
             }
         }
 
