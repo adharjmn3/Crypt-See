@@ -48,7 +48,8 @@ public class NPCAgent : Agent
         bool canSee = enemyVision.CanSeeTarget();
         bool canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition());
 
-        Debug.Log(canSee);
+        //Debug.Log(canSee);
+        Debug.Log(canHear);
 
         AddReward(0.0001f);
     }
