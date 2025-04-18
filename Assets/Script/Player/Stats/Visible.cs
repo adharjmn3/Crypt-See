@@ -23,6 +23,8 @@ namespace Player.Stats
         private Dictionary<Light2D, float> lightCooldowns = new Dictionary<Light2D, float>(); // Cooldown tracker for lights
         [SerializeField] private float lightToggleCooldown = 0.5f; // Cooldown duration in seconds
 
+        private bool isGraduallyTurningOnLight = false; // Flag to track if GraduallyTurnOnLight is running
+
         public float LightLevel
         {
             get { return lightLevel; }
@@ -184,6 +186,9 @@ namespace Player.Stats
 
         private void DisableExcludedLights()
         {
+            // Wait until GraduallyTurnOnLight is finished
+            if (isGraduallyTurningOnLight) return;
+
             foreach (Light2D excludedLight in excludedLights)
             {
                 if (excludedLight != null && excludedLight.enabled)
@@ -222,6 +227,8 @@ namespace Player.Stats
         {
             if (!excludedLights.Contains(light)) yield break;
 
+            isGraduallyTurningOnLight = true; // Set the flag to true
+
             float targetIntensity = light.intensity; // Store the target intensity
             light.intensity = 0.0f; // Start from 0 intensity
 
@@ -236,6 +243,8 @@ namespace Player.Stats
             }
 
             light.intensity = targetIntensity; // Ensure the final intensity is set
+
+            isGraduallyTurningOnLight = false; // Set the flag to false
         }
 
         // Exclude a light for cosmetic purposes
