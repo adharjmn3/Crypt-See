@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f4cf0270f38e1d44bdad2820e6e857b, type: 3}
   m_Name: Tutor
   m_EditorClassIdentifier: 
-  objectiveName: 
+  objectiveName: Tutorial 1
   type: 0
   objectivePrefab: {fileID: 0}
-  dialogSpeakerName: 
-  dialogContent: 
+  dialogSpeakerName: Comms
+  dialogContent: Hey Don't Forget to Press R ro reload your gun
   typingSpeed: 0.05
   isMandatory: 1
   hasReward: 0
