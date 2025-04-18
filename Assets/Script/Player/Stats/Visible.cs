@@ -16,6 +16,7 @@ namespace Player.Stats
         [SerializeField, Range(0.1f, 1.0f)] private float soundDecayRate = 0.2f; // Rate at which sound level decreases over time
         [SerializeField] private AudioClip lightOffSound; // Audio clip to play when lights are turned off
         [SerializeField] private AudioClip lightOnSound; // Audio clip to play when lights are turned on
+        [SerializeField] private float movementSpeedThreshold = 0.5f; // Minimum speed to affect LightLevel
         private AudioSource audioSource; // Reference to the AudioSource component
 
         private PlayerMovement playerMovement; // Reference to PlayerMovement
@@ -55,7 +56,7 @@ namespace Player.Stats
             DetectLightSources();
 
             // Check if the player is moving or shooting
-            if ((playerMovement != null && playerMovement.CurrentSpeed > 0.0f && IsMoving()) || IsShooting())
+            if ((playerMovement != null && playerMovement.CurrentSpeed > movementSpeedThreshold && IsMoving()) || IsShooting())
             {
                 // Dynamically scale sound level based on player movement or shooting
                 float movementSound = playerMovement.CalculateVolume(playerMovement.CurrentSpeed);
@@ -71,6 +72,10 @@ namespace Player.Stats
                     soundLevel = Mathf.Clamp(soundLevel, 0.0f, 5.0f); // Ensure it doesn't go below 0
                 }
             }
+
+            // Combine LightLevel and soundLevel for the final LightLevel calculation
+            float combinedLevel = lightLevel + (soundLevel); // Normalize soundLevel to a 0-1 range
+            LightLevel = Mathf.Clamp(combinedLevel, 0.0f, 1.0f); // Clamp the final LightLevel between 0 and 1
         }
 
         // Helper method to check if the player is moving
@@ -176,7 +181,7 @@ namespace Player.Stats
             // Disable or enable excluded lights based on LightLevel
             if (LightLevel == 1.0f)
             {
-                DisableExcludedLights();
+                DisableExcludedLights(); // Ensure excluded lights are disabled when LightLevel hits 1
             }
             else
             {
