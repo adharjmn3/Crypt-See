@@ -141,7 +141,23 @@ public class Shoot : MonoBehaviour
     {
         if (context.performed && !isReloading)
         {
-            StartCoroutine(ReloadWeapon());
+            WeaponInstance currentWeapon = inventory.CurrentWeapon;
+            if (currentWeapon != null)
+            {
+                if (currentWeapon.totalAmmo > 0) // Check if there is reserved ammo
+                {
+                    StartCoroutine(ReloadWeapon());
+                }
+                else
+                {
+                    Debug.Log("Cannot reload: No reserved ammo.");
+                    PlayEmptySound(); // Play empty reload sound or feedback
+                }
+            }
+            else
+            {
+                Debug.Log("Cannot reload: No weapon equipped.");
+            }
         }
     }
 
