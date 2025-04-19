@@ -105,6 +105,10 @@ public class UIManager : MonoBehaviour
             soundSlider.value = soundLevel;
         }
     }
+        public bool IsDialogActive()
+    {
+        return dialogBackground != null && dialogBackground.activeSelf;
+    }
 
     // Method to update the sound slider dynamically
     public void UpdateSoundSlider(float soundLevel)

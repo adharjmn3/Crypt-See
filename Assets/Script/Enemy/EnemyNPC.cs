@@ -7,15 +7,14 @@ using UnityEngine;
 public class EnemyNPC : Agent
 {
     [Header("Agent Settings")]
-    [SerializeField] private float tensionMeter;
-    [SerializeField] private float maxTensionMeter;
+    [SerializeField] public float tensionMeter;
+    [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
 
     private float lastTensionMeter = 0f;
 
     private EnemyVision enemyVision;
-    private EnemyHearing enemyHearing;
     private EnemyMovement enemyMovement;
 
     private Transform playerTransform;
@@ -23,10 +22,9 @@ public class EnemyNPC : Agent
     public override void Initialize()
     {
         enemyMovement = GetComponent<EnemyMovement>();
-        enemyHearing = GetComponent<EnemyHearing>();
         enemyVision = GetComponent<EnemyVision>();
 
-        // Otomatis cari Player berdasarkan tag
+        // Automatically find the player by tag
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
@@ -35,7 +33,7 @@ public class EnemyNPC : Agent
         }
         else
         {
-            Debug.LogWarning("Player dengan tag 'Player' tidak ditemukan!");
+            Debug.LogWarning("Player with tag 'Player' not found!");
         }
     }
 
@@ -47,10 +45,10 @@ public class EnemyNPC : Agent
         Vector3 playerPos = playerTransform.position;
 
         bool canSee = enemyVision.CanSeeTarget();
-        bool canHear = enemyHearing.CanHearPlayer(agentPos, playerPos);
 
-        if (canSee || canHear)
+        if (canSee)
         {
+            Debug.Log("Enemy can see the player!");
             float distance = Vector3.Distance(agentPos, playerPos);
             float proximityFactor = Mathf.Clamp01(1f - distance / 10f);
             float adjustedFillSpeed = fillSpeed * (0.5f + proximityFactor);
@@ -99,10 +97,8 @@ public class EnemyNPC : Agent
         sensor.AddObservation(tensionChange);
         sensor.AddObservation(tensionFull);
         sensor.AddObservation(enemyVision.CanSeeTarget() ? 1f : 0f);
-        sensor.AddObservation(enemyHearing.CanHearPlayer(agentPos, playerPos) ? 1f : 0f);
 
         Debug.Log(enemyVision.CanSeeTarget());
-        Debug.Log(enemyHearing.CanHearPlayer(agentPos, playerPos));
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -110,18 +106,26 @@ public class EnemyNPC : Agent
         float moveAction = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
-        if(IsTensionMeterFull()){
-            if(moveAction < 0.2f && enemyVision.CanSeeTarget()){
+        if (IsTensionMeterFull() && enemyVision.CanSeeTarget())
+        {
+            Debug.Log("Enemy is chasing the player!");
+        }
+
+        if (IsTensionMeterFull())
+        {
+            if (moveAction < 0.2f && enemyVision.CanSeeTarget())
+            {
                 moveAction = 1f;
             }
-            else if(!enemyVision.CanSeeTarget()){
+            else if (!enemyVision.CanSeeTarget())
+            {
                 moveAction = 0f;
             }
         }
 
         if (moveAction < 0.2f && IsTensionMeterFull() && enemyVision.CanSeeTarget())
         {
-            moveAction = 1f; // Paksa maju saat tension penuh
+            moveAction = 1f; // Force forward movement when tension is full
         }
 
         enemyMovement.Move(moveAction, lookAction);

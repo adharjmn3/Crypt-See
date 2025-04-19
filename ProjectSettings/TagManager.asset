@@ -57,3 +57,6 @@ TagManager:
   - name: Lights
     uniqueID: 3234433379
     locked: 0
+  - name: Enemy
+    uniqueID: 562086281
+    locked: 0

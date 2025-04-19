@@ -19,6 +19,6 @@ MonoBehaviour:
   totalAmmo: 26
   damage: 40
   fireRate: 30
-  range: 30
+  range: 300
   bulletSpeed: 10
   sound: 1
