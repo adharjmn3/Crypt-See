@@ -17,3 +17,5 @@ MonoBehaviour:
   dialogContent: "Ok Agent, I hope you can hear me loud and clear. the objective
     is collect all artefact from this museum.\n "
   typingSpeed: 0.0003
+  changeCameraFocus: 0
+  cameraTargetPosition: {x: -19.98, y: 21.02, z: 0}

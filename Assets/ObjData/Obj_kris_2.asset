@@ -16,8 +16,8 @@ MonoBehaviour:
   type: 0
   objectivePrefab: {fileID: 8779265482033835491, guid: c1f1186daf483a44285020c4c964ce8f, type: 3}
   dialogSpeakerName: Comms
-  dialogContent: From what i read these dagger really are something, i wonder why
-    people back then create dagger with these kind of curve
+  dialogContent: I hope it's not in this condition but job is job, i wonder why people
+    back then create dagger with these kind of curve
   typingSpeed: 0.05
   isMandatory: 1
   hasReward: 0

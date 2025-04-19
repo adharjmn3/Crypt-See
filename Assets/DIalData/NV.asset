@@ -16,4 +16,6 @@ MonoBehaviour:
   dialogSpeakerName: Comms
   dialogContent: That nightvision google is light sensitive, it will turn on and
     off automatically based on where you are
-  typingSpeed: 0.0005
+  typingSpeed: 0.0003
+  changeCameraFocus: 0
+  cameraTargetPosition: {x: 0, y: 0, z: 0}

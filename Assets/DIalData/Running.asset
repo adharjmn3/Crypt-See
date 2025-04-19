@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84a63a818cbca9e49be6d6b0480c55e7, type: 3}
   m_Name: Running
   m_EditorClassIdentifier: 
-  dialogName: 
-  dialogSpeakerName: 
-  dialogContent: 
-  typingSpeed: 0.05
+  dialogName: Tutorial
+  dialogSpeakerName: Comms
+  dialogContent: You can change your walking speed by using MOUSE SCROLL WHEEL
+  typingSpeed: 0.000004
+  changeCameraFocus: 0
+  cameraTargetPosition: {x: 0, y: 0, z: 0}
