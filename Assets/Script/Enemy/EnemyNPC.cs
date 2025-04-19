@@ -89,6 +89,7 @@ public class EnemyNPC : Agent
 
         sensor.AddObservation(agentPos);
         sensor.AddObservation(playerPos);
+        sensor.AddObservation(transform.rotation.z);
 
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;

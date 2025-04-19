@@ -27,15 +27,33 @@
                 "auxillary_file_paths": [
                     "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-425290.pt"
                 ]
+            },
+            {
+                "steps": 499991,
+                "file_path": "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-499991.onnx",
+                "reward": null,
+                "creation_time": 1745048697.717532,
+                "auxillary_file_paths": [
+                    "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-499991.pt"
+                ]
+            },
+            {
+                "steps": 500567,
+                "file_path": "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-500567.onnx",
+                "reward": null,
+                "creation_time": 1745048704.2382405,
+                "auxillary_file_paths": [
+                    "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-500567.pt"
+                ]
             }
         ],
         "final_checkpoint": {
-            "steps": 425290,
+            "steps": 500567,
             "file_path": "results\\AgentsV1_11\\ExploreAgent.onnx",
-            "reward": 0.7048582614145495,
-            "creation_time": 1745036997.8190522,
+            "reward": null,
+            "creation_time": 1745048704.2382405,
             "auxillary_file_paths": [
-                "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-425290.pt"
+                "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-500567.pt"
             ]
         }
     },
