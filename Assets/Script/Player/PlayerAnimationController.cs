@@ -10,6 +10,8 @@ namespace TopDown.Movement
         private PlayerMovement playerMovement; // Reference to the PlayerMovement script for input detection.
         private Shoot shoot; // Reference to the Shoot script for shooting detection.
 
+        private bool isPunching = false; // Track if the player is punching
+
         // Start is called before the first frame update
         void Start()
         {
@@ -31,9 +33,11 @@ namespace TopDown.Movement
             // Update the Animator's "isShoot" parameter.
             animator.SetBool("isShoot", shoot != null && shoot.isShooting);
 
-            // Update the Animator's "isPunch" parameter (if punching logic is added later).
-            // animator.SetBool("isPunch", ...); // Add punching logic here if needed.
+            // Update the Animator's "isPunch" parameter.
+            animator.SetBool("isPunch", isPunching);
         }
+
+        
     }
 }
 
