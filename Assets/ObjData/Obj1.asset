@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f4cf0270f38e1d44bdad2820e6e857b, type: 3}
+  m_Name: Obj1
+  m_EditorClassIdentifier: 
+  objectiveName: Collect Artefact
+  type: 0
+  objectivePrefab: {fileID: 8779265482033835491, guid: c1f1186daf483a44285020c4c964ce8f, type: 3}
+  dialogSpeakerName: Comms
+  dialogContent: Thats and ancient dagger popular for performing ritual and traditional
+    ceremonies. Pretty popular in south east asia especially in Indonesia. i think
+    this is the last of its kind these days
+  typingSpeed: 0.05
+  isMandatory: 1
+  hasReward: 0
+  ammoReward: 0
+  healthReward: 0

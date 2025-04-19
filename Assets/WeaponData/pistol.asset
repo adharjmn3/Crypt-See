@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b2be2704c053f4287c901d62077e93, type: 3}
+  m_Name: pistol
+  m_EditorClassIdentifier: 
+  weaponName: P1 9mm
+  ammoType: 0
+  magazineSize: 13
+  bulletsInMagazine: 13
+  totalAmmo: 26
+  damage: 40
+  fireRate: 30
+  range: 30
+  bulletSpeed: 10
+  sound: 1
