@@ -56,7 +56,7 @@ public class EnemyNPC : Agent
             float adjustedFillSpeed = fillSpeed * (0.5f + proximityFactor);
             tensionMeter = MathF.Min(maxTensionMeter, tensionMeter + adjustedFillSpeed * Time.deltaTime);
 
-            if (distance < 2f)
+            if (distance < 3f)
             {
                 tensionMeter = maxTensionMeter;
             }
@@ -106,6 +106,20 @@ public class EnemyNPC : Agent
     {
         float moveAction = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+
+        if(IsTensionMeterFull()){
+            if(moveAction < 0.2f && enemyVision.CanSeeTarget()){
+                moveAction = 1f;
+            }
+            else if(!enemyVision.CanSeeTarget()){
+                moveAction = 0f;
+            }
+        }
+
+        if (moveAction < 0.2f && IsTensionMeterFull() && enemyVision.CanSeeTarget())
+        {
+            moveAction = 1f; // Paksa maju saat tension penuh
+        }
 
         enemyMovement.Move(moveAction, lookAction);
     }
