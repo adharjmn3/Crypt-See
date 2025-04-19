@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1745054045",
+        "python_version": "3.10.12 | packaged by Anaconda, Inc. | (main, Jul  5 2023, 19:01:18) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\trist\\anaconda3\\envs\\mlagents\\Scripts\\mlagents-learn .\\Config\\trainingConfigNC.yaml --run-id AgentsV1_14 --torch-device cuda --initialize-from AgentsV1_13 --resume",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.6.0+cu126",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1745054060"
+    },
+    "total": 14.524057200000243,
+    "count": 1,
+    "self": 0.008442800000921125,
+    "children": {
+        "run_training.setup": {
+            "total": 0.14320589999988442,
+            "count": 1,
+            "self": 0.14320589999988442
+        },
+        "TrainerController.start_learning": {
+            "total": 14.372408499999437,
+            "count": 1,
+            "self": 0.0004408000022522174,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 14.37194620000082,
+                    "count": 1,
+                    "self": 14.37194620000082
+                },
+                "trainer_threads": {
+                    "total": 1.5999976312741637e-06,
+                    "count": 1,
+                    "self": 1.5999976312741637e-06
+                },
+                "TrainerController._save_models": {
+                    "total": 1.9899998733308166e-05,
+                    "count": 1,
+                    "self": 1.9899998733308166e-05
+                }
+            }
+        }
+    }
+}

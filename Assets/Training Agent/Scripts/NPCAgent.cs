@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class NPCAgent : Agent
 {
@@ -21,8 +23,12 @@ public class NPCAgent : Agent
     private EnemyMovement enemyMovement;
 
     private Vector2 lastExplorationPosition;
-    private float explorationThreshold = 7f; // jarak minimum untuk dianggap menjelajah
+    private float explorationThreshold = 3f; // jarak minimum untuk dianggap menjelajah
     private float explorationReward = 0.001f;
+
+    private HashSet<Vector2Int> visitedTiles = new HashSet<Vector2Int>();
+    [SerializeField] private float subgoalReward = 0.001f;
+    [SerializeField] private Tilemap tilemap; // drag dari inspector
 
     public override void Initialize()
     {
@@ -60,6 +66,7 @@ public class NPCAgent : Agent
     {
         trainingManager.ResetTrainingPosition();
         tensionMeter = 0f;
+        visitedTiles.Clear();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -67,6 +74,9 @@ public class NPCAgent : Agent
         sensor.AddObservation(trainingManager.GetAgentPosition());
         sensor.AddObservation(trainingManager.GetPlayerPosition());
         sensor.AddObservation(transform.localRotation.z);
+
+        sensor.AddObservation(Vector2.Distance(trainingManager.GetPlayerPosition(), trainingManager.GetAgentPosition()));
+        sensor.AddObservation((trainingManager.GetPlayerPosition() - trainingManager.GetAgentPosition()).normalized);
 
         float playerVisible = enemyVision.CanSeeTarget() ? 1f : 0f;
         float canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition()) ? 1f : 0f;
@@ -98,7 +108,8 @@ public class NPCAgent : Agent
 
             // Semakin dekat dengan player, semakin besar reward
             float approachReward = Mathf.Clamp01(1f - distance / 10f); // anggap 10 sebagai jarak max
-            AddReward(approachReward * 0.001f);
+            float chaseBonus = Mathf.Pow(approachReward, 2f); // lebih tajam reward saat dekat
+            AddReward(chaseBonus * 0.01f);
 
             if(moveAction > 0.8f){
                 AddReward(0.001f);
@@ -111,13 +122,23 @@ public class NPCAgent : Agent
             AddReward(0.001f);
         }
         else{
-            Vector2 currentPos = trainingManager.GetAgentPosition();
-            float distanceMoved = Vector2.Distance(currentPos, lastExplorationPosition);
-
-            if (distanceMoved > explorationThreshold)
+            if (moveAction > 0.8f && Mathf.Abs(lookAction) < 0.1f)
             {
-                AddReward(explorationReward);
-                lastExplorationPosition = currentPos;
+                AddReward(0.0005f); // reward kecil untuk maju lurus
+            }
+
+            if (Mathf.Abs(lookAction) > 0.5f && moveAction < 0.1f)
+            {
+                AddReward(-0.0002f); // penalti kecil karena hanya muter tanpa gerak
+            }
+
+            Vector3 worldPos = trainingManager.GetAgentPosition();
+            Vector3Int cellPos = tilemap.WorldToCell(worldPos);
+            Vector2Int tileCoord = new Vector2Int(cellPos.x, cellPos.y);
+
+            if (!visitedTiles.Contains(tileCoord)) {
+                visitedTiles.Add(tileCoord);
+                AddReward(subgoalReward);
             }
         }
 

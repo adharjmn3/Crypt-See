@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5703334623496463804}
   - component: {fileID: 3904527904444078404}
   - component: {fileID: 6494849873801201137}
-  - component: {fileID: 5068241789512340985}
+  - component: {fileID: 1753183382196385663}
   - component: {fileID: 6342576034947266623}
   - component: {fileID: 9067182369635146521}
   - component: {fileID: 1910705015125928947}
@@ -143,8 +143,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &5068241789512340985
-BoxCollider2D:
+--- !u!58 &1753183382196385663
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -176,18 +176,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.26, y: 0.78}
-  m_EdgeRadius: 0
+  m_Radius: 0.51
 --- !u!114 &6342576034947266623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,7 +191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 11
+    VectorObservationSize: 13
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -210,7 +200,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: e541a5fc7749f2946a6355ebf0711ce3, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 91f789180fe0dc54cadeac06e9a70c9a, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: ExploreAgent
@@ -318,7 +308,7 @@ MonoBehaviour:
   m_RayLength: 20
   m_RayLayerMask:
     serializedVersion: 2
-    m_Bits: 4294959232
+    m_Bits: 191
   m_ObservationStacks: 1
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
   rayMissColor: {r: 1, g: 1, b: 1, a: 1}
