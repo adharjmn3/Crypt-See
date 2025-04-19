@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogName: Intro
   dialogSpeakerName: Comms
-  dialogContent: That nightvision google is light sensitive, it will turn on and
-    off automatically based on where you are
+  dialogContent: Hey i read the scematic of these robot from what i see they will
+    try to learn your behaviour !. Becareful Agent
   typingSpeed: 0.05
