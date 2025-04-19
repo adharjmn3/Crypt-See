@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4965238112451171896}
   - component: {fileID: -1117182621314810337}
   m_Layer: 0
-  m_Name: Keris1
+  m_Name: Keris2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78cd98d52abe5bc4d97d9df42d7b0059, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectiveData: {fileID: 11400000, guid: f01ddc8b4959cdf42b91eae76a988164, type: 2}
+  objectiveData: {fileID: 11400000, guid: 8ef1b60624fdc194d9647d7bd1210b16, type: 2}
 --- !u!114 &4965238112451171896
 MonoBehaviour:
   m_ObjectHideFlags: 0
