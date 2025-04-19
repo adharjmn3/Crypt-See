@@ -10,17 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f4cf0270f38e1d44bdad2820e6e857b, type: 3}
-  m_Name: Obj2
+  m_Name: Obj_kris_2
   m_EditorClassIdentifier: 
-  objectiveName: Collect Talindo
+  objectiveName: Collect Artefact
   type: 0
-  objectivePrefab: {fileID: 4358663694733340933, guid: 292f8b1d61be84a48821c86df85cc034, type: 3}
+  objectivePrefab: {fileID: 8779265482033835491, guid: c1f1186daf483a44285020c4c964ce8f, type: 3}
   dialogSpeakerName: Comms
-  dialogContent: 'Hey that''s Talindo, pretty good looking instrument, its been a
-    while people using this for everyday uses. i hope people in Toraja still using
-    Talindo these days
-
-'
+  dialogContent: Thats and ancient dagger popular for performing ritual and traditional
+    ceremonies. Pretty popular in south east asia especially in Indonesia. i think
+    this is the last of its kind these days
   typingSpeed: 0.05
   isMandatory: 1
   hasReward: 0
