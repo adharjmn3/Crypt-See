@@ -9,6 +9,16 @@ public class EnemyHearing : MonoBehaviour
 
     private Vector3 agentPostionDebug;
 
+    void Awake()
+    {
+        if(playerAudioSource == null){
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if(player != null){
+                playerAudioSource = player.GetComponent<AudioSource>();
+            }
+        }
+    }
+
     public bool CanHearPlayer(Vector3 agentPosition, Vector3 playerPosition)
     {
         if (playerAudioSource == null)

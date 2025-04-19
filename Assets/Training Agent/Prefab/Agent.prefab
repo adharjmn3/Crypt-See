@@ -264,6 +264,10 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   trainingManager: {fileID: 0}
+  tensionMeter: 0
+  maxTensionMeter: 0
+  fillSpeed: 0.5
+  drainSpeed: 0.2
 --- !u!114 &8009832494332996022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,7 +280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50911e09d1d884d4284ed69e6f505369, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 10
   lookSpeed: 180
 --- !u!114 &4624623082222681950
 MonoBehaviour:
