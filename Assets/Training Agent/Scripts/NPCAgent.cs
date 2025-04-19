@@ -1,3 +1,4 @@
+using System;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -7,6 +8,13 @@ public class NPCAgent : Agent
 {
     [Header("Gameobject Reference")]
     [SerializeField] private TrainingManager trainingManager;
+
+    [Header("Agent Settings")]
+    [SerializeField] private float tensionMeter;
+    [SerializeField] private float maxTensionMeter;
+    [SerializeField] private float fillSpeed = 0.5f;
+    [SerializeField] private float drainSpeed = 0.2f;
+    private float lastTensionMeter = 0f;
 
     private EnemyVision enemyVision;
     private EnemyHearing enemyHearing;
@@ -21,9 +29,25 @@ public class NPCAgent : Agent
         enemyVision.SetTarget(trainingManager.playerGameobject, trainingManager);
     }
 
+    void Update()
+    {
+        bool canSee = enemyVision.CanSeeTarget();
+        bool canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition());
+
+        if(canSee || canHear){
+            tensionMeter = MathF.Min(maxTensionMeter, tensionMeter + fillSpeed * Time.deltaTime);
+        }
+        else {
+            tensionMeter = MathF.Max(0f, tensionMeter - drainSpeed * Time.deltaTime);
+        }
+
+        lastTensionMeter = tensionMeter;
+    }
+
     public override void OnEpisodeBegin()
     {
         trainingManager.ResetTrainingPosition();
+        tensionMeter = 0f;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -33,7 +57,11 @@ public class NPCAgent : Agent
 
         float playerVisible = enemyVision.CanSeeTarget() ? 1f : 0f;
         float canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition()) ? 1f : 0f;
+        float tensionFull = IsTensionMeterFull() ? 1f : 0f;
+        float tensionChange = tensionMeter - lastTensionMeter;
 
+        sensor.AddObservation(tensionChange);
+        sensor.AddObservation(tensionFull);
         sensor.AddObservation(playerVisible);
         sensor.AddObservation(canHear);
     }
@@ -47,8 +75,50 @@ public class NPCAgent : Agent
 
         bool canSee = enemyVision.CanSeeTarget();
         bool canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition());
+        bool tensionFull = IsTensionMeterFull();
 
-        Debug.Log(canSee);
+        Debug.Log(tensionMeter);
+
+        if(tensionFull){
+            Vector2 toPlayer = trainingManager.GetPlayerPosition() - trainingManager.GetAgentPosition();
+            float distance = toPlayer.magnitude;
+
+            // Semakin dekat dengan player, semakin besar reward
+            float approachReward = Mathf.Clamp01(1f - distance / 10f); // anggap 10 sebagai jarak max
+            AddReward(approachReward * 0.001f);
+
+            // Tambahan bonus kecil jika agen bergerak (dorong untuk tidak diam)
+            if (moveAction > 0.1f)
+            {
+                AddReward(0.0005f);
+            }
+
+            if (distance < 2.5f && moveAction < 0.1f)
+            {
+                // Agen terlalu dekat tapi tidak melakukan apa-apa
+                AddReward(-0.001f);
+            }
+        }
+
+        if(canSee || canHear){
+            if(!tensionFull){
+                AddReward(0.0001f);
+            }
+        }
+
+        bool isFilling = tensionMeter > lastTensionMeter;
+
+        if (isFilling && moveAction > 0.1f)
+        {
+            // Penalti jika agen bergerak saat tension mengisi
+            AddReward(-0.001f);
+        }
+
+        if (isFilling && Mathf.Abs(lookAction) < 0.01f && !canSee)
+        {
+            // Bonus kecil jika tetap melihat untuk menemukan player saat tension naik
+            AddReward(0.0005f);
+        }
 
         AddReward(0.0001f);
     }
@@ -68,10 +138,18 @@ public class NPCAgent : Agent
             EndEpisode();
         }
 
-        if (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget())
+        if (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget() && IsTensionMeterFull())
         {
             AddReward(1f);
             EndEpisode();
         }
+        else if(collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget() && !IsTensionMeterFull()){
+            AddReward(-0.5f);
+            EndEpisode();
+        }
+    }
+
+    private bool IsTensionMeterFull(){
+        return tensionMeter >= maxTensionMeter;
     }
 }
