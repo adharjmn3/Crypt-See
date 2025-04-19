@@ -35,7 +35,14 @@ public class NPCAgent : Agent
         bool canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition());
 
         if(canSee || canHear){
-            tensionMeter = MathF.Min(maxTensionMeter, tensionMeter + fillSpeed * Time.deltaTime);
+            float distance = Vector3.Distance(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition());
+            float proximityFactor = Mathf.Clamp01(1f - distance / 10f); // semakin dekat, semakin mendekati 1
+
+            float adjustedFillSpeed = fillSpeed * (0.5f + proximityFactor); // dasar 0.5x, naik hingga 1.5x saat dekat
+            tensionMeter = MathF.Min(maxTensionMeter, tensionMeter + adjustedFillSpeed * Time.deltaTime);
+            if(distance < 2f){
+                tensionMeter = maxTensionMeter;
+            }
         }
         else {
             tensionMeter = MathF.Max(0f, tensionMeter - drainSpeed * Time.deltaTime);
@@ -86,41 +93,25 @@ public class NPCAgent : Agent
             // Semakin dekat dengan player, semakin besar reward
             float approachReward = Mathf.Clamp01(1f - distance / 10f); // anggap 10 sebagai jarak max
             AddReward(approachReward * 0.001f);
-
-            // Tambahan bonus kecil jika agen bergerak (dorong untuk tidak diam)
-            if (moveAction > 0.1f)
-            {
-                AddReward(0.0005f);
-            }
-
-            if (distance < 2.5f && moveAction < 0.1f)
-            {
-                // Agen terlalu dekat tapi tidak melakukan apa-apa
-                AddReward(-0.001f);
-            }
         }
 
-        if(canSee || canHear){
-            if(!tensionFull){
-                AddReward(0.0001f);
-            }
+        if(tensionFull){
+            AddReward(0.001f);
+        }
+        else if(canHear || canSee){
+            AddReward(0.001f);
+        }
+        else{
+            AddReward(0.0001f);
         }
 
         bool isFilling = tensionMeter > lastTensionMeter;
-
-        if (isFilling && moveAction > 0.1f)
-        {
-            // Penalti jika agen bergerak saat tension mengisi
-            AddReward(-0.001f);
-        }
 
         if (isFilling && Mathf.Abs(lookAction) < 0.01f && !canSee)
         {
             // Bonus kecil jika tetap melihat untuk menemukan player saat tension naik
             AddReward(0.0005f);
         }
-
-        AddReward(0.0001f);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -140,11 +131,7 @@ public class NPCAgent : Agent
 
         if (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget() && IsTensionMeterFull())
         {
-            AddReward(1f);
-            EndEpisode();
-        }
-        else if(collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget() && !IsTensionMeterFull()){
-            AddReward(-0.5f);
+            AddReward(2f);
             EndEpisode();
         }
     }

@@ -1,0 +1,47 @@
+{
+    "ExploreAgent": {
+        "checkpoints": [
+            {
+                "steps": 87140,
+                "file_path": "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-87140.onnx",
+                "reward": 0.8255105084298473,
+                "creation_time": 1745035384.250664,
+                "auxillary_file_paths": [
+                    "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-87140.pt"
+                ]
+            },
+            {
+                "steps": 152063,
+                "file_path": "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-152063.onnx",
+                "reward": 0.9592599573616798,
+                "creation_time": 1745035736.0139883,
+                "auxillary_file_paths": [
+                    "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-152063.pt"
+                ]
+            },
+            {
+                "steps": 425290,
+                "file_path": "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-425290.onnx",
+                "reward": 0.7048582614145495,
+                "creation_time": 1745036997.8190522,
+                "auxillary_file_paths": [
+                    "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-425290.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 425290,
+            "file_path": "results\\AgentsV1_11\\ExploreAgent.onnx",
+            "reward": 0.7048582614145495,
+            "creation_time": 1745036997.8190522,
+            "auxillary_file_paths": [
+                "results\\AgentsV1_11\\ExploreAgent\\ExploreAgent-425290.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu126"
+    }
+}
