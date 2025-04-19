@@ -20,6 +20,10 @@ public class NPCAgent : Agent
     private EnemyHearing enemyHearing;
     private EnemyMovement enemyMovement;
 
+    private Vector2 lastExplorationPosition;
+    private float explorationThreshold = 7f; // jarak minimum untuk dianggap menjelajah
+    private float explorationReward = 0.001f;
+
     public override void Initialize()
     {
         enemyMovement = GetComponent<EnemyMovement>();
@@ -27,6 +31,7 @@ public class NPCAgent : Agent
         enemyVision = GetComponent<EnemyVision>();
 
         enemyVision.SetTarget(trainingManager.playerGameobject, trainingManager);
+        lastExplorationPosition = trainingManager.GetAgentPosition();
     }
 
     void Update()
@@ -61,6 +66,7 @@ public class NPCAgent : Agent
     {
         sensor.AddObservation(trainingManager.GetAgentPosition());
         sensor.AddObservation(trainingManager.GetPlayerPosition());
+        sensor.AddObservation(transform.localRotation.z);
 
         float playerVisible = enemyVision.CanSeeTarget() ? 1f : 0f;
         float canHear = enemyHearing.CanHearPlayer(trainingManager.GetAgentPosition(), trainingManager.GetPlayerPosition()) ? 1f : 0f;
@@ -93,19 +99,34 @@ public class NPCAgent : Agent
             // Semakin dekat dengan player, semakin besar reward
             float approachReward = Mathf.Clamp01(1f - distance / 10f); // anggap 10 sebagai jarak max
             AddReward(approachReward * 0.001f);
-        }
 
-        if(tensionFull){
-            AddReward(0.001f);
+            if(moveAction > 0.8f){
+                AddReward(0.001f);
+            }
+            else if(moveAction < 0.6f){
+                AddReward(-0.0005f);
+            }
         }
         else if(canHear || canSee){
             AddReward(0.001f);
         }
         else{
-            AddReward(0.0001f);
+            Vector2 currentPos = trainingManager.GetAgentPosition();
+            float distanceMoved = Vector2.Distance(currentPos, lastExplorationPosition);
+
+            if (distanceMoved > explorationThreshold)
+            {
+                AddReward(explorationReward);
+                lastExplorationPosition = currentPos;
+            }
         }
 
         bool isFilling = tensionMeter > lastTensionMeter;
+        bool isDraining = tensionMeter < lastTensionMeter;
+
+        if(isDraining){
+            AddReward(-0.005f);
+        }
 
         if (isFilling && Mathf.Abs(lookAction) < 0.01f && !canSee)
         {
