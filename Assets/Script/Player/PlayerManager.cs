@@ -22,12 +22,19 @@ public class PlayerManager : MonoBehaviour
 
     public PlayerInput playerInput;
 
+    [Header("Trigger Collider")]
+    public Collider2D triggerCollider; // Reference to the player's trigger collider
+
     // Public readonly properties for lightLevel and soundLevel
     public float LightLevel => visibility != null ? visibility.LightLevel : 0.0f;
     public float SoundLevel => visibility != null ? visibility.soundLevel : 0.0f;
 
     private bool isShooting = false;
     private bool isReloading = false; // Prevent shooting during reload
+
+    private bool isTakingDamage = false; // Whether the player is currently taking damage
+    private float damageMultiplier = 1.0f; // Multiplier for incremental damage
+    private Coroutine damageCoroutine; // Coroutine to handle incremental damage
 
     void Start()
     {
@@ -41,6 +48,20 @@ public class PlayerManager : MonoBehaviour
         inventory.RestartAmmo();
         UpdateAmmoUI();
         UpdateWeaponUI();
+
+        // Ensure the trigger collider is set up
+        if (triggerCollider == null)
+        {
+            triggerCollider = GetComponent<Collider2D>();
+            if (triggerCollider != null)
+            {
+                triggerCollider.isTrigger = true; // Ensure the collider is set as a trigger
+            }
+            else
+            {
+                Debug.LogError("No Collider2D found on the player! Please assign a trigger collider.");
+            }
+        }
     }
 
     void Update()
@@ -131,7 +152,10 @@ public class PlayerManager : MonoBehaviour
                 // Normal reload
                 Debug.Log("Performing normal reload...");
                 yield return new WaitForSeconds(1.5f); // Shorter reload time
-                currentWeapon.Reload(false); // Pass false for non-empty reload
+                int bulletsToReload = currentWeapon.magazineSize - currentWeapon.bulletsInMagazine;
+                int totalReload = Mathf.Min(bulletsToReload, currentWeapon.totalAmmo);
+                currentWeapon.bulletsInMagazine += totalReload; // Add bullets to the magazine
+                currentWeapon.totalAmmo -= totalReload; // Deduct bullets from reserve
             }
             else
             {
@@ -139,14 +163,17 @@ public class PlayerManager : MonoBehaviour
                 Debug.Log("Performing empty reload...");
                 yield return new WaitForSeconds(1.5f); // Time for changing the magazine
                 yield return new WaitForSeconds(1.0f); // Time for racking the gun
-                currentWeapon.Reload(true); // Pass true for empty reload
+
+                int bulletsToReload = Mathf.Min(currentWeapon.magazineSize, currentWeapon.totalAmmo);
+                currentWeapon.bulletsInMagazine = bulletsToReload; // Reload the magazine
+                currentWeapon.totalAmmo -= bulletsToReload; // Deduct bullets from reserve
             }
 
             Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
 
             // Update the UI after reload
             UpdateAmmoUI();
-            UpdateWeaponUI(); // Revert to the original weapon name
+            // UpdateWeaponUI(); // Revert to the original weapon name
             isReloading = false; // Allow shooting again
         }
     }
@@ -223,6 +250,63 @@ public class PlayerManager : MonoBehaviour
         {
             stats.AddKill();
             Debug.Log($"Player kills: {stats.GetKills()}");
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Debug.Log($"Enemy entered trigger: {other.name}");
+            StartTakingDamage();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Debug.Log($"Enemy exited trigger: {other.name}");
+            StopTakingDamage();
+        }
+    }
+
+    private void StartTakingDamage()
+    {
+        if (!isTakingDamage)
+        {
+            isTakingDamage = true;
+            damageMultiplier = 1.0f; // Reset the damage multiplier
+            damageCoroutine = StartCoroutine(IncrementalDamage());
+        }
+    }
+
+    private void StopTakingDamage()
+    {
+        if (isTakingDamage)
+        {
+            isTakingDamage = false;
+            if (damageCoroutine != null)
+            {
+                StopCoroutine(damageCoroutine);
+            }
+        }
+    }
+
+    private IEnumerator IncrementalDamage()
+    {
+        while (isTakingDamage)
+        {
+            if (health != null)
+            {
+                int damage = Mathf.CeilToInt(5 * damageMultiplier); // Base damage of 5, scaled by multiplier
+                health.TakeDamage(damage);
+                uiManager?.UpdateHealth(health.currentHealth, health.maxHealth);
+                Debug.Log($"Player took {damage} damage. Current health: {health.currentHealth}");
+            }
+
+            damageMultiplier += 0.5f; // Increment the damage multiplier
+            yield return new WaitForSeconds(1.0f); // Damage applied every second
         }
     }
 }

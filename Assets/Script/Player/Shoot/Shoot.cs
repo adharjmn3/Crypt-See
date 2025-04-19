@@ -168,21 +168,10 @@ public class Shoot : MonoBehaviour
         {
             isReloading = true; // Prevent shooting during reload
 
-            if (currentWeapon.bulletsInMagazine > 0)
+            // Play empty reload effects if the magazine is empty
+            if (currentWeapon.bulletsInMagazine == 0)
             {
-                // Normal reload with +1 bullet
-                Debug.Log("Reloading with bullets in magazine...");
-                PlayReloadSound(reloadSound);
-                yield return new WaitForSeconds(1.5f); // Shorter reload time
-                int bulletsToReload = currentWeapon.magazineSize - currentWeapon.bulletsInMagazine;
-                int totalReload = Mathf.Min(bulletsToReload, currentWeapon.totalAmmo);
-                currentWeapon.bulletsInMagazine += totalReload + 1; // Add +1 bullet
-                currentWeapon.totalAmmo -= totalReload;
-            }
-            else
-            {
-                // Empty reload
-                Debug.Log("Reloading from empty...");
+                Debug.Log("Empty reload effects triggered...");
                 PlayReloadSound(changeMagazineSound); // Play change magazine sound
                 yield return new WaitForSeconds(1.5f); // Time for changing the magazine
 
@@ -197,13 +186,17 @@ public class Shoot : MonoBehaviour
                 }
                 PlayReloadSound(gunRackingSound); // Play gun racking sound
                 yield return new WaitForSeconds(1.0f); // Time for racking the gun
-
-                int bulletsToReload = Mathf.Min(currentWeapon.magazineSize, currentWeapon.totalAmmo);
-                currentWeapon.bulletsInMagazine = bulletsToReload;
-                currentWeapon.totalAmmo -= bulletsToReload;
-
-                // Spawn magazine eject object (commented for now)
             }
+
+            // Unified reload calculation
+            Debug.Log("Reloading...");
+            PlayReloadSound(reloadSound); // Play normal reload sound
+            yield return new WaitForSeconds(1.5f); // Reload time
+
+            int bulletsToReload = currentWeapon.magazineSize - currentWeapon.bulletsInMagazine;
+            int totalReload = Mathf.Min(bulletsToReload, currentWeapon.totalAmmo);
+            currentWeapon.bulletsInMagazine += totalReload; // Add bullets to the magazine
+            currentWeapon.totalAmmo -= totalReload; // Deduct bullets from reserve
 
             Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
             UpdateWeaponUI(); // Update the UI after reload
