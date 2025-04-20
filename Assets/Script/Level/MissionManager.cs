@@ -13,17 +13,33 @@ public class MissionManager : MonoBehaviour
     private List<GameObject> activeMandatoryObjectives = new List<GameObject>(); // Active mandatory objectives
     private List<GameObject> activeSideObjectives = new List<GameObject>(); // Active side objectives
     private int completedMandatoryObjectives = 0; // Track completed mandatory objectives
+    private bool allObjectivesCompleted = false; // Flag to track if all objectives are completed
 
     private void Start()
     {
         GenerateObjectives();
-        PlaceFinishTrigger();
+        // PlaceFinishTrigger();
     }
 
     private void GenerateObjectives()
     {
+        // Log the contents of the objectivePrefabs list for debugging
+        Debug.Log("Objective Prefabs at Start:");
+        foreach (var prefab in objectivePrefabs)
+        {
+            Debug.Log(prefab.name);
+        }
+
         // Shuffle the objective prefabs list to randomize selection
         List<GameObject> shuffledObjectives = new List<GameObject>(objectivePrefabs);
+
+        // Ensure the finishTrigger is not in the shuffledObjectives list
+        if (shuffledObjectives.Contains(finishTrigger))
+        {
+            Debug.LogWarning("FinishTrigger found in objectivePrefabs at runtime. Removing it...");
+            shuffledObjectives.Remove(finishTrigger);
+        }
+
         shuffledObjectives.Sort((a, b) => Random.Range(-1, 2));
 
         // Shuffle spawn points
@@ -34,8 +50,15 @@ public class MissionManager : MonoBehaviour
         for (int i = 0; i < Mathf.Min(shuffledObjectives.Count, shuffledSpawnPoints.Count); i++)
         {
             GameObject objectivePrefab = shuffledObjectives[i];
-            Transform spawnPoint = shuffledSpawnPoints[i];
 
+            // Skip if the prefab is the finishTrigger (additional safeguard)
+            if (objectivePrefab == finishTrigger)
+            {
+                Debug.LogWarning("FinishTrigger found in shuffledObjectives. Skipping...");
+                continue;
+            }
+
+            Transform spawnPoint = shuffledSpawnPoints[i];
             GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
             // Ensure the ObjectiveBehavior script is attached
@@ -111,16 +134,32 @@ public class MissionManager : MonoBehaviour
         if (completedMandatoryObjectives >= maxObjectives || activeMandatoryObjectives.Count == 0)
         {
             Debug.Log("All mandatory objectives completed!");
-            CheckAllObjectivesCompleted();
+            allObjectivesCompleted = true;
         }
     }
 
-    private void CheckAllObjectivesCompleted()
+    public void OnFinishTriggerActivated()
     {
-        if (activeMandatoryObjectives.Count == 0)
+        if (allObjectivesCompleted)
         {
-            Debug.Log("All mandatory objectives completed! Restarting level...");
+            Debug.Log("Player reached the finish trigger. Restarting level...");
+            
+            // Placeholder for dialog before restarting the game
+            // if (uiManager != null)
+            // {
+            //     uiManager.UpdateDialog(
+            //         "System", // Speaker name
+            //         "Congratulations! Restarting the game...", // Dialog content
+            //         true,
+            //         0.05f // Typing speed
+            //     );
+            // }
+
             RestartLevel();
+        }
+        else
+        {
+            Debug.Log("Player cannot exit yet. Complete all objectives first!");
         }
     }
 
