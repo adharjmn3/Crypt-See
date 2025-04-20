@@ -393,8 +393,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthPoint: 100
-  damageToPlayer: 5
-  damageInterval: 1
+  damageToPlayer: 20
+  damageInterval: 30
+  hitSound: {fileID: 8300000, guid: f2e80ce6bf8cc0e42b871a54f40ee2a8, type: 3}
 --- !u!114 &3786677667076190479
 MonoBehaviour:
   m_ObjectHideFlags: 0

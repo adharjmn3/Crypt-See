@@ -18,7 +18,7 @@ MonoBehaviour:
   dialogSpeakerName: Comms
   dialogContent: Hey agent i hope you not playing with that instrument during this
     mission
-  typingSpeed: 0.05
+  typingSpeed: 0.0005
   isMandatory: 1
   hasReward: 0
   ammoReward: 0

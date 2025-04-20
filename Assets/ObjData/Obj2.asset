@@ -21,7 +21,7 @@ MonoBehaviour:
     Talindo these days
 
 '
-  typingSpeed: 0.05
+  typingSpeed: 0.0005
   isMandatory: 1
   hasReward: 0
   ammoReward: 0

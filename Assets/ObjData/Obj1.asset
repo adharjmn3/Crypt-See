@@ -19,7 +19,7 @@ MonoBehaviour:
   dialogContent: Thats and ancient dagger popular for performing ritual and traditional
     ceremonies. Pretty popular in south east asia especially in Indonesia. i think
     this is the last of its kind these days
-  typingSpeed: 0.05
+  typingSpeed: 0.0005
   isMandatory: 1
   hasReward: 0
   ammoReward: 0
