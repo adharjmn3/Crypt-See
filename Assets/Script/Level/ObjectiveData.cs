@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewObjective", menuName = "Game/Objective")]
 public class ObjectiveData : ScriptableObject
 {
-    public enum ObjectiveType { Collect, Tutorial } // Removed "Finish" category
+    public enum ObjectiveType { Collect, Finish }
 
     public string objectiveName; // Name of the objective
     public ObjectiveType type; // Type of the objective

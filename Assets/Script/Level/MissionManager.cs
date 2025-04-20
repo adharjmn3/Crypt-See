@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement; // For restarting the level
+using UnityEngine.SceneManagement;
 
 public class MissionManager : MonoBehaviour
 {
@@ -11,35 +11,19 @@ public class MissionManager : MonoBehaviour
     public int maxObjectives = 3; // Maximum number of mandatory objectives to spawn
 
     private List<GameObject> activeMandatoryObjectives = new List<GameObject>(); // Active mandatory objectives
-    private List<GameObject> activeSideObjectives = new List<GameObject>(); // Active side objectives
     private int completedMandatoryObjectives = 0; // Track completed mandatory objectives
     private bool allObjectivesCompleted = false; // Flag to track if all objectives are completed
 
     private void Start()
     {
         GenerateObjectives();
-        // PlaceFinishTrigger();
+        finishTrigger.SetActive(false); // Disable the finish trigger initially
     }
 
     private void GenerateObjectives()
     {
-        // Log the contents of the objectivePrefabs list for debugging
-        Debug.Log("Objective Prefabs at Start:");
-        foreach (var prefab in objectivePrefabs)
-        {
-            Debug.Log(prefab.name);
-        }
-
         // Shuffle the objective prefabs list to randomize selection
         List<GameObject> shuffledObjectives = new List<GameObject>(objectivePrefabs);
-
-        // Ensure the finishTrigger is not in the shuffledObjectives list
-        if (shuffledObjectives.Contains(finishTrigger))
-        {
-            Debug.LogWarning("FinishTrigger found in objectivePrefabs at runtime. Removing it...");
-            shuffledObjectives.Remove(finishTrigger);
-        }
-
         shuffledObjectives.Sort((a, b) => Random.Range(-1, 2));
 
         // Shuffle spawn points
@@ -47,17 +31,9 @@ public class MissionManager : MonoBehaviour
         shuffledSpawnPoints.Sort((a, b) => Random.Range(-1, 2));
 
         // Spawn objectives at random spawn points
-        for (int i = 0; i < Mathf.Min(shuffledObjectives.Count, shuffledSpawnPoints.Count); i++)
+        for (int i = 0; i < Mathf.Min(maxObjectives, shuffledSpawnPoints.Count); i++)
         {
             GameObject objectivePrefab = shuffledObjectives[i];
-
-            // Skip if the prefab is the finishTrigger (additional safeguard)
-            if (objectivePrefab == finishTrigger)
-            {
-                Debug.LogWarning("FinishTrigger found in shuffledObjectives. Skipping...");
-                continue;
-            }
-
             Transform spawnPoint = shuffledSpawnPoints[i];
             GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
@@ -66,35 +42,26 @@ public class MissionManager : MonoBehaviour
             if (behavior != null)
             {
                 behavior.Initialize(this); // Initialize with the MissionManager reference
-
-                // Check if the objective is mandatory or a side objective
-                if (behavior.objectiveData.isMandatory)
-                {
-                    activeMandatoryObjectives.Add(objectiveInstance);
-                }
-                else
-                {
-                    activeSideObjectives.Add(objectiveInstance);
-                }
+                activeMandatoryObjectives.Add(objectiveInstance);
             }
             else
             {
                 Debug.LogError("ObjectiveBehavior script is missing on the objective prefab!");
             }
         }
-    }
 
-    private void PlaceFinishTrigger()
-    {
-        if (finishTrigger != null && spawnPoints.Count > 0)
+        // Spawn the finish objective at a fixed position (not randomized)
+        if (finishTrigger != null)
         {
-            // Place the finish trigger at the last spawn point
-            Transform finishPoint = spawnPoints[spawnPoints.Count - 1];
-            Instantiate(finishTrigger, finishPoint.position, finishPoint.rotation);
-        }
-        else
-        {
-            Debug.LogError("Finish trigger or spawn points are not set!");
+            ObjectiveBehavior finishBehavior = finishTrigger.GetComponent<ObjectiveBehavior>();
+            if (finishBehavior != null)
+            {
+                finishBehavior.Initialize(this); // Assign the MissionManager to the finish objective
+            }
+            else
+            {
+                Debug.LogError("ObjectiveBehavior script is missing on the finish trigger!");
+            }
         }
     }
 
@@ -106,26 +73,18 @@ public class MissionManager : MonoBehaviour
         if (uiManager != null)
         {
             uiManager.UpdateDialog(
-                objectiveData.dialogSpeakerName, // Use the speaker name from ObjectiveData
-                objectiveData.dialogContent, // Use the dialog content from ObjectiveData
+                objectiveData.dialogSpeakerName,
+                objectiveData.dialogContent,
                 true,
-                objectiveData.typingSpeed // Use the typing speed from ObjectiveData
+                objectiveData.typingSpeed
             );
         }
-        else
-        {
-            Debug.LogError("UIManager reference is not set in MissionManager!");
-        }
 
-        // Handle mandatory and side objectives separately
+        // Handle mandatory objectives
         if (objectiveData.isMandatory)
         {
             activeMandatoryObjectives.Remove(completedObjective);
             completedMandatoryObjectives++;
-        }
-        else
-        {
-            activeSideObjectives.Remove(completedObjective);
         }
 
         Destroy(completedObjective);
@@ -135,35 +94,20 @@ public class MissionManager : MonoBehaviour
         {
             Debug.Log("All mandatory objectives completed!");
             allObjectivesCompleted = true;
+            finishTrigger.SetActive(true); // Enable the finish trigger
         }
     }
 
-    public void OnFinishTriggerActivated()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (allObjectivesCompleted)
+        if (other.CompareTag("Player") && allObjectivesCompleted)
         {
-            Debug.Log("Player reached the finish trigger. Restarting level...");
-            
-            // Placeholder for dialog before restarting the game
-            // if (uiManager != null)
-            // {
-            //     uiManager.UpdateDialog(
-            //         "System", // Speaker name
-            //         "Congratulations! Restarting the game...", // Dialog content
-            //         true,
-            //         0.05f // Typing speed
-            //     );
-            // }
-
-            RestartLevel();
-        }
-        else
-        {
-            Debug.Log("Player cannot exit yet. Complete all objectives first!");
+            Debug.Log("Player reached the finish point. Reloading scene...");
+            ReloadScene();
         }
     }
 
-    private void RestartLevel()
+    private void ReloadScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Restart the current level
     }

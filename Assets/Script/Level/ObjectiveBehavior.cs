@@ -3,7 +3,6 @@ using UnityEngine;
 public class ObjectiveBehavior : MonoBehaviour
 {
     private MissionManager missionManager;
-    private Animator playerAnimator; // Reference to the player's Animator
 
     [Header("Objective Data")]
     public ObjectiveData objectiveData; // Reference to the ScriptableObject containing objective data
@@ -11,6 +10,10 @@ public class ObjectiveBehavior : MonoBehaviour
     [Header("Audio Settings")]
     public AudioClip collectSound; // Sound to play when the objective is collected
     private AudioSource audioSource; // Reference to the AudioSource component
+
+    [Header("Animation Settings")]
+    public Animator animator; // Animator for the punching animation
+    public string punchAnimationTrigger = "Punch"; // Trigger name for the punch animation
 
     public void Initialize(MissionManager manager)
     {
@@ -28,49 +31,41 @@ public class ObjectiveBehavior : MonoBehaviour
 
         // Configure the AudioSource
         audioSource.playOnAwake = false;
+
+        // Ensure the Animator is assigned
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"Trigger detected with {other.name} for objective: {gameObject.name}");
-
-        if (missionManager == null)
-        {
-            Debug.LogError("ObjectiveBehavior is not initialized properly! Ensure Initialize() is called.");
-            return;
-        }
-
         if (other.CompareTag("Player"))
         {
             Debug.Log($"Player interacted with objective: {gameObject.name}");
-
-            // Play the player's "punch" animation
-            if (playerAnimator == null)
-            {
-                playerAnimator = other.GetComponent<Animator>(); // Get the Animator component from the player
-            }
-
-            if (playerAnimator != null)
-            {
-                playerAnimator.SetTrigger("punch"); // Trigger the "punch" animation
-            }
-            else
-            {
-                Debug.LogError("Player Animator not found! Ensure the player has an Animator component.");
-            }
 
             // Play the collect sound
             if (collectSound != null && audioSource != null)
             {
                 audioSource.PlayOneShot(collectSound);
             }
-            else
+
+            // Play the punching animation
+            if (animator != null)
             {
-                Debug.LogWarning("Collect sound or AudioSource is missing!");
+                animator.SetTrigger(punchAnimationTrigger);
             }
 
             // Pass the objective data to the MissionManager
-            missionManager.CompleteObjective(gameObject, objectiveData);
+            if (missionManager != null)
+            {
+                missionManager.CompleteObjective(gameObject, objectiveData);
+            }
+            else
+            {
+                Debug.LogError("MissionManager is not assigned to ObjectiveBehavior!");
+            }
         }
     }
 }
