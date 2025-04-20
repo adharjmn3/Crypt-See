@@ -10,6 +10,9 @@ public class EnemyHealth : MonoBehaviour
     [Header("Audio Settings")]
     [SerializeField] private AudioClip hitSound; // Sound to play when the enemy is hit
     private AudioSource audioSource; // Reference to the AudioSource component
+    [Header("Death Settings")]
+    [SerializeField] private AudioClip deathSound; // Sound to play when the enemy dies
+    private Animator animator; // Reference to the Animator component
 
     private Coroutine damageCoroutine;
 
@@ -22,6 +25,13 @@ public class EnemyHealth : MonoBehaviour
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Get the Animator component
+        animator = GetComponent<Animator>();
+        if (animator == null)
+        {
+            Debug.LogWarning("Animator component is missing on the enemy!");
         }
     }
 
@@ -52,7 +62,20 @@ public class EnemyHealth : MonoBehaviour
     {
         if (healthPoint <= 0)
         {
-            Destroy(gameObject); // Destroy the enemy when health reaches 0
+            // Play the death sound
+            if (audioSource != null && deathSound != null)
+            {
+                audioSource.PlayOneShot(deathSound);
+            }
+
+            // Trigger the death animation
+            if (animator != null)
+            {
+                animator.SetTrigger("Die"); // Ensure the Animator has a "Die" trigger
+            }
+
+            // Delay the destruction of the enemy to allow the animation and sound to play
+            Destroy(gameObject, 1.5f); // Adjust the delay to match the length of the animation/sound
         }
     }
 
