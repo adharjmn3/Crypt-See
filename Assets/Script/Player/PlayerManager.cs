@@ -258,7 +258,23 @@ public class PlayerManager : MonoBehaviour
         if (other.CompareTag("Enemy"))
         {
             Debug.Log($"Enemy entered trigger: {other.name}");
-            StartTakingDamage();
+            health?.StartTakingDamage(); // Delegate damage logic to Health
+        }
+        else
+        {
+            Debug.Log($"Non-enemy object entered trigger: {other.name}");
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Debug.Log($"Enemy staying in trigger: {other.name}");
+            if (health != null && !health.isTakingDamage)
+            {
+                health.StartTakingDamage(); // Ensure damage starts if not already active
+            }
         }
     }
 
@@ -267,46 +283,11 @@ public class PlayerManager : MonoBehaviour
         if (other.CompareTag("Enemy"))
         {
             Debug.Log($"Enemy exited trigger: {other.name}");
-            StopTakingDamage();
+            health?.StopTakingDamage(); // Stop damage when enemy exits
         }
-    }
-
-    private void StartTakingDamage()
-    {
-        if (!isTakingDamage)
+        else
         {
-            isTakingDamage = true;
-            damageMultiplier = 1.0f; // Reset the damage multiplier
-            damageCoroutine = StartCoroutine(IncrementalDamage());
-        }
-    }
-
-    private void StopTakingDamage()
-    {
-        if (isTakingDamage)
-        {
-            isTakingDamage = false;
-            if (damageCoroutine != null)
-            {
-                StopCoroutine(damageCoroutine);
-            }
-        }
-    }
-
-    private IEnumerator IncrementalDamage()
-    {
-        while (isTakingDamage)
-        {
-            if (health != null)
-            {
-                int damage = Mathf.CeilToInt(5 * damageMultiplier); // Base damage of 5, scaled by multiplier
-                health.TakeDamage(damage);
-                uiManager?.UpdateHealth(health.currentHealth, health.maxHealth);
-                Debug.Log($"Player took {damage} damage. Current health: {health.currentHealth}");
-            }
-
-            damageMultiplier += 0.5f; // Increment the damage multiplier
-            yield return new WaitForSeconds(1.0f); // Damage applied every second
+            Debug.Log($"Non-enemy object exited trigger: {other.name}");
         }
     }
 }

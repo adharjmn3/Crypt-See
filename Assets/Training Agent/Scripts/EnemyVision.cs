@@ -14,11 +14,8 @@ public class EnemyVision : MonoBehaviour
 
     public bool CanSeeTarget()
     {
-        Debug.Log("Checking visibility of target: " + target?.name);
-        if (target == null){
-            Debug.LogWarning("Target is null. Cannot check visibility.");
+        if (target == null)
             return false;
-        }
 
         Vector3 origin = trainingManager != null ? trainingManager.GetAgentPosition() : transform.position;
         Vector3 targetPosition = trainingManager != null ? trainingManager.GetPosition(target.transform) : target.transform.position;
@@ -62,7 +59,6 @@ public class EnemyVision : MonoBehaviour
     {
         target = newTarget;
         trainingManager = manager;
-        Debug.Log("Target set to: " + target?.name);
     }
 
     void OnDrawGizmosSelected()

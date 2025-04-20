@@ -58,6 +58,13 @@ public class UIManager : MonoBehaviour
         {
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth;
+
+            // Debug logs to verify the values
+            Debug.Log($"Health UI Updated: Current Health = {currentHealth}, Max Health = {maxHealth}");
+        }
+        else
+        {
+            Debug.LogWarning("Health Slider is not assigned in the UIManager.");
         }
     }
 

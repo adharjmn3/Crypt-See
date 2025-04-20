@@ -133,6 +133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectiveData: {fileID: 11400000, guid: c98a16d8707645c459810cc1b02ce00d, type: 2}
+  collectSound: {fileID: 8300000, guid: 4340445f12c9fd24b842f858e19dc227, type: 3}
 --- !u!114 &4387178395642359197
 MonoBehaviour:
   m_ObjectHideFlags: 0
