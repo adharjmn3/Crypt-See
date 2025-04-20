@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f462fb62fa1b76d4f88e6a0d31b1152d
+guid: 7b83b5f9c701b124ca863ea29959ff0c
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -94,7 +94,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
-    buildTarget: Android
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -107,7 +107,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -123,13 +123,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Table_0
+      name: Baladu Aseprite_0
       rect:
         serializedVersion: 2
-        x: 5
-        y: 22
-        width: 53
-        height: 23
+        x: 8
+        y: 12
+        width: 43
+        height: 43
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,8 +137,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d9289913dfc5c50448f26dae5fcbb359
-      internalID: 1304945797
+      spriteID: d010855a4f42ea44d9dafcf9208e8d7e
+      internalID: -2087468586
       vertices: []
       indices: 
       edges: []
@@ -154,7 +154,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Table_0: 1304945797
+      Baladu Aseprite_0: -2087468586
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

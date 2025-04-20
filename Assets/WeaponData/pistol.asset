@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: P1 9mm
   ammoType: 0
-  magazineSize: 13
-  bulletsInMagazine: 13
-  totalAmmo: 13
+  magazineSize: 7
+  bulletsInMagazine: 7
+  totalAmmo: 7
   damage: 50
   fireRate: 30
   range: 300
   bulletSpeed: 10
-  sound: 1
+  sound: 5

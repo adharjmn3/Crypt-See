@@ -12,8 +12,8 @@ public class NPCAgent : Agent
     [SerializeField] private TrainingManager trainingManager;
 
     [Header("Agent Settings")]
-    [SerializeField] private float tensionMeter;
-    [SerializeField] private float maxTensionMeter;
+    [SerializeField] public float tensionMeter;
+    [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
     private float lastTensionMeter = 0f;

@@ -536,6 +536,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7901527271702047255}
   - component: {fileID: 48095827613153527}
+  - component: {fileID: 6598872797138342056}
   m_Layer: 6
   m_Name: Light
   m_TagString: Untagged
@@ -608,6 +609,21 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+--- !u!114 &6598872797138342056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7283611971274308403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83332e3d1f0923b4ab1e7b0200b6d66c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyNPC: {fileID: 9067182369635146521}
+  lowAwarenessColor: {r: 0, g: 1, b: 0, a: 1}
+  highAwarenessColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &7600368491413637880
 GameObject:
   m_ObjectHideFlags: 0

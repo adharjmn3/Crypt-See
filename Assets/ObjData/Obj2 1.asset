@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f4cf0270f38e1d44bdad2820e6e857b, type: 3}
+  m_Name: Obj2 1
+  m_EditorClassIdentifier: 
+  objectiveName: Collect Talindo
+  type: 0
+  objectivePrefab: {fileID: 4358663694733340933, guid: 292f8b1d61be84a48821c86df85cc034, type: 3}
+  dialogSpeakerName: Comms
+  dialogContent: Hey don't try to play that Talido during mission
+  typingSpeed: 0.0005
+  isMandatory: 1
+  hasReward: 0
+  ammoReward: 0
+  healthReward: 0
