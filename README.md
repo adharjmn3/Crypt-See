@@ -33,3 +33,8 @@ Jika pemain berhasil melarikan diri dan keluar dari jangkauan deteksi, AI akan k
 
 ## Downloadable Build
 🔗 [Download Build (Windows) ](https://github.com/adharjmn3/Crypt-See/releases/tag/0.0.1)
+
+# Credit
+<a href="https://github.com/adharjmn3/Crypt-See/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=adharjmn3/Crypt-See" />
+</a>
