@@ -66,6 +66,9 @@ public class ObjectiveBehavior : MonoBehaviour
             {
                 Debug.LogError("MissionManager is not assigned to ObjectiveBehavior!");
             }
+
+            // Destroy the objective after interaction
+            Destroy(gameObject);
         }
     }
 }

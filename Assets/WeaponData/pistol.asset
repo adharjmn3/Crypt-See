@@ -16,8 +16,8 @@ MonoBehaviour:
   ammoType: 0
   magazineSize: 13
   bulletsInMagazine: 13
-  totalAmmo: 26
-  damage: 40
+  totalAmmo: 13
+  damage: 50
   fireRate: 30
   range: 300
   bulletSpeed: 10

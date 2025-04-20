@@ -188,4 +188,54 @@ public class LightBehaviour : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(0.1f, 0.3f));
         }
     }
+
+    // Method to reset the light to its initial state
+    public void ResetLight()
+    {
+        isBroken = false;
+        isFlickering = false;
+
+        if (light2D != null)
+        {
+            light2D.enabled = true;
+            light2D.intensity = 10f; // Restore intensity
+            light2D.pointLightInnerRadius = initialInnerRadius;
+            light2D.pointLightOuterRadius = initialOuterRadius;
+            light2D.falloffIntensity = initialFalloffIntensity;
+            light2D.pointLightInnerAngle = initialInnerSpotAngle;
+            light2D.pointLightOuterAngle = initialOuterSpotAngle;
+        }
+
+        if (spriteRenderer != null && brokenLightSprite != null)
+        {
+            spriteRenderer.sprite = null; // Restore the original sprite
+        }
+
+        if (TryGetComponent(out Collider2D collider))
+        {
+            collider.enabled = true; // Re-enable the collider
+        }
+
+        Debug.Log($"Light {gameObject.name} has been reset.");
+    }
+
+    // Method to disable the light
+    public void DisableLight()
+    {
+        if (light2D != null)
+        {
+            light2D.enabled = false;
+        }
+        Debug.Log($"Light {gameObject.name} has been disabled.");
+    }
+
+    // Method to enable the light
+    public void EnableLight()
+    {
+        if (light2D != null)
+        {
+            light2D.enabled = true;
+        }
+        Debug.Log($"Light {gameObject.name} has been enabled.");
+    }
 }

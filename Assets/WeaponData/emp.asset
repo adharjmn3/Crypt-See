@@ -16,7 +16,7 @@ MonoBehaviour:
   ammoType: 1
   magazineSize: 1
   bulletsInMagazine: 1
-  totalAmmo: 10
+  totalAmmo: 20
   damage: 5
   fireRate: 1
   range: 10

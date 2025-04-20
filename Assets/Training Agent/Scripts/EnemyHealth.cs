@@ -7,10 +7,23 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private float healthPoint = 10f;
     [SerializeField] private float damageToPlayer = 5f; // Damage dealt to the player
     [SerializeField] private float damageInterval = 1f; // Interval between damage ticks
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip hitSound; // Sound to play when the enemy is hit
+    private AudioSource audioSource; // Reference to the AudioSource component
 
     private Coroutine damageCoroutine;
 
     public float HealthPoint { get; }
+
+    private void Start()
+    {
+        // Get or add an AudioSource component
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
 
     public void SetHealthPoint(float value)
     {
@@ -25,6 +38,13 @@ public class EnemyHealth : MonoBehaviour
     public void TakeDamage(float damagePoint)
     {
         healthPoint -= damagePoint;
+
+        // Play the hit sound
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
+
         CheckHP();
     }
 

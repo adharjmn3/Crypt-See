@@ -22,6 +22,14 @@ public class UIManager : MonoBehaviour
     public TMP_Text dialogText; // Text for the dialog content
     public GameObject dialogBackground; // Background for the dialog
 
+    [Header("End Story UI")]
+    public GameObject endStoryPanel; // Panel for the end story UI
+    public Button restartButton; // Button to restart the level
+    public Button exitButton; // Button to exit the game
+
+    [Header("Minimap UI")]
+    public GameObject minimap; // Reference to the minimap GameObject
+
     private Coroutine typingCoroutine; // To manage the typing effect coroutine
 
     private void Start()
@@ -176,6 +184,66 @@ public class UIManager : MonoBehaviour
             dialogText.text = ""; // Clear the dialog text
             dialogNameText.text = ""; // Clear the dialog name text
 
+        }
+    }
+
+    // Method to show the End Story UI
+    public void ShowEndStoryUI(bool show)
+    {
+        if (endStoryPanel != null)
+        {
+            Debug.Log($"End Story UI visibility set to: {show}");
+            endStoryPanel.SetActive(show);
+
+            // Disable the minimap when showing the end screen
+            ToggleMinimap(!show);
+        }
+        else
+        {
+            Debug.LogError("End Story Panel is not assigned in the UIManager.");
+        }
+    }
+
+    // Method to set up button actions
+    public void SetupEndStoryButtons(System.Action onRestart, System.Action onExit)
+    {
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveAllListeners();
+            restartButton.onClick.AddListener(() => onRestart?.Invoke());
+        }
+
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveAllListeners();
+            exitButton.onClick.AddListener(() => onExit?.Invoke());
+        }
+    }
+
+    // Example methods for restart and exit functionality
+    public void RestartGame()
+    {
+        Debug.Log("Restarting the game...");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    public void ExitGame()
+    {
+        Debug.Log("Exiting the game...");
+        Application.Quit();
+    }
+
+    // Method to enable or disable the minimap
+    public void ToggleMinimap(bool enable)
+    {
+        if (minimap != null)
+        {
+            minimap.SetActive(enable);
+            Debug.Log($"Minimap visibility set to: {enable}");
+        }
+        else
+        {
+            Debug.LogError("Minimap is not assigned in the UIManager.");
         }
     }
 }

@@ -50,17 +50,17 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        // Spawn the finish objective at a fixed position (not randomized)
+        // Initialize the finish trigger
         if (finishTrigger != null)
         {
-            ObjectiveBehavior finishBehavior = finishTrigger.GetComponent<ObjectiveBehavior>();
+            FinishTriggerBehavior finishBehavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
             if (finishBehavior != null)
             {
-                finishBehavior.Initialize(this); // Assign the MissionManager to the finish objective
+                finishBehavior.Initialize(this); // Assign the MissionManager to the finish trigger
             }
             else
             {
-                Debug.LogError("ObjectiveBehavior script is missing on the finish trigger!");
+                Debug.LogError("FinishTriggerBehavior script is missing on the finish trigger!");
             }
         }
     }
@@ -86,9 +86,6 @@ public class MissionManager : MonoBehaviour
             activeMandatoryObjectives.Remove(completedObjective);
             completedMandatoryObjectives++;
         }
-
-        Destroy(completedObjective);
-
         // Check if all mandatory objectives are completed
         if (completedMandatoryObjectives >= maxObjectives || activeMandatoryObjectives.Count == 0)
         {
@@ -102,13 +99,56 @@ public class MissionManager : MonoBehaviour
     {
         if (other.CompareTag("Player") && allObjectivesCompleted)
         {
-            Debug.Log("Player reached the finish point. Reloading scene...");
-            ReloadScene();
+            Debug.Log("Player reached the finish point. Showing End Story UI...");
+
+            if (uiManager != null)
+            {
+                // Show the End Story UI
+                uiManager.ShowEndStoryUI(true);
+
+                // Set up button actions
+                uiManager.SetupEndStoryButtons(
+                    onRestart: ReloadScene,
+                    onExit: ExitGame
+                );
+            }
         }
+    }
+
+    public bool AreAllObjectivesCompleted()
+    {
+        return allObjectivesCompleted && activeMandatoryObjectives.Count == 0;
+    }
+
+    public void FinishGame()
+    {
+        if (uiManager != null)
+        {
+            // Show the End Story UI
+            uiManager.ShowEndStoryUI(true);
+
+            // Set up button actions
+            uiManager.SetupEndStoryButtons(
+                onRestart: ReloadScene,
+                onExit: ExitGame
+            );
+        }
+        else
+        {
+            Debug.LogError("UIManager is not assigned in MissionManager.");
+        }
+    }
+
+    // Method to exit the game
+    private void ExitGame()
+    {
+        Debug.Log("Exiting the game...");
+        Application.Quit();
     }
 
     private void ReloadScene()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Restart the current level
+        // Reload the current scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

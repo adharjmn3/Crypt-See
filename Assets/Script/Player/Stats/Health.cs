@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+// Reference to the PlayerMovement namespace
 
 namespace Player.Stats
 {
@@ -18,11 +19,14 @@ namespace Player.Stats
         [Header("Audio")]
         public AudioSource audioSource; // Reference to the AudioSource component
         public AudioClip damageSound; // Sound clip to play when taking damage
+ // Reference to the PlayerMovement component
 
         private void Start()
         {
             currentHealth = maxHealth;
             UpdateHealthUI(); // Initialize the health UI
+
+            // Dynamically find the PlayerMovement component if not assigned
         }
 
         private void Update()
@@ -62,9 +66,42 @@ namespace Player.Stats
 
         private void Die()
         {
-            // Handle death logic here
             Debug.Log("Character has died.");
-            Destroy(gameObject);
+
+            // Disable the player's sprite
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = false;
+            }
+
+            // Disable all sounds in the scene
+            AudioSource[] allAudioSources = FindObjectsOfType<AudioSource>();
+            foreach (AudioSource source in allAudioSources)
+            {
+                source.Stop();
+            }
+
+            // Start the coroutine to delay showing the end story UI
+            StartCoroutine(ShowEndStoryAfterDelay(1f));
+        }
+
+        private IEnumerator ShowEndStoryAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay); // Wait for the specified delay
+
+            // Show the end story UI
+            if (uiManager != null)
+            {
+                uiManager.ShowEndStoryUI(true);
+
+                // Disable the player after showing the end story UI
+                gameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogError("UIManager is not assigned. Cannot show the end story UI.");
+            }
         }
 
         public void Heal(int amount)
