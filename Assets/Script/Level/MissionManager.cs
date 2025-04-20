@@ -63,6 +63,12 @@ public class MissionManager : MonoBehaviour
                 Debug.LogError("FinishTriggerBehavior script is missing on the finish trigger!");
             }
         }
+
+        // Update the objective counter in the UI
+        if (uiManager != null)
+        {
+            uiManager.UpdateObjectiveCounter(maxObjectives);
+        }
     }
 
     public void CompleteObjective(GameObject completedObjective, ObjectiveData objectiveData)
@@ -86,6 +92,14 @@ public class MissionManager : MonoBehaviour
             activeMandatoryObjectives.Remove(completedObjective);
             completedMandatoryObjectives++;
         }
+
+        // Update the objective counter in the UI
+        if (uiManager != null && objectiveData.isMandatory)
+        {
+            int remainingObjectives = maxObjectives - completedMandatoryObjectives;
+            uiManager.UpdateObjectiveCounter(remainingObjectives);
+        }
+
         // Check if all mandatory objectives are completed
         if (completedMandatoryObjectives >= maxObjectives || activeMandatoryObjectives.Count == 0)
         {

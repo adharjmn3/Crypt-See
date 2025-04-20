@@ -30,6 +30,10 @@ public class UIManager : MonoBehaviour
     [Header("Minimap UI")]
     public GameObject minimap; // Reference to the minimap GameObject
 
+    [Header("Objective Counter UI")]
+    public TMP_Text objectivesLeftText; // Text for objectives left
+    public TMP_Text objectivesLeftCopyText; // Copy of the objectives left text
+
     private Coroutine typingCoroutine; // To manage the typing effect coroutine
 
     private void Start()
@@ -244,6 +248,20 @@ public class UIManager : MonoBehaviour
         else
         {
             Debug.LogError("Minimap is not assigned in the UIManager.");
+        }
+    }
+
+    // Method to update the objective counter
+    public void UpdateObjectiveCounter(int objectivesLeft)
+    {
+        if (objectivesLeftText != null)
+        {
+            objectivesLeftText.text = objectivesLeft.ToString(); // Update the main objectives left text
+        }
+
+        if (objectivesLeftCopyText != null)
+        {
+            objectivesLeftCopyText.text = objectivesLeftText.text; // Copy the value to the other TMP
         }
     }
 }
