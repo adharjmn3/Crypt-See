@@ -394,9 +394,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthPoint: 100
+<<<<<<< HEAD
   damageToPlayer: 30
   damageInterval: 1
   hitSound: {fileID: 8300000, guid: f2e80ce6bf8cc0e42b871a54f40ee2a8, type: 3}
+=======
+  damageToPlayer: 5
+  damageInterval: 1
+>>>>>>> 53ea11b5a9a7bca578f1b00b07f1a29a1035b209
 --- !u!114 &3786677667076190479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -410,7 +415,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAudioSource: {fileID: 0}
-  hearingRadius: 4
+  hearingRadius: 8
 --- !u!114 &6085651836917200218
 MonoBehaviour:
   m_ObjectHideFlags: 0

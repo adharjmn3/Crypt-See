@@ -66,8 +66,6 @@ public class EnemyNPC : Agent
             tensionMeter = MathF.Max(0f, tensionMeter - drainSpeed * Time.deltaTime);
         }
 
-        Debug.Log($"Tension meter is full: {IsTensionMeterFull()}");
-
         lastTensionMeter = tensionMeter;
     }
 
