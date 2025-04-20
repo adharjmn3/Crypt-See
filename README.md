@@ -30,3 +30,6 @@ AI berperan sebagai sistem navigasi dan penjaga utama dalam game ini. Setiap mus
 AI akan terus berpatroli hingga mendeteksi keberadaan pemain melalui raycast (penglihatan) atau audio source (suara langkah). Ketika pemain terdeteksi, tension meter akan mulai terisi. Begitu meter ini penuh, AI akan masuk ke mode agresif dan mulai mengejar pemain secara aktif.
 
 Jika pemain berhasil melarikan diri dan keluar dari jangkauan deteksi, AI akan kembali ke berpatroli dan melanjutkan pengawasan di sekitar area.
+
+## Downloadable Build
+🔗 [Download Build (Windows) ](https://github.com/adharjmn3/Crypt-See/releases/tag/0.0.1)
