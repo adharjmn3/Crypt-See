@@ -10,14 +10,14 @@ public class EnemyMovement : MonoBehaviour
 
     private Rigidbody2D rb;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
     
     public void Move(float moveAction, float lookAction)
     {
-        Vector2 move = transform.up * moveAction * moveSpeed * Time.deltaTime;
+        Vector2 move = moveAction * moveSpeed * Time.deltaTime * transform.up;
         rb.MovePosition(rb.position + move);
 
         rb.MoveRotation(rb.rotation + lookAction * lookSpeed * Time.deltaTime);

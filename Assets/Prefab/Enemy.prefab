@@ -393,6 +393,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthPoint: 100
+  damageToPlayer: 5
+  damageInterval: 1
 --- !u!114 &3786677667076190479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,7 +408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAudioSource: {fileID: 0}
-  hearingRadius: 4
+  hearingRadius: 8
 --- !u!114 &6085651836917200218
 MonoBehaviour:
   m_ObjectHideFlags: 0
