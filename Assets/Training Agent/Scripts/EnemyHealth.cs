@@ -80,7 +80,7 @@ public class EnemyHealth : MonoBehaviour
             if (damageEffectPrefab != null)
             {
                 GameObject damageEffect = Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
-                StartCoroutine(DestroyDamageEffectAfterDelay(damageEffect, 2f)); // Destroy after 2 seconds
+                StartCoroutine(DestroyDamageEffectAfterDelay(damageEffect, 1f)); // Destroy after 2 seconds
             }
             else
             {
@@ -141,7 +141,7 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
@@ -155,16 +155,6 @@ public class EnemyHealth : MonoBehaviour
                     damageCoroutine = StartCoroutine(DamagePlayer(playerHealth));
                 }
             }
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            Debug.Log($"Player is staying in enemy trigger: {other.name}");
-            // Gradually increase the damage over time
-            currentDamageToPlayer += damageIncreaseRate * Time.deltaTime;
         }
     }
 

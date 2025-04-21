@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6b2be2704c053f4287c901d62077e93, type: 3}
   m_Name: pistol
   m_EditorClassIdentifier: 
-  weaponName: P1 9mm
+  weaponName: P1 .45 APC
   ammoType: 0
-  magazineSize: 13
-  bulletsInMagazine: 13
-  totalAmmo: 13
+  magazineSize: 7
+  bulletsInMagazine: 7
+  totalAmmo: 7
   damage: 20
   fireRate: 30
   range: 300
