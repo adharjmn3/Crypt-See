@@ -33,15 +33,36 @@ public class EnemyManager : MonoBehaviour
         List<Transform> shuffledSpawnPoints = new List<Transform>(spawnPoints);
         shuffledSpawnPoints.Sort((a, b) => Random.Range(-1, 2));
 
+        int enemiesSpawned = 0;
+
         // Spawn enemies at random spawn points
-        for (int i = 0; i < Mathf.Min(maxEnemies, shuffledSpawnPoints.Count); i++)
+        foreach (Transform spawnPoint in shuffledSpawnPoints)
         {
-            Transform spawnPoint = shuffledSpawnPoints[i];
-            GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-            activeEnemies.Add(enemyInstance);
+            if (enemiesSpawned >= maxEnemies)
+            {
+                break;
+            }
+
+            // Check if the spawn point is already occupied
+            bool isOccupied = false;
+            foreach (GameObject enemy in activeEnemies)
+            {
+                if (enemy != null && Vector3.Distance(enemy.transform.position, spawnPoint.position) < 0.1f)
+                {
+                    isOccupied = true;
+                    break;
+                }
+            }
+
+            if (!isOccupied)
+            {
+                GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+                activeEnemies.Add(enemyInstance);
+                enemiesSpawned++;
+            }
         }
 
-        Debug.Log($"Spawned {activeEnemies.Count} enemies.");
+        Debug.Log($"Spawned {enemiesSpawned} enemies.");
     }
 
     public void RemoveEnemy(GameObject enemy)
