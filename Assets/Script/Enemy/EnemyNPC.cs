@@ -66,6 +66,13 @@ public class EnemyNPC : Agent
             tensionMeter = MathF.Max(0f, tensionMeter - drainSpeed * Time.deltaTime);
         }
 
+        if (IsTensionMeterFull() && playerTransform != null)
+        {
+            Vector3 direction = (playerTransform.position - transform.position).normalized;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90;
+            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        }
+
         lastTensionMeter = tensionMeter;
     }
 
