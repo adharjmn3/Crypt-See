@@ -1,6 +1,10 @@
 # Crypt-See
 Crypt-See adalah game 2D bergenre stealth di mana pemain berperan sebagai seorang pemula yang tengah menjalani pelatihan di dalam sebuah museum. Tujuan utama pemain adalah mengumpulkan semua objek yang tersebar di dalam area museum dan mencapai pintu keluar. Namun, pemain harus berhati-hati dan menghindari deteksi serta kejaran robot penjaga yang terus berpatroli di setiap sudut ruangan.
 
+<picture>
+  <img src="https://github.com/adharjmn3/Crypt-See/blob/main/Readme%20Asset/Screenshot%202025-04-21%20111235.png" width=50% />
+</picture>
+
 ---
 
 ## 🕹️ Mekanik Game
@@ -30,6 +34,10 @@ AI berperan sebagai sistem navigasi dan penjaga utama dalam game ini. Setiap mus
 AI akan terus berpatroli hingga mendeteksi keberadaan pemain melalui raycast (penglihatan) atau audio source (suara langkah). Ketika pemain terdeteksi, tension meter akan mulai terisi. Begitu meter ini penuh, AI akan masuk ke mode agresif dan mulai mengejar pemain secara aktif.
 
 Jika pemain berhasil melarikan diri dan keluar dari jangkauan deteksi, AI akan kembali ke berpatroli dan melanjutkan pengawasan di sekitar area.
+
+<picture>
+  <img src="https://github.com/adharjmn3/Crypt-See/blob/5a7d947e0aa905c6bf141905e5853213d0ed4b5c/Readme%20Asset/Crypt-See%20AI%20Detection.gif" width=50% />
+</picture>
 
 ## Downloadable Build
 🔗 [Download Build (Windows) ](https://github.com/adharjmn3/Crypt-See/releases/tag/0.0.1)
