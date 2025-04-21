@@ -73,12 +73,19 @@ private readonly Color minimapRed = new Color(149f / 255f, 0f, 13f / 255f, 0.07f
                 if (soundLevel > 0.0f)
                 {
                     soundLevel -= soundDecayRate * Time.deltaTime; // Decrease sound level
-                    soundLevel = Mathf.Clamp(soundLevel, 0.0f, 5.0f); // Ensure it doesn't go below 0
+                    soundLevel = Mathf.Clamp(soundLevel, 0.0f, 10.0f); // Ensure it doesn't go below 0
                 }
             }
 
             // Combine LightLevel and soundLevel for the final LightLevel calculation
-            float combinedLevel = lightLevel + (soundLevel); // Normalize soundLevel to a 0-1 range
+            float combinedLevel = lightLevel + soundLevel;
+
+            // If soundLevel is greater than 0.8, set combinedLevel to max (1.0f)
+            if (soundLevel > 0.8f)
+            {
+                combinedLevel = 1.0f;
+            }
+
             LightLevel = Mathf.Clamp(combinedLevel, 0.0f, 1.0f); // Clamp the final LightLevel between 0 and 1
         }
 
