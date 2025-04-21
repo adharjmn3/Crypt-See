@@ -5,8 +5,9 @@ using Player.Stats; // Reference to the Health class namespace
 public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] private float healthPoint = 10f;
-    [SerializeField] private float damageToPlayer = 5f; // Damage dealt to the player
+    [SerializeField] private float baseDamageToPlayer = 5f; // Base damage dealt to the player
     [SerializeField] private float damageInterval = 1f; // Interval between damage ticks
+    [SerializeField] private float damageIncreaseRate = 1f; // Rate at which damage increases over time
     [Header("Audio Settings")]
     [SerializeField] private AudioClip hitSound; // Sound to play when the enemy is hit
     private AudioSource audioSource; // Reference to the AudioSource component
@@ -22,11 +23,15 @@ public class EnemyHealth : MonoBehaviour
 
     private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
     private Coroutine damageCoroutine;
+    private float currentDamageToPlayer; // Tracks the current damage being dealt to the player
 
     public float HealthPoint { get; }
 
     private void Start()
     {
+        // Initialize the current damage to the base damage
+        currentDamageToPlayer = baseDamageToPlayer;
+
         // Get or add an AudioSource component
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
@@ -153,17 +158,28 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Debug.Log($"Player is staying in enemy trigger: {other.name}");
+            // Gradually increase the damage over time
+            currentDamageToPlayer += damageIncreaseRate * Time.deltaTime;
+        }
+    }
+
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
             Debug.Log($"Player exited enemy trigger: {other.name}");
-            // Stop damaging the player
+            // Stop damaging the player and reset the damage to the base value
             if (damageCoroutine != null)
             {
                 StopCoroutine(damageCoroutine);
                 damageCoroutine = null;
             }
+            currentDamageToPlayer = baseDamageToPlayer; // Reset the damage
         }
     }
 
@@ -171,8 +187,8 @@ public class EnemyHealth : MonoBehaviour
     {
         while (true)
         {
-            playerHealth.TakeDamage((int)damageToPlayer); // Apply damage to the player
-            Debug.Log($"Player took {damageToPlayer} damage from enemy.");
+            playerHealth.TakeDamage((int)currentDamageToPlayer); // Apply the current damage to the player
+            Debug.Log($"Player took {currentDamageToPlayer} damage from enemy.");
             yield return new WaitForSeconds(damageInterval); // Wait for the next damage tick
         }
     }
