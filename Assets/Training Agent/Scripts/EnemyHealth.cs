@@ -83,6 +83,14 @@ public class EnemyHealth : MonoBehaviour
             }
         }
 
+        // Set tension meter to 5 and start chasing the player
+        EnemyNPC enemyNPC = GetComponent<EnemyNPC>();
+        if (enemyNPC != null)
+        {
+            enemyNPC.tensionMeter = 5f; // Set tension meter to 5
+            Debug.Log("Enemy tension meter set to 5. Starting chase.");
+        }
+
         CheckHP();
     }
 
