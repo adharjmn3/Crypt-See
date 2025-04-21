@@ -17,6 +17,8 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private Sprite explosionSprite; // Sprite for the explosion
     [SerializeField] private float explosionDuration = 1.5f; // Duration to display the explosion sprite
     [SerializeField] private GameObject explosionPrefab; // Prefab for the explosion effect
+    [Header("Damage Effect Settings")]
+    [SerializeField] private GameObject damageEffectPrefab; // Prefab for the damage effect
 
     private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
     private Coroutine damageCoroutine;
@@ -67,7 +69,31 @@ public class EnemyHealth : MonoBehaviour
             audioSource.PlayOneShot(hitSound);
         }
 
+        // Only spawn the damage effect if health is 20 or greater
+        if (healthPoint >= 20)
+        {
+            if (damageEffectPrefab != null)
+            {
+                GameObject damageEffect = Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
+                StartCoroutine(DestroyDamageEffectAfterDelay(damageEffect, 2f)); // Destroy after 2 seconds
+            }
+            else
+            {
+                Debug.LogWarning("Damage effect prefab is not assigned.");
+            }
+        }
+
         CheckHP();
+    }
+
+    private IEnumerator DestroyDamageEffectAfterDelay(GameObject damageEffect, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (damageEffect != null)
+        {
+            Destroy(damageEffect); // Destroy the damage effect prefab
+        }
     }
 
     private void CheckHP()

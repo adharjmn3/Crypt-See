@@ -18,7 +18,7 @@ MonoBehaviour:
   dialogSpeakerName: Comms
   dialogContent: I hope it's not in this condition but job is job, i wonder why people
     back then create dagger with these kind of curve
-  typingSpeed: 0.0005
+  typingSpeed: 0
   isMandatory: 1
   hasReward: 0
   ammoReward: 0

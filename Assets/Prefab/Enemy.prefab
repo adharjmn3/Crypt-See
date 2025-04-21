@@ -402,6 +402,7 @@ MonoBehaviour:
   explosionSprite: {fileID: 0}
   explosionDuration: 1.5
   explosionPrefab: {fileID: 6687087034554887178, guid: 69400a735494fd84e874b0d9eb76fd23, type: 3}
+  damageEffectPrefab: {fileID: 5559431631124865979, guid: ca4c584115dc27943928acf52736b922, type: 3}
 --- !u!114 &3786677667076190479
 MonoBehaviour:
   m_ObjectHideFlags: 0

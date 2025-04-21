@@ -17,7 +17,7 @@ MonoBehaviour:
   objectivePrefab: {fileID: 5746275302265102437, guid: b507c500383aab5439acf203612b9b27, type: 3}
   dialogSpeakerName: Comms
   dialogContent: Ok i think thats all of it
-  typingSpeed: 0.008
+  typingSpeed: 0
   isMandatory: 1
   hasReward: 0
   ammoReward: 0

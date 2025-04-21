@@ -17,7 +17,7 @@ MonoBehaviour:
   objectivePrefab: {fileID: 4358663694733340933, guid: 292f8b1d61be84a48821c86df85cc034, type: 3}
   dialogSpeakerName: Comms
   dialogContent: Hey don't try to play that Talido during mission
-  typingSpeed: 0.0005
+  typingSpeed: 0
   isMandatory: 1
   hasReward: 0
   ammoReward: 0

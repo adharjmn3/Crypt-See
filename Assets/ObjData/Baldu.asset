@@ -18,7 +18,7 @@ MonoBehaviour:
   dialogSpeakerName: Comms
   dialogContent: Oh Thats Baladu. Gorontalo traditional dagger. wanna try that Agent
     ?
-  typingSpeed: 0.00005
+  typingSpeed: 0
   isMandatory: 1
   hasReward: 0
   ammoReward: 0

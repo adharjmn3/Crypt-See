@@ -24,6 +24,9 @@ namespace Player.Stats
         [Header("Explosion Settings")]
         public GameObject explosionPrefab; // Prefab for the explosion effect
 
+        [Header("Damage Effect Settings")]
+        public GameObject damageEffectPrefab; // Prefab for the damage effect
+
         private void Start()
         {
             currentHealth = maxHealth;
@@ -61,9 +64,30 @@ namespace Player.Stats
             PlayDamageSound(); // Play the damage sound
             UpdateHealthUI(); // Update the health UI
 
+            // Instantiate the damage effect prefab
+            if (damageEffectPrefab != null)
+            {
+                GameObject damageEffect = Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
+                StartCoroutine(DestroyDamageEffectAfterDelay(damageEffect, 2f)); // Destroy after 2 seconds
+            }
+            else
+            {
+                Debug.LogWarning("Damage effect prefab is not assigned.");
+            }
+
             if (currentHealth <= 0)
             {
                 Die();
+            }
+        }
+
+        private IEnumerator DestroyDamageEffectAfterDelay(GameObject damageEffect, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            if (damageEffect != null)
+            {
+                Destroy(damageEffect); // Destroy the damage effect prefab
             }
         }
 
