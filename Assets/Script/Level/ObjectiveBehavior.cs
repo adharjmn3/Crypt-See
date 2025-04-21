@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class ObjectiveBehavior : MonoBehaviour
 {
@@ -15,9 +16,11 @@ public class ObjectiveBehavior : MonoBehaviour
     public Animator animator; // Animator for the punching animation
     public string punchAnimationTrigger = "Punch"; // Trigger name for the punch animation
 
+    private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
     public void Initialize(MissionManager manager)
     {
         missionManager = manager;
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void Start()
@@ -70,12 +73,19 @@ public class ObjectiveBehavior : MonoBehaviour
             // Check the type of the objective before destroying it
             if (objectiveData.type != ObjectiveData.ObjectiveType.Finish) // Use the correct property and enum
             {
-                Destroy(gameObject);
+                spriteRenderer.enabled = false; // Hide the sprite
+                StartCoroutine(DestroyAfterDelay(0.1f)); // Add a 2-second delay before destroying
             }
             else
             {
                 Debug.Log("Objective is of type 'Finish' and will not be destroyed.");
             }
         }
+    }
+
+    private IEnumerator DestroyAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Destroy(gameObject);
     }
 }

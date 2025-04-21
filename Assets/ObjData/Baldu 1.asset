@@ -16,7 +16,7 @@ MonoBehaviour:
   type: 0
   objectivePrefab: {fileID: 4358663694733340933, guid: 292f8b1d61be84a48821c86df85cc034, type: 3}
   dialogSpeakerName: Comms
-  dialogContent: Make sure to secure the sheath of that Baldu
+  dialogContent: Make sure to secure the sheath of that Baladu
   typingSpeed: 0
   isMandatory: 1
   hasReward: 0
