@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: -1117182621314810337}
   - component: {fileID: -8108723231904060013}
   - component: {fileID: 227762092183048476}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Keris1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

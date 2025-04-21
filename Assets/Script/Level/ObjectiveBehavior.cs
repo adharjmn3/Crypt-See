@@ -67,8 +67,15 @@ public class ObjectiveBehavior : MonoBehaviour
                 Debug.LogError("MissionManager is not assigned to ObjectiveBehavior!");
             }
 
-            // Destroy the objective after interaction
-            Destroy(gameObject);
+            // Check the type of the objective before destroying it
+            if (objectiveData.type != ObjectiveData.ObjectiveType.Finish) // Use the correct property and enum
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                Debug.Log("Objective is of type 'Finish' and will not be destroyed.");
+            }
         }
     }
 }

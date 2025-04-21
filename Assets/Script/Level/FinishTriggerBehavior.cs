@@ -23,6 +23,17 @@ public class FinishTriggerBehavior : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Player touched the finish trigger, but not all objectives are completed!");
+
+                    // Show dialog to indicate objectives are not completed
+                    if (missionManager.uiManager != null)
+                    {
+                        missionManager.uiManager.UpdateDialog(
+                            "comms", 
+                            "I think we forgot something", 
+                            true, 
+                            0.05f // Typing speed
+                        );
+                    }
                 }
             }
             else

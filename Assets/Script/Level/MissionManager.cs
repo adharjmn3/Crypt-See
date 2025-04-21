@@ -17,7 +17,7 @@ public class MissionManager : MonoBehaviour
     private void Start()
     {
         GenerateObjectives();
-        finishTrigger.SetActive(false); // Disable the finish trigger initially
+        // finishTrigger.SetActive(false); // Ensure the finish trigger is hidden initially
     }
 
     private void GenerateObjectives()
@@ -26,15 +26,15 @@ public class MissionManager : MonoBehaviour
         List<GameObject> shuffledObjectives = new List<GameObject>(objectivePrefabs);
         shuffledObjectives.Sort((a, b) => Random.Range(-1, 2));
 
-        // Shuffle spawn points
+        // Shuffle the spawn points to ensure randomness
         List<Transform> shuffledSpawnPoints = new List<Transform>(spawnPoints);
-        shuffledSpawnPoints.Sort((a, b) => Random.Range(-1, 2));
+        ShuffleList(shuffledSpawnPoints);
 
-        // Spawn objectives at random spawn points
+        // Spawn objectives at unique spawn points
         for (int i = 0; i < Mathf.Min(maxObjectives, shuffledSpawnPoints.Count); i++)
         {
             GameObject objectivePrefab = shuffledObjectives[i];
-            Transform spawnPoint = shuffledSpawnPoints[i];
+            Transform spawnPoint = shuffledSpawnPoints[i]; // Use a unique spawn point
             GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
             // Ensure the ObjectiveBehavior script is attached
@@ -71,6 +71,18 @@ public class MissionManager : MonoBehaviour
         }
     }
 
+    // Utility method to shuffle a list
+    private void ShuffleList<T>(List<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            int randomIndex = Random.Range(0, list.Count);
+            T temp = list[i];
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+    }
+
     public void CompleteObjective(GameObject completedObjective, ObjectiveData objectiveData)
     {
         Debug.Log($"Completed Objective: {objectiveData.objectiveName}");
@@ -89,15 +101,22 @@ public class MissionManager : MonoBehaviour
         // Handle mandatory objectives
         if (objectiveData.isMandatory)
         {
-            activeMandatoryObjectives.Remove(completedObjective);
-            completedMandatoryObjectives++;
-        }
+            if (activeMandatoryObjectives.Contains(completedObjective))
+            {
+                activeMandatoryObjectives.Remove(completedObjective);
+                completedMandatoryObjectives++;
 
-        // Update the objective counter in the UI
-        if (uiManager != null && objectiveData.isMandatory)
-        {
-            int remainingObjectives = maxObjectives - completedMandatoryObjectives;
-            uiManager.UpdateObjectiveCounter(remainingObjectives);
+                // Update the objective counter in the UI
+                if (uiManager != null)
+                {
+                    int remainingObjectives = Mathf.Max(0, maxObjectives - completedMandatoryObjectives); // Ensure no negative values
+                    uiManager.UpdateObjectiveCounter(remainingObjectives);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Attempted to complete an objective that is not active or already completed.");
+            }
         }
 
         // Check if all mandatory objectives are completed
@@ -105,7 +124,12 @@ public class MissionManager : MonoBehaviour
         {
             Debug.Log("All mandatory objectives completed!");
             allObjectivesCompleted = true;
-            finishTrigger.SetActive(true); // Enable the finish trigger
+
+            // Enable the finish trigger only when all objectives are completed
+            if (finishTrigger != null)
+            {
+                finishTrigger.SetActive(true);
+            }
         }
     }
 
@@ -131,6 +155,7 @@ public class MissionManager : MonoBehaviour
 
     public bool AreAllObjectivesCompleted()
     {
+        // Ensure all mandatory objectives are completed before returning true
         return allObjectivesCompleted && activeMandatoryObjectives.Count == 0;
     }
 

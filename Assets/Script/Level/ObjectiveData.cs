@@ -1,6 +1,8 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewObjective", menuName = "Game/Objective")]
+
+
 public class ObjectiveData : ScriptableObject
 {
     public enum ObjectiveType { Collect, Finish }

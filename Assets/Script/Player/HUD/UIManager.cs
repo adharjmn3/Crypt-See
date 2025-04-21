@@ -251,17 +251,21 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Method to update the objective counter
+    // Method to update the objective counter with a delay
     public void UpdateObjectiveCounter(int objectivesLeft)
     {
+        StartCoroutine(UpdateObjectiveCounterWithDelay(objectivesLeft));
+    }
+
+    // Coroutine to handle the delay
+    private IEnumerator UpdateObjectiveCounterWithDelay(int objectivesLeft)
+    {
+        yield return new WaitForSeconds(1f); // Add a 1-second delay
+
         if (objectivesLeftText != null)
         {
-            objectivesLeftText.text = objectivesLeft.ToString(); // Update the main objectives left text
-        }
-
-        if (objectivesLeftCopyText != null)
-        {
-            objectivesLeftCopyText.text = objectivesLeftText.text; // Copy the value to the other TMP
+            objectivesLeftText.text = Mathf.Max(0, objectivesLeft).ToString(); // Ensure no negative values
+            objectivesLeftCopyText.text = Mathf.Max(0, objectivesLeft).ToString();
         }
     }
 }

@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 730351263374886274}
   - component: {fileID: 6218269170785437403}
   - component: {fileID: -1281647957295713689}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Talido
   m_TagString: Untagged
   m_Icon: {fileID: 0}
