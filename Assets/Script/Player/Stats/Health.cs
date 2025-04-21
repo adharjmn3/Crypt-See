@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TopDown.Movement;
 // Reference to the PlayerMovement namespace
 
 namespace Player.Stats
@@ -19,7 +20,9 @@ namespace Player.Stats
         [Header("Audio")]
         public AudioSource audioSource; // Reference to the AudioSource component
         public AudioClip damageSound; // Sound clip to play when taking damage
- // Reference to the PlayerMovement component
+
+        [Header("Explosion Settings")]
+        public GameObject explosionPrefab; // Prefab for the explosion effect
 
         private void Start()
         {
@@ -75,11 +78,28 @@ namespace Player.Stats
                 spriteRenderer.enabled = false;
             }
 
+            // Disable player movement
+            PlayerMovement playerMovement = GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                playerMovement.CanMove = false; // Disable movement
+            }
+
             // Disable all sounds in the scene
             AudioSource[] allAudioSources = FindObjectsOfType<AudioSource>();
             foreach (AudioSource source in allAudioSources)
             {
                 source.Stop();
+            }
+
+            // Instantiate the explosion prefab at the player's position
+            if (explosionPrefab != null)
+            {
+                Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            }
+            else
+            {
+                Debug.LogError("Explosion prefab is not assigned!");
             }
 
             // Start the coroutine to delay showing the end story UI

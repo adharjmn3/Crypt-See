@@ -37,7 +37,17 @@ namespace TopDown.Movement
             animator.SetBool("isPunch", isPunching);
         }
 
-        
+        public void TriggerExplosion()
+        {
+            if (animator != null)
+            {
+                animator.SetTrigger("Explode"); // Ensure "Explode" is the name of the trigger in the Animator
+            }
+            else
+            {
+                Debug.LogError("Animator component is missing on the player!");
+            }
+        }
     }
 }
 

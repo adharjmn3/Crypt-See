@@ -13,7 +13,12 @@ public class EnemyHealth : MonoBehaviour
     [Header("Death Settings")]
     [SerializeField] private AudioClip deathSound; // Sound to play when the enemy dies
     private Animator animator; // Reference to the Animator component
+    [Header("Explosion Settings")]
+    [SerializeField] private Sprite explosionSprite; // Sprite for the explosion
+    [SerializeField] private float explosionDuration = 1.5f; // Duration to display the explosion sprite
+    [SerializeField] private GameObject explosionPrefab; // Prefab for the explosion effect
 
+    private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
     private Coroutine damageCoroutine;
 
     public float HealthPoint { get; }
@@ -32,6 +37,13 @@ public class EnemyHealth : MonoBehaviour
         if (animator == null)
         {
             Debug.LogWarning("Animator component is missing on the enemy!");
+        }
+
+        // Get the SpriteRenderer component
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("SpriteRenderer component is missing on the enemy!");
         }
     }
 
@@ -68,14 +80,25 @@ public class EnemyHealth : MonoBehaviour
                 audioSource.PlayOneShot(deathSound);
             }
 
-            // Trigger the death animation
-            if (animator != null)
+            // Instantiate the explosion prefab at the enemy's position
+            if (explosionPrefab != null)
             {
-                animator.SetTrigger("Die"); // Ensure the Animator has a "Die" trigger
+                Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            }
+            else
+            {
+                Debug.LogError("Explosion prefab is not assigned!");
             }
 
-            // Delay the destruction of the enemy to allow the animation and sound to play
-            Destroy(gameObject, 1.5f); // Adjust the delay to match the length of the animation/sound
+            // Disable further interactions
+            Collider2D collider = GetComponent<Collider2D>();
+            if (collider != null)
+            {
+                collider.enabled = false;
+            }
+
+            // Destroy the enemy GameObject
+            Destroy(gameObject);
         }
     }
 
