@@ -84,4 +84,26 @@ public class EnemyManager : MonoBehaviour
         activeEnemies.Clear();
         Debug.Log("All enemies removed.");
     }
+
+    public void OnEnemyKilled(GameObject enemy)
+    {
+        EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+        if (enemyHealth != null && enemyHealth.HealthPoint > 0)
+        {
+            Debug.LogWarning("OnEnemyKilled called for an enemy that is still alive!");
+            return;
+        }
+
+        // Remove the enemy from the active enemies list
+        RemoveEnemy(enemy);
+
+        // Increment the player's kill count
+        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+        if (playerManager != null)
+        {
+            playerManager.AddKill();
+        }
+
+        Debug.Log("Enemy killed and kill count updated.");
+    }
 }

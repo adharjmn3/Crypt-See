@@ -59,7 +59,7 @@ public class PlayerManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("No Collider2D found on the player! Please assign a trigger collider.");
+                // Debug.LogError("No Collider2D found on the player! Please assign a trigger collider.");
             }
         }
     }
@@ -169,7 +169,7 @@ public class PlayerManager : MonoBehaviour
                 currentWeapon.totalAmmo -= bulletsToReload; // Deduct bullets from reserve
             }
 
-            Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
+            // Debug.Log($"Reloaded {currentWeapon.weaponName}. Bullets in magazine: {currentWeapon.bulletsInMagazine}, Total ammo: {currentWeapon.totalAmmo}");
 
             // Update the UI after reload
             UpdateAmmoUI();
@@ -290,4 +290,12 @@ public class PlayerManager : MonoBehaviour
             Debug.Log($"Non-enemy object exited trigger: {other.name}");
         }
     }
+
+
+    public int GetKills()
+    {
+        return stats != null ? stats.GetKills() : 0;
+    }
+
+
 }

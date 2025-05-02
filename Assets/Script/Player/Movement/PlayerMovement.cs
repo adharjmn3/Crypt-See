@@ -12,8 +12,7 @@ namespace TopDown.Movement
         [SerializeField] private float minSpeed = 100f; // Minimum speed limit
 
         [SerializeField] private float minVolume = 0.1f; // Minimum volume
-        [SerializeField] private float maxVolume = 1.0f; // Maximum volume
-
+        [SerializeField] private float maxVolume = 1.0f; // Maximum volume 
         public bool CanMove { get; set; } = true; // New property to control movement
 
         public float CurrentSpeed
@@ -31,6 +30,8 @@ namespace TopDown.Movement
             {
                 Vector3 playerInput = new Vector3(value.Get<Vector2>().x, value.Get<Vector2>().y, 0);
                 currInput = playerInput;
+
+                // Draw a line at the player's position
             }
             else
             {
@@ -64,5 +65,7 @@ namespace TopDown.Movement
 
             return volume;
         }
+
+       
     }
 }

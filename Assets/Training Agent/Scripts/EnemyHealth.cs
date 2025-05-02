@@ -23,6 +23,7 @@ public class EnemyHealth : MonoBehaviour
 
     private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
     private Coroutine damageCoroutine;
+    private EnemyManager enemyManager; // Reference to the EnemyManager script
     private float currentDamageToPlayer; // Tracks the current damage being dealt to the player
 
     public float HealthPoint { get; }
@@ -52,6 +53,13 @@ public class EnemyHealth : MonoBehaviour
         {
             Debug.LogError("SpriteRenderer component is missing on the enemy!");
         }
+
+        // Find the EnemyManager in the scene
+        enemyManager = FindObjectOfType<EnemyManager>();
+        if (enemyManager == null)
+        {
+            Debug.LogError("EnemyManager is missing in the scene!");
+        }
     }
 
     public void SetHealthPoint(float value)
@@ -66,6 +74,12 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(float damagePoint)
     {
+        if (healthPoint <= 0)
+        {
+            Debug.LogWarning("TakeDamage called on an already dead enemy!");
+            return;
+        }
+
         healthPoint -= damagePoint;
 
         // Play the hit sound
@@ -129,11 +143,10 @@ public class EnemyHealth : MonoBehaviour
                 Debug.LogError("Explosion prefab is not assigned!");
             }
 
-            // Disable further interactions
-            Collider2D collider = GetComponent<Collider2D>();
-            if (collider != null)
+            // Notify EnemyManager about the enemy's death
+            if (enemyManager != null)
             {
-                collider.enabled = false;
+                enemyManager.OnEnemyKilled(this.gameObject);
             }
 
             // Destroy the enemy GameObject
@@ -149,10 +162,15 @@ public class EnemyHealth : MonoBehaviour
             Health playerHealth = other.GetComponent<Health>();
             if (playerHealth != null)
             {
-                // Start damaging the player
-                if (damageCoroutine == null)
+                // Check if the EnemyNPC's tensionMeter is 5
+                EnemyNPC enemyNPC = GetComponent<EnemyNPC>();
+                if (enemyNPC != null && enemyNPC.tensionMeter == 5f)
                 {
-                    damageCoroutine = StartCoroutine(DamagePlayer(playerHealth));
+                    // Start damaging the player
+                    if (damageCoroutine == null)
+                    {
+                        damageCoroutine = StartCoroutine(DamagePlayer(playerHealth));
+                    }
                 }
             }
         }

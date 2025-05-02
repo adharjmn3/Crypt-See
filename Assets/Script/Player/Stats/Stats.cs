@@ -28,6 +28,7 @@ public class Stats : MonoBehaviour
     public void AddKill()
     {
         kills++;
+        Debug.Log("Kill added. Total kills: " + kills);
     }
     public int GetKills()
     {
