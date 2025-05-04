@@ -189,6 +189,25 @@ private readonly Color minimapRed = new Color(149f / 255f, 0f, 13f / 255f, 0.07f
             // Update the light level (clamped between 0 and 1)
             LightLevel = Mathf.Clamp(totalIntensity, 0.0f, 1.0f);
 
+            // Update shadow and light timers in Stats
+            Stats stats = GetComponent<Stats>();
+            if (stats != null)
+            {
+                if (LightLevel == 0.0f)
+                {
+                    stats.UpdateShadowTime(Time.deltaTime);
+                    stats.SetVisibilityStatus("hide");
+                }
+                else
+                {
+                    stats.UpdateLightTime(Time.deltaTime);
+                    stats.SetVisibilityStatus("spotted");
+                }
+
+                // Update visibility level in Stats
+                stats.SetVisibilityLevel(LightLevel);
+            }
+
             // Disable or enable excluded lights based on LightLevel
             if (LightLevel == 1.0f)
             {

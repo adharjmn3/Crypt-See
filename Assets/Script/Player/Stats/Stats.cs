@@ -15,6 +15,14 @@ public class Stats : MonoBehaviour
 
     private int kills = 0;
 
+    // Timers for shadow and light
+    private float shadowTime = 0.0f;
+    private float lightTime = 0.0f;
+
+    // Visibility status and level
+    private string visibilityStatus = "hide"; // Default status
+    private float visibilityLevel = 0.0f; // How visible the player is (0 to 1)
+
     public float GetDetectionValue()
     {
         return detectionValue;
@@ -30,15 +38,53 @@ public class Stats : MonoBehaviour
         kills++;
         Debug.Log("Kill added. Total kills: " + kills);
     }
+
     public int GetKills()
     {
         return kills;
     }
 
-    
+    // Methods to update shadow and light timers
+    public void UpdateShadowTime(float deltaTime)
+    {
+        shadowTime += deltaTime;
+    }
+
+    public void UpdateLightTime(float deltaTime)
+    {
+        lightTime += deltaTime;
+    }
+
+    public float GetShadowTime()
+    {
+        return shadowTime;
+    }
+
+    public float GetLightTime()
+    {
+        return lightTime;
+    }
+
+    // Methods to handle visibility status and level
+    public void SetVisibilityStatus(string status)
+    {
+        visibilityStatus = status;
+    }
+
+    public string GetVisibilityStatus()
+    {
+        return visibilityStatus;
+    }
+
+    public void SetVisibilityLevel(float level)
+    {
+        visibilityLevel = Mathf.Clamp01(level); // Clamp between 0 and 1
+    }
+
+    public float GetVisibilityLevel()
+    {
+        return visibilityLevel;
+    }
 }
-
-
-    
 
 }
