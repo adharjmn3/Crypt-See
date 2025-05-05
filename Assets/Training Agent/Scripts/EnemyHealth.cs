@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI; // Required for the Slider component
 using Player.Stats; // Reference to the Health class namespace
 
 public class EnemyHealth : MonoBehaviour
@@ -20,11 +21,14 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private GameObject explosionPrefab; // Prefab for the explosion effect
     [Header("Damage Effect Settings")]
     [SerializeField] private GameObject damageEffectPrefab; // Prefab for the damage effect
+    [SerializeField] private Slider healthSlider; // Reference to the HUD Slider for enemy health
+    [SerializeField] private Vector3 sliderOffset = new Vector3(0, 1.5f, 0); // Offset for the slider position
 
     private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
     private Coroutine damageCoroutine;
     private EnemyManager enemyManager; // Reference to the EnemyManager script
     private float currentDamageToPlayer; // Tracks the current damage being dealt to the player
+    private Camera mainCamera; // Reference to the main camera
 
     public float HealthPoint { get; }
 
@@ -60,6 +64,25 @@ public class EnemyHealth : MonoBehaviour
         {
             Debug.LogError("EnemyManager is missing in the scene!");
         }
+
+        // Initialize the slider if assigned
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = healthPoint; // Set the slider's max value to the enemy's health
+            healthSlider.value = healthPoint;   // Set the slider's current value to the enemy's health
+        }
+
+        // Cache the main camera reference
+        mainCamera = Camera.main;
+    }
+
+    private void LateUpdate()
+    {
+        // Make the slider follow the enemy's position
+        if (healthSlider != null)
+        {
+            healthSlider.transform.position = transform.position + sliderOffset; // Update the slider's position with an offset
+        }
     }
 
     public void SetHealthPoint(float value)
@@ -86,6 +109,12 @@ public class EnemyHealth : MonoBehaviour
         if (audioSource != null && hitSound != null)
         {
             audioSource.PlayOneShot(hitSound);
+        }
+
+        // Update the slider value
+        if (healthSlider != null)
+        {
+            healthSlider.value = healthPoint;
         }
 
         // Only spawn the damage effect if health is 20 or greater
@@ -147,6 +176,12 @@ public class EnemyHealth : MonoBehaviour
             if (enemyManager != null)
             {
                 enemyManager.OnEnemyKilled(this.gameObject);
+            }
+
+            // Hide or destroy the slider when the enemy dies
+            if (healthSlider != null)
+            {
+                healthSlider.gameObject.SetActive(false); // Optionally, you can destroy it with Destroy(healthSlider.gameObject);
             }
 
             // Destroy the enemy GameObject

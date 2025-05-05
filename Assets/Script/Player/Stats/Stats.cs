@@ -11,17 +11,17 @@ public class Stats : MonoBehaviour
     private float detectionValue = 0.0f;
 
     // The maximum value for the detection percentage
-    private float maxDetectionPercentage = 100.0f;
+    [SerializeField] private float maxDetectionPercentage = 100.0f;
 
-    private int kills = 0;
+    [SerializeField] private int kills = 0;
 
     // Timers for shadow and light
-    private float shadowTime = 0.0f;
-    private float lightTime = 0.0f;
+    [SerializeField] private float shadowTime = 0.0f;
+    [SerializeField] private float lightTime = 0.0f;
 
     // Visibility status and level
-    private string visibilityStatus = "hide"; // Default status
-    private float visibilityLevel = 0.0f; // How visible the player is (0 to 1)
+    [SerializeField] private string visibilityStatus = "hide"; // Default status
+    [SerializeField] private float visibilityLevel = 0.0f; // How visible the player is (0 to 1)
 
     public float GetDetectionValue()
     {
