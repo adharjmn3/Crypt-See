@@ -198,15 +198,15 @@ public class EnemyHealth : MonoBehaviour
             if (playerHealth != null)
             {
                 // Check if the EnemyNPC's tensionMeter is 5
-                EnemyNPC enemyNPC = GetComponent<EnemyNPC>();
-                if (enemyNPC != null && enemyNPC.tensionMeter == 5f)
-                {
-                    // Start damaging the player
-                    if (damageCoroutine == null)
-                    {
-                        damageCoroutine = StartCoroutine(DamagePlayer(playerHealth));
-                    }
-                }
+                // EnemyNPC enemyNPC = GetComponent<EnemyNPC>();
+                // if (enemyNPC != null && enemyNPC.tensionMeter == 5f)
+                // {
+                //     // Start damaging the player
+                //     if (damageCoroutine == null)
+                //     {
+                //         damageCoroutine = StartCoroutine(DamagePlayer(playerHealth));
+                //     }
+                // }
             }
         }
     }

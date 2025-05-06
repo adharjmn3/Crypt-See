@@ -523,7 +523,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 466748297758298726, guid: 9ba0edca13c2c12478990184850b9b4d, type: 3}
   bulletSpawnPoint: {fileID: 8277239109722871074}
   bulletSpeed: 30
-  fireRate: 100
+  fireRate: 8
   shootingRange: 30
   bulletDamage: 50
   muzzleFlash: {fileID: 7440191685052868192, guid: 5a936c83b1746f14f9100db745e94f04, type: 3}
@@ -807,7 +807,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 84400
+  m_InstanceId: 37334
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
