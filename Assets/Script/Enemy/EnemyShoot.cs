@@ -8,7 +8,6 @@ public class EnemyShoot : MonoBehaviour
     public GameObject bulletPrefab; // Prefab for the bullet
     public Transform bulletSpawnPoint; // Transform for bullet spawn
     public float bulletSpeed = 10f; // Speed of the bullet
-    public float fireRate = 1f; // Time between shots
     public float shootingRange = 10f; // Maximum range to shoot the player
     public int bulletDamage = 10; // Damage dealt by the bullet
 
@@ -19,7 +18,7 @@ public class EnemyShoot : MonoBehaviour
 
     private Transform playerTransform; // Reference to the player's transform
     private float nextFireTime = 0f; // Time until the next shot can be fired
-    private EnemyNPC enemyNPC; // Reference to the EnemyNPC script
+    private EnemyStats enemyStats; // Reference to the EnemyStats script
 
     void Start()
     {
@@ -34,34 +33,37 @@ public class EnemyShoot : MonoBehaviour
             Debug.LogError("Player not found! Make sure the player has the 'Player' tag.");
         }
 
-        // Get the EnemyNPC component
-        enemyNPC = GetComponent<EnemyNPC>();
-        if (enemyNPC == null)
+        // Get the EnemyStats component
+        enemyStats = GetComponent<EnemyStats>();
+        if (enemyStats == null)
         {
-            Debug.LogError("EnemyNPC component is missing on this GameObject!");
+            Debug.LogError("EnemyStats component is missing on this GameObject!");
         }
     }
 
     void Update()
     {
-        if (playerTransform == null || enemyNPC == null) return;
+        if (playerTransform == null || enemyStats == null) return;
 
-        // Check if the tension meter is full
-        if (enemyNPC.IsTensionMeterFull())
+        // Check if the player is within shooting range
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+        if (distanceToPlayer <= shootingRange && Time.time >= nextFireTime)
         {
-            // Check if the player is within shooting range
-            float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-            if (distanceToPlayer <= shootingRange && Time.time >= nextFireTime)
-            {
-                // Shoot at the player
-                ShootAtPlayer();
-                nextFireTime = Time.time + 1f / fireRate; // Set the next fire time
-            }
+            // Shoot at the player
+            ShootAtPlayer();
+            nextFireTime = Time.time + 1f / enemyStats.rateOfFire; // Use rateOfFire from EnemyStats
         }
     }
 
     private void ShootAtPlayer()
     {
+        // Simulate accuracy
+        if (Random.value > enemyStats.accuracy) // Use accuracy from EnemyStats
+        {
+            Debug.Log($"{gameObject.name} missed the shot!");
+            return; // Miss the shot
+        }
+
         // Play muzzle flash effect
         if (muzzleFlash != null)
         {

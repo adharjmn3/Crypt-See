@@ -14,6 +14,8 @@ public class EnemyStats : MonoBehaviour
     public float attackPower = 10f; // Damage dealt to the player
     public float attackRange = 2f; // Range within which the enemy can attack
     public float attackCooldown = 1.5f; // Time between attacks
+    public float accuracy = 0.9f; // Accuracy of attacks (1.0 = perfect accuracy)
+    public float rateOfFire = 1f; // Number of attacks per second
 
     [Header("Awareness Stats")]
     public float detectionRange = 10f; // How far the enemy can detect the player
