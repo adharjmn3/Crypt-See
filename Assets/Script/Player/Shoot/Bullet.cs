@@ -7,12 +7,14 @@ public class Bullet : MonoBehaviour
     private int damage;
     private Vector3 startPosition;
     public Weapon.AmmoType ammoType; // Variable to store the weapon type
+    private GameObject shooter; // Reference to the shooter
 
-    public void Initialize(float range, int damage, Weapon.AmmoType ammoType)
+    public void Initialize(float range, int damage, Weapon.AmmoType ammoType, GameObject shooter)
     {
         this.range = range;
         this.damage = damage;
         this.ammoType = ammoType; // Assign the weapon type
+        this.shooter = shooter; // Assign the shooter
         startPosition = transform.position;
     }
 
@@ -27,7 +29,10 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy"))
+        // Ignore collision with the shooter
+        if (collision.gameObject == shooter) return;
+
+        if (collision.CompareTag("Enemy") && shooter.CompareTag("Player"))
         {
             Debug.Log($"Bullet hit enemy: {collision.gameObject.name}, Ammo Type: {ammoType}");
             EnemyHealth enemyHealth = collision.GetComponent<EnemyHealth>();
@@ -45,6 +50,19 @@ public class Bullet : MonoBehaviour
                     // Pause enemy movement for 'damage' seconds
                     StartCoroutine(PauseEnemyMovement(enemyMovement, damage));
                 }
+            }
+
+            Destroy(gameObject); // Destroy the bullet
+        }
+        else if (collision.CompareTag("Player") && shooter.CompareTag("Enemy"))
+        {
+            Debug.Log($"Bullet hit player: {collision.gameObject.name}, Ammo Type: {ammoType}");
+            Player.Stats.Health playerHealth = collision.GetComponent<Player.Stats.Health>();
+
+            if (playerHealth != null)
+            {
+                // Apply damage to the player
+                playerHealth.TakeDamage(damage);
             }
 
             Destroy(gameObject); // Destroy the bullet

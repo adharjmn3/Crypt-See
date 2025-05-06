@@ -148,7 +148,7 @@ public class EnemyNPC : Agent
         }
     }
 
-    private bool IsTensionMeterFull()
+    public bool IsTensionMeterFull()
     {
         return tensionMeter >= maxTensionMeter;
     }

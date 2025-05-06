@@ -248,7 +248,7 @@ public class Shoot : MonoBehaviour
             Bullet bulletScript = bullet.GetComponent<Bullet>();
             if (bulletScript != null)
             {
-                bulletScript.Initialize(currentWeapon.range, currentWeapon.damage, currentWeapon.ammoType);
+                bulletScript.Initialize(currentWeapon.range, currentWeapon.damage, currentWeapon.ammoType, gameObject); // Pass the player as the shooter
             }
 
             // Apply velocity to the bullet
