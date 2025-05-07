@@ -87,6 +87,13 @@ private readonly Color minimapRed = new Color(149f / 255f, 0f, 13f / 255f, 0.07f
             }
 
             LightLevel = Mathf.Clamp(combinedLevel, 0.0f, 1.0f); // Clamp the final LightLevel between 0 and 1
+
+            // Update visibilityLevel in Stats
+            Stats stats = GetComponent<Stats>();
+            if (stats != null)
+            {
+                stats.SetVisibilityLevel(LightLevel); // Update visibilityLevel
+            }
         }
 
         // Helper method to check if the player is moving
