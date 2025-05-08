@@ -10,7 +10,7 @@ public class LightArea : MonoBehaviour
     private Light2D light2D;
     private PolygonCollider2D polygonCollider;
 
-    [SerializeField] private Transform directionTransform; // Transform to define the light's direction
+    [SerializeField, Range(3, 100)] private int circleSegments = 36; // Number of segments for the circle
 
     void Awake()
     {
@@ -22,36 +22,22 @@ public class LightArea : MonoBehaviour
         polygonCollider.isTrigger = true;
 
         // Generate the polygon collider based on the light's properties
-        GenerateLightArea();
+        GenerateHalfCircularCollider();
     }
 
-    void GenerateLightArea()
+    void GenerateHalfCircularCollider()
     {
         // Clear existing points
-        polygonCollider.pathCount = 0;
+        polygonCollider.pathCount = 1;
 
-        // Generate points for the outer radius
-        List<Vector2> outerPoints = GenerateArcPoints(light2D.pointLightOuterRadius, light2D.pointLightOuterAngle);
-
-        // Generate points for the inner radius (if applicable)
-        List<Vector2> innerPoints = GenerateArcPoints(light2D.pointLightInnerRadius, light2D.pointLightInnerAngle, true);
-
-        // Combine the outer and inner points to form the polygon
-        List<Vector2> combinedPoints = new List<Vector2>(outerPoints);
-
-        // Close the polygon by adding the reversed inner points
-        if (innerPoints.Count > 0)
-        {
-            combinedPoints.AddRange(innerPoints);
-            combinedPoints.Add(outerPoints[0]); // Close the loop
-        }
+        // Generate points for the half-circle
+        List<Vector2> halfCirclePoints = GenerateHalfCirclePoints(light2D.pointLightOuterRadius);
 
         // Set the points to the collider
-        polygonCollider.pathCount = 1;
-        polygonCollider.SetPath(0, combinedPoints.ToArray());
+        polygonCollider.SetPath(0, halfCirclePoints.ToArray());
     }
 
-    List<Vector2> GenerateArcPoints(float radius, float angle, bool reverse = false)
+    List<Vector2> GenerateHalfCirclePoints(float radius)
     {
         List<Vector2> points = new List<Vector2>();
 
@@ -61,37 +47,24 @@ public class LightArea : MonoBehaviour
             return points;
         }
 
-        // Determine the rotation based on the directionTransform or fallback to the object's rotation
-        float lightRotation = directionTransform != null
-            ? directionTransform.eulerAngles.z // Use directionTransform's Z rotation
-            : transform.eulerAngles.z;         // Fallback to the object's Z rotation
+        // Calculate the angle step based on the number of segments
+        float angleStep = 180f / (circleSegments - 1); // Half-circle spans 180 degrees
 
-        // Convert the rotation to radians
-        float lightRotationRadians = Mathf.Deg2Rad * lightRotation;
-
-        // Calculate the number of segments based on the angle
-        int segments = Mathf.CeilToInt(angle / 5.0f); // Adjust segment size as needed
-        float angleStep = angle / segments;
-
-        // Generate points along the arc
-        for (int i = 0; i <= segments; i++)
+        // Generate points along the half-circle
+        for (int i = 0; i < circleSegments; i++)
         {
-            float currentAngle = -angle / 2 + angleStep * i; // Angle relative to the light
-            float radian = Mathf.Deg2Rad * currentAngle + lightRotationRadians; // Add light rotation
+            float angle = Mathf.Deg2Rad * (i * angleStep); // Convert angle to radians
 
             Vector2 point = new Vector2(
-                Mathf.Cos(radian) * radius,
-                Mathf.Sin(radian) * radius
+                Mathf.Cos(angle) * radius,
+                Mathf.Sin(angle) * radius
             );
 
             points.Add(point);
         }
 
-        // Reverse the points if needed (for inner radius)
-        if (reverse)
-        {
-            points.Reverse();
-        }
+        // Add the center point to close the half-circle
+        points.Add(Vector2.zero);
 
         return points;
     }
@@ -101,7 +74,7 @@ public class LightArea : MonoBehaviour
         // Regenerate the light area when properties are changed in the editor
         if (light2D != null && polygonCollider != null)
         {
-            GenerateLightArea();
+            GenerateHalfCircularCollider();
         }
     }
 }

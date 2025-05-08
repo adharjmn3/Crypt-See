@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3020975971024016346}
   - component: {fileID: 6060313504245585953}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Lamp1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -98,9 +98,9 @@ GameObject:
   - component: {fileID: 2234766922046844152}
   - component: {fileID: 2835689330591374079}
   - component: {fileID: 421002620849557153}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Light
-  m_TagString: Untagged
+  m_TagString: Light
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -305,7 +305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22953fefda400d34e954d4277c9ab565, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  directionTransform: {fileID: 8570734169456826963}
+  circleSegments: 36
 --- !u!1 &8805638768681149386
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,7 +315,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8570734169456826963}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Dirrection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
