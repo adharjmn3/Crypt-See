@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 
 public class LevelGenerator : MonoBehaviour
 {
-    public GameObject roomPrefab; // Assign a RoomLayout prefab in the Unity Inspector
+    public List<GameObject> roomPrefabs; // List of RoomLayout prefabs to choose from
     public Tilemap wallTilemap; // Tilemap for the walls
     public TileBase wallTile; // Tile to use for the walls
     public int roomSize = 20; // Size of each room (20x20 tiles)
@@ -31,8 +31,14 @@ public class LevelGenerator : MonoBehaviour
                     0
                 );
 
-                // Instantiate the RoomLayout prefab
-                GameObject room = Instantiate(roomPrefab, roomPosition, Quaternion.identity, transform);
+                // Randomly select a room prefab from the list
+                GameObject selectedRoomPrefab = roomPrefabs[Random.Range(0, roomPrefabs.Count)];
+
+                // Instantiate the selected RoomLayout prefab
+                GameObject room = Instantiate(selectedRoomPrefab, roomPosition, Quaternion.identity, transform);
+
+                // Apply random rotation or mirroring
+                ApplyRandomModifiers(room);
 
                 // Call the GenerateWalls method in RoomLayout
                 RoomLayout roomLayout = room.GetComponent<RoomLayout>();
@@ -50,40 +56,39 @@ public class LevelGenerator : MonoBehaviour
         GenerateOuterBoundary();
     }
 
+    void ApplyRandomModifiers(GameObject room)
+    {
+        // Randomly rotate the room (0, 90, 180, or 270 degrees)
+        int randomRotation = Random.Range(0, 4) * 90; // 0, 90, 180, or 270
+        room.transform.Rotate(0, 0, randomRotation);
+
+        // Randomly mirror the room layout (flip on X or Y axis)
+        bool mirrorX = Random.value > 0.5f; // 50% chance to flip on X-axis
+        bool mirrorY = Random.value > 0.5f; // 50% chance to flip on Y-axis
+        Vector3 scale = room.transform.localScale;
+        scale.x *= mirrorX ? -1 : 1; // Flip X-axis if mirrorX is true
+        scale.y *= mirrorY ? -1 : 1; // Flip Y-axis if mirrorY is true
+        room.transform.localScale = scale;
+    }
+
     void GenerateGapWalls(int x, int y, Vector3 roomPosition)
     {
-        // Generate vertical walls in the gap between rooms
+        // Removed vertical wall generation
         if (x < gridSize - 1) // If not the last column
         {
-            Vector3Int verticalWallPosition = new Vector3Int(
-                Mathf.RoundToInt(roomPosition.x + roomSize + roomSpacing / 2f),
-                Mathf.RoundToInt(roomPosition.y + roomSize / 2f),
-                0
-            );
-            
+            // Code for vertical wall generation removed
         }
 
-        // Generate horizontal walls in the gap between rooms
+        // Removed horizontal wall generation
         if (y < gridSize - 1) // If not the last row
         {
-            Vector3Int horizontalWallPosition = new Vector3Int(
-                Mathf.RoundToInt(roomPosition.x + roomSize / 2f),
-                Mathf.RoundToInt(roomPosition.y + roomSize + roomSpacing / 2f),
-                0
-            );
-            
+            // Code for horizontal wall generation removed
         }
 
-        // Generate corner walls in the gap between rooms
+        // Removed corner wall generation
         if (x < gridSize - 1 && y < gridSize - 1) // If not the last column or row
         {
-            // Adjust the corner wall position slightly
-            Vector3Int cornerWallPosition = new Vector3Int(
-                Mathf.RoundToInt(roomPosition.x + roomSize + roomSpacing),
-                Mathf.RoundToInt(roomPosition.y + roomSize + roomSpacing),
-                0
-            );
-         
+            // Code for corner wall generation removed
         }
     }
 

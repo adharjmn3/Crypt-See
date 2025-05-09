@@ -288,12 +288,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d20e6658315891646841c3e02ffe2e7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomPrefab: {fileID: 1019759256195211765, guid: 6f4c8072aff51b14dadf201ece9132e4, type: 3}
+  roomPrefabs:
+  - {fileID: 1019759256195211765, guid: 6f4c8072aff51b14dadf201ece9132e4, type: 3}
+  - {fileID: 1019759256195211765, guid: 4e0960626e782ce4a90dd5e441c265bf, type: 3}
+  - {fileID: 1019759256195211765, guid: ff4b22e74bff5674481c550c84baed66, type: 3}
   wallTilemap: {fileID: 7323747544037590105}
   wallTile: {fileID: 11400000, guid: 6d835414690a8144698a9e8389bdeba2, type: 2}
   roomSize: 20
   gridSize: 3
-  roomSpacing: 8
+  roomSpacing: 6
+  outerBoundarySpacing: 4
 --- !u!4 &1443259527
 Transform:
   m_ObjectHideFlags: 0
