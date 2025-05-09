@@ -36,11 +36,17 @@ public class RoomLayout : MonoBehaviour
         // Calculate the bounds of the room based on the middle position
         Vector3Int middleCell = wallTilemap.WorldToCell(middle.position);
 
-        // Randomly decide which sides will have walls
-        bool hasTopWall = Random.value > 0.5f;
-        bool hasBottomWall = Random.value > 0.5f;
-        bool hasLeftWall = Random.value > 0.5f;
-        bool hasRightWall = Random.value > 0.5f;
+        // Randomly decide which sides will have walls (80% chance to spawn a wall)
+        bool hasTopWall = Random.value > 0.2f;
+        bool hasBottomWall = Random.value > 0.2f;
+        bool hasLeftWall = Random.value > 0.2f;
+        bool hasRightWall = Random.value > 0.2f;
+
+        // Randomly decide if each side will have a door (70% chance to generate a door)
+        bool hasTopDoor = Random.value > 0.3f;
+        bool hasBottomDoor = Random.value > 0.3f;
+        bool hasLeftDoor = Random.value > 0.3f;
+        bool hasRightDoor = Random.value > 0.3f;
 
         // Ensure at least one side has a wall
         if (!hasTopWall && !hasBottomWall && !hasLeftWall && !hasRightWall)
@@ -49,10 +55,10 @@ public class RoomLayout : MonoBehaviour
         }
 
         // Fetch or generate door positions for each wall
-        List<int> topDoorPositions = hasTopWall && topNeighbor != null ? topNeighbor.GetDoorPositionsForNeighbor("bottom") : GenerateDoorPositions(roomWidth);
-        List<int> bottomDoorPositions = hasBottomWall && bottomNeighbor != null ? bottomNeighbor.GetDoorPositionsForNeighbor("top") : GenerateDoorPositions(roomWidth);
-        List<int> leftDoorPositions = hasLeftWall && leftNeighbor != null ? leftNeighbor.GetDoorPositionsForNeighbor("right") : GenerateDoorPositions(roomHeight);
-        List<int> rightDoorPositions = hasRightWall && rightNeighbor != null ? rightNeighbor.GetDoorPositionsForNeighbor("left") : GenerateDoorPositions(roomHeight);
+        List<int> topDoorPositions = hasTopWall && hasTopDoor && topNeighbor != null ? topNeighbor.GetDoorPositionsForNeighbor("bottom") : GenerateDoorPositions(roomWidth);
+        List<int> bottomDoorPositions = hasBottomWall && hasBottomDoor && bottomNeighbor != null ? bottomNeighbor.GetDoorPositionsForNeighbor("top") : GenerateDoorPositions(roomWidth);
+        List<int> leftDoorPositions = hasLeftWall && hasLeftDoor && leftNeighbor != null ? leftNeighbor.GetDoorPositionsForNeighbor("right") : GenerateDoorPositions(roomHeight);
+        List<int> rightDoorPositions = hasRightWall && hasRightDoor && rightNeighbor != null ? rightNeighbor.GetDoorPositionsForNeighbor("left") : GenerateDoorPositions(roomHeight);
 
         // Generate top and bottom walls
         for (int x = -roomWidth / 2; x <= roomWidth / 2; x++)
@@ -60,7 +66,7 @@ public class RoomLayout : MonoBehaviour
             // Top wall
             if (hasTopWall)
             {
-                if (IsWithinDoorRange(x + roomWidth / 2, topDoorPositions))
+                if (hasTopDoor && IsWithinDoorRange(x + roomWidth / 2, topDoorPositions))
                 {
                     wallTilemap.SetTile(middleCell + new Vector3Int(x, roomHeight / 2, 0), emptyTile);
                 }
@@ -73,7 +79,7 @@ public class RoomLayout : MonoBehaviour
             // Bottom wall
             if (hasBottomWall)
             {
-                if (IsWithinDoorRange(x + roomWidth / 2, bottomDoorPositions))
+                if (hasBottomDoor && IsWithinDoorRange(x + roomWidth / 2, bottomDoorPositions))
                 {
                     wallTilemap.SetTile(middleCell + new Vector3Int(x, -roomHeight / 2, 0), emptyTile);
                 }
@@ -90,7 +96,7 @@ public class RoomLayout : MonoBehaviour
             // Left wall
             if (hasLeftWall)
             {
-                if (IsWithinDoorRange(y + roomHeight / 2, leftDoorPositions))
+                if (hasLeftDoor && IsWithinDoorRange(y + roomHeight / 2, leftDoorPositions))
                 {
                     wallTilemap.SetTile(middleCell + new Vector3Int(-roomWidth / 2, y, 0), emptyTile);
                 }
@@ -103,7 +109,7 @@ public class RoomLayout : MonoBehaviour
             // Right wall
             if (hasRightWall)
             {
-                if (IsWithinDoorRange(y + roomHeight / 2, rightDoorPositions))
+                if (hasRightDoor && IsWithinDoorRange(y + roomHeight / 2, rightDoorPositions))
                 {
                     wallTilemap.SetTile(middleCell + new Vector3Int(roomWidth / 2, y, 0), emptyTile);
                 }

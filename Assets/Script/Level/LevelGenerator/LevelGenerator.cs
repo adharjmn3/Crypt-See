@@ -11,6 +11,7 @@ public class LevelGenerator : MonoBehaviour
     public int roomSize = 20; // Size of each room (20x20 tiles)
     public int gridSize = 3; // 3x3 grid
     public int roomSpacing = 1; // Space between rooms in tiles
+    public int outerBoundarySpacing = 2; // Space between the outer boundary and the rooms
 
     void Start()
     {
@@ -59,7 +60,7 @@ public class LevelGenerator : MonoBehaviour
                 Mathf.RoundToInt(roomPosition.y + roomSize / 2f),
                 0
             );
-            wallTilemap.SetTile(verticalWallPosition, wallTile);
+            
         }
 
         // Generate horizontal walls in the gap between rooms
@@ -70,18 +71,19 @@ public class LevelGenerator : MonoBehaviour
                 Mathf.RoundToInt(roomPosition.y + roomSize + roomSpacing / 2f),
                 0
             );
-            wallTilemap.SetTile(horizontalWallPosition, wallTile);
+            
         }
 
         // Generate corner walls in the gap between rooms
         if (x < gridSize - 1 && y < gridSize - 1) // If not the last column or row
         {
+            // Adjust the corner wall position slightly
             Vector3Int cornerWallPosition = new Vector3Int(
-                Mathf.RoundToInt(roomPosition.x + roomSize + roomSpacing / 2f),
-                Mathf.RoundToInt(roomPosition.y + roomSize + roomSpacing / 2f),
+                Mathf.RoundToInt(roomPosition.x + roomSize + roomSpacing),
+                Mathf.RoundToInt(roomPosition.y + roomSize + roomSpacing),
                 0
             );
-            wallTilemap.SetTile(cornerWallPosition, wallTile);
+         
         }
     }
 
@@ -91,24 +93,30 @@ public class LevelGenerator : MonoBehaviour
         int totalWidth = gridSize * (roomSize + roomSpacing);
         int totalHeight = gridSize * (roomSize + roomSpacing);
 
+        // Adjust the boundary size by adding the outerBoundarySpacing
+        int boundaryLeft = -outerBoundarySpacing;
+        int boundaryRight = totalWidth + outerBoundarySpacing;
+        int boundaryBottom = -outerBoundarySpacing;
+        int boundaryTop = totalHeight + outerBoundarySpacing;
+
         // Generate top and bottom boundary walls
-        for (int x = -1; x <= totalWidth; x++)
+        for (int x = boundaryLeft; x <= boundaryRight; x++)
         {
             // Top boundary
-            wallTilemap.SetTile(new Vector3Int(x, totalHeight, 0), wallTile);
+            wallTilemap.SetTile(new Vector3Int(x, boundaryTop, 0), wallTile);
 
             // Bottom boundary
-            wallTilemap.SetTile(new Vector3Int(x, -1, 0), wallTile);
+            wallTilemap.SetTile(new Vector3Int(x, boundaryBottom, 0), wallTile);
         }
 
         // Generate left and right boundary walls
-        for (int y = -1; y <= totalHeight; y++)
+        for (int y = boundaryBottom; y <= boundaryTop; y++)
         {
             // Left boundary
-            wallTilemap.SetTile(new Vector3Int(-1, y, 0), wallTile);
+            wallTilemap.SetTile(new Vector3Int(boundaryLeft, y, 0), wallTile);
 
             // Right boundary
-            wallTilemap.SetTile(new Vector3Int(totalWidth, y, 0), wallTile);
+            wallTilemap.SetTile(new Vector3Int(boundaryRight, y, 0), wallTile);
         }
     }
 }
