@@ -7,7 +7,10 @@ public class LevelGenerator : MonoBehaviour
 {
     public List<GameObject> roomPrefabs; // List of RoomLayout prefabs to choose from
     public Tilemap wallTilemap; // Tilemap for the walls
+    public Tilemap minimapTilemap; // Tilemap for the minimap
     public TileBase wallTile; // Tile to use for the walls
+    public TileBase floorTile; // Tile to use for the floor
+    public TileBase minimapWallTile; // Tile to use for the minimap walls
     public int roomSize = 20; // Size of each room (20x20 tiles)
     public int gridSize = 3; // 3x3 grid
     public int roomSpacing = 1; // Space between rooms in tiles
@@ -109,9 +112,11 @@ public class LevelGenerator : MonoBehaviour
         {
             // Top boundary
             wallTilemap.SetTile(new Vector3Int(x, boundaryTop, 0), wallTile);
+            minimapTilemap.SetTile(new Vector3Int(x, boundaryTop, 0), minimapWallTile); // Copy to minimap
 
             // Bottom boundary
             wallTilemap.SetTile(new Vector3Int(x, boundaryBottom, 0), wallTile);
+            minimapTilemap.SetTile(new Vector3Int(x, boundaryBottom, 0), minimapWallTile); // Copy to minimap
         }
 
         // Generate left and right boundary walls
@@ -119,9 +124,20 @@ public class LevelGenerator : MonoBehaviour
         {
             // Left boundary
             wallTilemap.SetTile(new Vector3Int(boundaryLeft, y, 0), wallTile);
+            minimapTilemap.SetTile(new Vector3Int(boundaryLeft, y, 0), minimapWallTile); // Copy to minimap
 
             // Right boundary
             wallTilemap.SetTile(new Vector3Int(boundaryRight, y, 0), wallTile);
+            minimapTilemap.SetTile(new Vector3Int(boundaryRight, y, 0), minimapWallTile); // Copy to minimap
+        }
+
+        // Fill the inner area of the boundary with floor tiles
+        for (int x = boundaryLeft + 1; x < boundaryRight; x++)
+        {
+            for (int y = boundaryBottom + 1; y < boundaryTop; y++)
+            {
+                wallTilemap.SetTile(new Vector3Int(x, y, 0), floorTile); // Use floorTile for the inner area
+            }
         }
     }
 }

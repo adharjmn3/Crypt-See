@@ -7,8 +7,10 @@ public class RoomLayout : MonoBehaviour
 {
     public Transform middle; // Reference to the "Middle" GameObject in the room layout
     public Tilemap wallTilemap; // Tilemap for the walls
+    public Tilemap minimapTilemap; // Tilemap for the minimap
     public TileBase wallTile; // Tile to use for the walls
     public TileBase emptyTile; // Tile to represent the door (or leave empty)
+    public TileBase minimapWallTile; // Tile to represent the walls on the minimap
     public int roomWidth = 20; // Width of the room in tiles
     public int roomHeight = 20; // Height of the room in tiles
     public int doorSize = 3; // Size of the door in tiles
@@ -27,9 +29,9 @@ public class RoomLayout : MonoBehaviour
             return;
         }
 
-        if (wallTilemap == null || wallTile == null)
+        if (wallTilemap == null || wallTile == null || minimapTilemap == null || minimapWallTile == null)
         {
-            Debug.LogError("Wall Tilemap or Wall Tile is not assigned!");
+            Debug.LogError("Tilemaps or Tiles are not assigned!");
             return;
         }
 
@@ -66,26 +68,30 @@ public class RoomLayout : MonoBehaviour
             // Top wall
             if (hasTopWall)
             {
+                Vector3Int position = middleCell + new Vector3Int(x, roomHeight / 2, 0);
                 if (hasTopDoor && IsWithinDoorRange(x + roomWidth / 2, topDoorPositions))
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(x, roomHeight / 2, 0), emptyTile);
+                    wallTilemap.SetTile(position, emptyTile);
                 }
                 else
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(x, roomHeight / 2, 0), wallTile);
+                    wallTilemap.SetTile(position, wallTile);
+                    minimapTilemap.SetTile(position, minimapWallTile); // Copy to minimap
                 }
             }
 
             // Bottom wall
             if (hasBottomWall)
             {
+                Vector3Int position = middleCell + new Vector3Int(x, -roomHeight / 2, 0);
                 if (hasBottomDoor && IsWithinDoorRange(x + roomWidth / 2, bottomDoorPositions))
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(x, -roomHeight / 2, 0), emptyTile);
+                    wallTilemap.SetTile(position, emptyTile);
                 }
                 else
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(x, -roomHeight / 2, 0), wallTile);
+                    wallTilemap.SetTile(position, wallTile);
+                    minimapTilemap.SetTile(position, minimapWallTile); // Copy to minimap
                 }
             }
         }
@@ -96,26 +102,30 @@ public class RoomLayout : MonoBehaviour
             // Left wall
             if (hasLeftWall)
             {
+                Vector3Int position = middleCell + new Vector3Int(-roomWidth / 2, y, 0);
                 if (hasLeftDoor && IsWithinDoorRange(y + roomHeight / 2, leftDoorPositions))
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(-roomWidth / 2, y, 0), emptyTile);
+                    wallTilemap.SetTile(position, emptyTile);
                 }
                 else
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(-roomWidth / 2, y, 0), wallTile);
+                    wallTilemap.SetTile(position, wallTile);
+                    minimapTilemap.SetTile(position, minimapWallTile); // Copy to minimap
                 }
             }
 
             // Right wall
             if (hasRightWall)
             {
+                Vector3Int position = middleCell + new Vector3Int(roomWidth / 2, y, 0);
                 if (hasRightDoor && IsWithinDoorRange(y + roomHeight / 2, rightDoorPositions))
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(roomWidth / 2, y, 0), emptyTile);
+                    wallTilemap.SetTile(position, emptyTile);
                 }
                 else
                 {
-                    wallTilemap.SetTile(middleCell + new Vector3Int(roomWidth / 2, y, 0), wallTile);
+                    wallTilemap.SetTile(position, wallTile);
+                    minimapTilemap.SetTile(position, minimapWallTile); // Copy to minimap
                 }
             }
         }
