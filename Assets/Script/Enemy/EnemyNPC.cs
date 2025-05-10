@@ -20,6 +20,9 @@ public class EnemyNPC : Agent
 
     private Transform playerTransform;
 
+    Vector3 agentPos;
+    Vector3 targetPos;
+
     public override void Initialize()
     {
         enemyMovement = GetComponent<EnemyMovement>();
@@ -43,15 +46,15 @@ public class EnemyNPC : Agent
     {
         if (playerTransform == null) return;
 
-        Vector3 agentPos = transform.position;
-        Vector3 playerPos = playerTransform.position;
+        agentPos = transform.position;
+        targetPos = playerTransform.position;
 
-        bool canSee = enemyVision.CanSeeTarget();
-        bool canHear = enemyHearing.CanHearPlayer(agentPos, playerPos);
+        bool canSee = enemyVision.CanSeeTarget(agentPos, targetPos);
+        bool canHear = enemyHearing.CanHearPlayer(agentPos, targetPos);
 
         if (canSee || canHear)
         {
-            float distance = Vector3.Distance(agentPos, playerPos);
+            float distance = Vector3.Distance(agentPos, targetPos);
             float proximityFactor = Mathf.Clamp01(1f - distance / 10f);
             float adjustedFillSpeed = fillSpeed * (0.5f + proximityFactor);
             tensionMeter = MathF.Min(maxTensionMeter, tensionMeter + adjustedFillSpeed * Time.deltaTime);
@@ -103,10 +106,10 @@ public class EnemyNPC : Agent
 
         sensor.AddObservation(tensionChange);
         sensor.AddObservation(tensionFull);
-        sensor.AddObservation(enemyVision.CanSeeTarget() ? 1f : 0f);
-        sensor.AddObservation(enemyHearing.CanHearPlayer(agentPos, playerPos) ? 1f : 0f);
+        sensor.AddObservation(enemyVision.CanSeeTarget(agentPos,targetPos) ? 1f : 0f);
+        sensor.AddObservation(enemyHearing.CanHearPlayer(agentPos, targetPos) ? 1f : 0f);
 
-        Debug.Log(enemyVision.CanSeeTarget());
+        Debug.Log(enemyVision.CanSeeTarget(agentPos, targetPos));
         Debug.Log(enemyHearing.CanHearPlayer(agentPos, playerPos));
     }
 
@@ -116,15 +119,15 @@ public class EnemyNPC : Agent
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
         if(IsTensionMeterFull()){
-            if(moveAction < 0.2f && enemyVision.CanSeeTarget()){
+            if(moveAction < 0.2f && enemyVision.CanSeeTarget(agentPos, targetPos)){
                 moveAction = 1f;
             }
-            else if(!enemyVision.CanSeeTarget()){
+            else if(!enemyVision.CanSeeTarget(agentPos, targetPos)){
                 moveAction = 0f;
             }
         }
 
-        if (moveAction < 0.2f && IsTensionMeterFull() && enemyVision.CanSeeTarget())
+        if (moveAction < 0.2f && IsTensionMeterFull() && enemyVision.CanSeeTarget(agentPos, targetPos))
         {
             moveAction = 1f; // Paksa maju saat tension penuh
         }
@@ -142,7 +145,7 @@ public class EnemyNPC : Agent
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Wall") ||
-            (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget() && IsTensionMeterFull()))
+            (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget(agentPos, targetPos) && IsTensionMeterFull()))
         {
             EndEpisode();
         }
