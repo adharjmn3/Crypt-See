@@ -1,5 +1,5 @@
 behaviors:
-  ExploreAgent:
+  SeeTarget:
     trainer_type: ppo
     hyperparameters:
       batch_size: 1024
@@ -24,7 +24,6 @@ behaviors:
     max_steps: 2.0e6
     time_horizon: 64
     summary_freq: 10000
-
     keep_checkpoints: 5
     checkpoint_interval: 500000
 
