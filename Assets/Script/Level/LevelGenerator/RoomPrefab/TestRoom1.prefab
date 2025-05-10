@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5469797458828848902}
   - component: {fileID: 1331889574678145928}
+  - component: {fileID: 5384431460754629292}
   m_Layer: 0
   m_Name: TestRoom1
   m_TagString: Untagged
@@ -52,13 +53,29 @@ MonoBehaviour:
   wallTile: {fileID: 11400000, guid: 6d835414690a8144698a9e8389bdeba2, type: 2}
   emptyTile: {fileID: 0}
   minimapWallTile: {fileID: 11400000, guid: 7dcce23449f6c6c4091b429e4487bf70, type: 2}
-  roomWidth: 20
-  roomHeight: 20
-  doorSize: 3
+  roomWidth: 21
+  roomHeight: 21
+  doorSize: 4
   topNeighbor: {fileID: 0}
   bottomNeighbor: {fileID: 0}
   leftNeighbor: {fileID: 0}
   rightNeighbor: {fileID: 0}
+--- !u!114 &5384431460754629292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019759256195211765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e34fcd7e52e9c8499d64313948394f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  decorPrefabs:
+  - {fileID: 7315635223969459670, guid: bca3621530595504681d2fbdd5cfcb97, type: 3}
+  - {fileID: 403394099734679382, guid: 96bac332224cb69468823e8c1e91a77d, type: 3}
+  decorCount: 5
 --- !u!1 &2272163520963476977
 GameObject:
   m_ObjectHideFlags: 0
@@ -828,6 +845,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4643609645468550793}
   - component: {fileID: 7899979133043959318}
+  - component: {fileID: 7131500070690131238}
+  - component: {fileID: 1626850126769379159}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -864,3 +883,77 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!1839735485 &7131500070690131238
+Tilemap:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5116487813267229330}
+  m_Enabled: 1
+  m_Tiles: {}
+  m_AnimatedTiles: {}
+  m_TileAssetArray: []
+  m_TileSpriteArray: []
+  m_TileMatrixArray: []
+  m_TileColorArray: []
+  m_TileObjectToInstantiateArray: []
+  m_AnimationFrameRate: 1
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Origin: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0, y: 0, z: 1}
+  m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
+  m_TileOrientation: 0
+  m_TileOrientationMatrix:
+    e00: 1
+    e01: 0
+    e02: 0
+    e03: 0
+    e10: 0
+    e11: 1
+    e12: 0
+    e13: 0
+    e20: 0
+    e21: 0
+    e22: 1
+    e23: 0
+    e30: 0
+    e31: 0
+    e32: 0
+    e33: 1
+--- !u!19719996 &1626850126769379159
+TilemapCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5116487813267229330}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_MaximumTileChangeCount: 1000
+  m_ExtrusionFactor: 0
+  m_UseDelaunayMesh: 0

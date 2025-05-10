@@ -97,6 +97,13 @@ public class LevelGenerator : MonoBehaviour
 
     void GenerateOuterBoundary()
     {
+        // Set the order in layer of the floor to -50
+        TilemapRenderer wallTilemapRenderer = wallTilemap.GetComponent<TilemapRenderer>();
+        if (wallTilemapRenderer != null)
+        {
+            wallTilemapRenderer.sortingOrder = -50;
+        }
+
         // Calculate the total size of the grid including spacing
         int totalWidth = gridSize * (roomSize + roomSpacing);
         int totalHeight = gridSize * (roomSize + roomSpacing);
@@ -136,7 +143,7 @@ public class LevelGenerator : MonoBehaviour
         {
             for (int y = boundaryBottom + 1; y < boundaryTop; y++)
             {
-                wallTilemap.SetTile(new Vector3Int(x, y, 0), floorTile); // Use floorTile for the inner area
+                wallTilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
             }
         }
     }

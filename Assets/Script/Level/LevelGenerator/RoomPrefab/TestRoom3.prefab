@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5469797458828848902}
   - component: {fileID: 1331889574678145928}
+  - component: {fileID: -7670658381190894952}
   m_Layer: 0
   m_Name: TestRoom3
   m_TagString: Untagged
@@ -52,13 +53,29 @@ MonoBehaviour:
   wallTile: {fileID: 11400000, guid: 6d835414690a8144698a9e8389bdeba2, type: 2}
   emptyTile: {fileID: 0}
   minimapWallTile: {fileID: 11400000, guid: 7dcce23449f6c6c4091b429e4487bf70, type: 2}
-  roomWidth: 20
-  roomHeight: 20
-  doorSize: 3
+  roomWidth: 21
+  roomHeight: 21
+  doorSize: 4
   topNeighbor: {fileID: 0}
   bottomNeighbor: {fileID: 0}
   leftNeighbor: {fileID: 0}
   rightNeighbor: {fileID: 0}
+--- !u!114 &-7670658381190894952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019759256195211765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e34fcd7e52e9c8499d64313948394f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  decorPrefabs:
+  - {fileID: 7315635223969459670, guid: bca3621530595504681d2fbdd5cfcb97, type: 3}
+  - {fileID: 403394099734679382, guid: 96bac332224cb69468823e8c1e91a77d, type: 3}
+  decorCount: 5
 --- !u!1 &2272163520963476977
 GameObject:
   m_ObjectHideFlags: 0
