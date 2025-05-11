@@ -189,4 +189,32 @@ public class RoomLayout : MonoBehaviour
                 return new List<int>();
         }
     }
+
+    void ApplyRandomModifiers(GameObject room)
+    {
+        // Randomly rotate the room (0, 90, 180, or 270 degrees)
+        int randomRotation = Random.Range(0, 4) * 90; // 0, 90, 180, or 270
+        room.transform.Rotate(0, 0, randomRotation);
+
+        // Randomly mirror the room layout (flip on X or Y axis)
+        bool mirrorX = Random.value > 0.5f; // 50% chance to flip on X-axis
+        bool mirrorY = Random.value > 0.5f; // 50% chance to flip on Y-axis
+        Vector3 scale = room.transform.localScale;
+        scale.x *= mirrorX ? -1 : 1; // Flip X-axis if mirrorX is true
+        scale.y *= mirrorY ? -1 : 1; // Flip Y-axis if mirrorY is true
+        room.transform.localScale = scale;
+
+        // Apply the same modifiers to all child objects (decorative objects)
+        foreach (Transform child in room.transform)
+        {
+            // Rotate the child object
+            child.Rotate(0, 0, randomRotation);
+
+            // Mirror the child object
+            Vector3 childScale = child.localScale;
+            childScale.x *= mirrorX ? -1 : 1; // Flip X-axis if mirrorX is true
+            childScale.y *= mirrorY ? -1 : 1; // Flip Y-axis if mirrorY is true
+            child.localScale = childScale;
+        }
+    }
 }
