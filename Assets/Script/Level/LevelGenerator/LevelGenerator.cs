@@ -18,12 +18,13 @@ public class LevelGenerator : MonoBehaviour
     public int outerBoundarySpacing = 2; // Space between the outer boundary and the rooms
 
     public EnemyManager enemyManager; // Reference to the EnemyManager
-    private List<Transform> allSpawnPoints = new List<Transform>(); // Collect all spawn points
+    private List<Transform> enemySpawnPoints = new List<Transform>(); // Collect all enemy spawn points
+    private List<Transform> objectiveSpawnPoints = new List<Transform>(); // Collect all objective spawn points
 
     void Start()
     {
         GenerateLevel();
-        TransferSpawnPointsToEnemyManager();
+        TransferSpawnPointsToManagers();
     }
 
     void GenerateLevel()
@@ -52,7 +53,8 @@ public class LevelGenerator : MonoBehaviour
                 RoomLayout roomLayout = room.GetComponent<RoomLayout>();
                 if (roomLayout != null)
                 {
-                    allSpawnPoints.AddRange(roomLayout.EnemySpawnPosition);
+                    enemySpawnPoints.AddRange(roomLayout.EnemySpawnPosition);
+                    objectiveSpawnPoints.AddRange(roomLayout.ObjectiveSpawnPosition);
                     roomLayout.GenerateWalls();
                 }
             }
@@ -62,12 +64,22 @@ public class LevelGenerator : MonoBehaviour
         GenerateOuterBoundary();
     }
 
-    void TransferSpawnPointsToEnemyManager()
+    public List<Transform> GetEnemySpawnPoints()
+    {
+        return enemySpawnPoints;
+    }
+
+    public List<Transform> GetObjectiveSpawnPoints()
+    {
+        return objectiveSpawnPoints;
+    }
+
+    void TransferSpawnPointsToManagers()
     {
         if (enemyManager != null)
         {
-            enemyManager.InitializeSpawnPoints(allSpawnPoints); // Use the new method in EnemyManager
-            Debug.Log($"Transferred {allSpawnPoints.Count} spawn points to EnemyManager.");
+            enemyManager.InitializeSpawnPoints(enemySpawnPoints); // Use the new method in EnemyManager
+            Debug.Log($"Transferred {enemySpawnPoints.Count} enemy spawn points to EnemyManager.");
         }
         else
         {

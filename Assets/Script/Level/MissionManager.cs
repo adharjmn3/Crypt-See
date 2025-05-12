@@ -9,6 +9,7 @@ public class MissionManager : MonoBehaviour
     public UIManager uiManager; // Reference to the UIManager
     public GameObject finishTrigger; // Finish trigger GameObject
     public int maxObjectives = 3; // Maximum number of mandatory objectives to spawn
+    public LevelGenerator levelGenerator; // Reference to the LevelGenerator (optional)
 
     private List<GameObject> activeMandatoryObjectives = new List<GameObject>(); // Active mandatory objectives
     private int completedMandatoryObjectives = 0; // Track completed mandatory objectives
@@ -16,12 +17,34 @@ public class MissionManager : MonoBehaviour
 
     private void Start()
     {
+        if (levelGenerator != null)
+        {
+            Debug.Log("LevelGenerator is referenced. Collecting spawn points...");
+            CollectSpawnPointsFromLevelGenerator();
+        }
+        else
+        {
+            Debug.Log("No LevelGenerator referenced. Using predefined spawn points.");
+        }
+
         GenerateObjectives();
-        // finishTrigger.SetActive(false); // Ensure the finish trigger is hidden initially
+    }
+
+    private void CollectSpawnPointsFromLevelGenerator()
+    {
+        // Collect spawn points from the LevelGenerator
+        spawnPoints = new List<Transform>(levelGenerator.GetObjectiveSpawnPoints());
+        Debug.Log($"Collected {spawnPoints.Count} spawn points from LevelGenerator.");
     }
 
     private void GenerateObjectives()
     {
+        if (spawnPoints.Count == 0)
+        {
+            Debug.LogError("No spawn points available to generate objectives!");
+            return;
+        }
+
         // Shuffle the objective prefabs list to randomize selection
         List<GameObject> shuffledObjectives = new List<GameObject>(objectivePrefabs);
         shuffledObjectives.Sort((a, b) => Random.Range(-1, 2));
@@ -50,6 +73,14 @@ public class MissionManager : MonoBehaviour
             }
         }
 
+        // Move the finish trigger to one of the collected positions if LevelGenerator is referenced
+        if (levelGenerator != null && finishTrigger != null && shuffledSpawnPoints.Count > 0)
+        {
+            Transform finishPosition = shuffledSpawnPoints[shuffledSpawnPoints.Count - 1]; // Use the last shuffled spawn point
+            finishTrigger.transform.position = finishPosition.position;
+            Debug.Log($"Finish trigger moved to position: {finishPosition.position}");
+        }
+
         // Initialize the finish trigger
         if (finishTrigger != null)
         {
@@ -64,8 +95,8 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        // Update the objective counter in the UI
-        if (uiManager != null)
+        // Update the objective counter in the UI only if LevelGenerator is not referenced
+        if (uiManager != null && levelGenerator == null)
         {
             uiManager.UpdateObjectiveCounter(maxObjectives);
         }
@@ -87,8 +118,8 @@ public class MissionManager : MonoBehaviour
     {
         Debug.Log($"Completed Objective: {objectiveData.objectiveName}");
 
-        // Show dialog for the completed objective
-        if (uiManager != null)
+        // Show dialog for the completed objective only if LevelGenerator is not referenced
+        if (uiManager != null && levelGenerator == null)
         {
             uiManager.UpdateDialog(
                 objectiveData.dialogSpeakerName,
@@ -106,8 +137,8 @@ public class MissionManager : MonoBehaviour
                 activeMandatoryObjectives.Remove(completedObjective);
                 completedMandatoryObjectives++;
 
-                // Update the objective counter in the UI
-                if (uiManager != null)
+                // Update the objective counter in the UI only if LevelGenerator is not referenced
+                if (uiManager != null && levelGenerator == null)
                 {
                     int remainingObjectives = Mathf.Max(0, maxObjectives - completedMandatoryObjectives); // Ensure no negative values
                     uiManager.UpdateObjectiveCounter(remainingObjectives);
