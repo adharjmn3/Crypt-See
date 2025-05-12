@@ -8,7 +8,7 @@ public class EnemyManager : MonoBehaviour
     public List<Transform> spawnPoints = new List<Transform>(); // List of spawn points for enemies
     public int maxEnemies = 5; // Maximum number of enemies to spawn
 
-    public LevelGenerator levelGenerator; // Reference to the LevelGenerator
+    // public LevelGenerator levelGenerator; // Reference to the LevelGenerator
 
     private void Start()
     {
