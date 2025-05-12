@@ -21,6 +21,8 @@ public class RoomLayout : MonoBehaviour
     public RoomLayout leftNeighbor;
     public RoomLayout rightNeighbor;
 
+    public List<Transform> spawnPoints; // List of spawn points in this room
+
     public void GenerateWalls()
     {
         if (middle == null)
@@ -216,5 +218,10 @@ public class RoomLayout : MonoBehaviour
             childScale.y *= mirrorY ? -1 : 1; // Flip Y-axis if mirrorY is true
             child.localScale = childScale;
         }
+    }
+
+    public List<Transform> GetSpawnPoints()
+    {
+        return spawnPoints; // Return the list of spawn points
     }
 }

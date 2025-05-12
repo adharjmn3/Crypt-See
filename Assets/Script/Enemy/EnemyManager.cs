@@ -5,14 +5,29 @@ public class EnemyManager : MonoBehaviour
 {
     [Header("Enemy Settings")]
     public GameObject enemyPrefab; // The enemy prefab to spawn
-    public List<Transform> spawnPoints; // List of spawn points for enemies
+    public List<Transform> spawnPoints = new List<Transform>(); // List of spawn points for enemies
     public int maxEnemies = 5; // Maximum number of enemies to spawn
 
-    private List<GameObject> activeEnemies = new List<GameObject>(); // List of active enemies
+    public LevelGenerator levelGenerator; // Reference to the LevelGenerator
 
     private void Start()
     {
+        if (levelGenerator != null)
+        {
+            // Collect spawn points from the LevelGenerator
+            spawnPoints.AddRange(levelGenerator.allSpawnPoints);
+        }
+
         SpawnEnemies();
+    }
+
+    public void RegisterSpawnPoint(Transform spawnPoint)
+    {
+        if (!spawnPoints.Contains(spawnPoint))
+        {
+            spawnPoints.Add(spawnPoint);
+            Debug.Log($"Spawn point registered: {spawnPoint.position}");
+        }
     }
 
     private void SpawnEnemies()
@@ -43,67 +58,24 @@ public class EnemyManager : MonoBehaviour
                 break;
             }
 
-            // Check if the spawn point is already occupied
-            bool isOccupied = false;
-            foreach (GameObject enemy in activeEnemies)
-            {
-                if (enemy != null && Vector3.Distance(enemy.transform.position, spawnPoint.position) < 0.1f)
-                {
-                    isOccupied = true;
-                    break;
-                }
-            }
-
-            if (!isOccupied)
-            {
-                GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-                activeEnemies.Add(enemyInstance);
-                enemiesSpawned++;
-            }
+            GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+            enemiesSpawned++;
         }
 
         Debug.Log($"Spawned {enemiesSpawned} enemies.");
     }
 
-    public void RemoveEnemy(GameObject enemy)
-    {
-        if (activeEnemies.Contains(enemy))
-        {
-            activeEnemies.Remove(enemy);
-            Destroy(enemy);
-            Debug.Log("Enemy removed.");
-        }
-    }
-
-    public void RemoveAllEnemies()
-    {
-        foreach (GameObject enemy in activeEnemies)
-        {
-            Destroy(enemy);
-        }
-        activeEnemies.Clear();
-        Debug.Log("All enemies removed.");
-    }
-
     public void OnEnemyKilled(GameObject enemy)
     {
-        EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
-        if (enemyHealth != null && enemyHealth.HealthPoint > 0)
-        {
-            Debug.LogWarning("OnEnemyKilled called for an enemy that is still alive!");
-            return;
-        }
-
         // Remove the enemy from the active enemies list
-        RemoveEnemy(enemy);
-
-        // Increment the player's kill count
-        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
-        if (playerManager != null)
+        if (spawnPoints.Contains(enemy.transform))
         {
-            playerManager.AddKill();
+            spawnPoints.Remove(enemy.transform);
         }
 
-        Debug.Log("Enemy killed and kill count updated.");
+        // Destroy the enemy GameObject
+        Destroy(enemy);
+
+        Debug.Log("Enemy killed and removed from spawn points.");
     }
 }
