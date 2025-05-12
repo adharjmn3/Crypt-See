@@ -7,6 +7,7 @@ public class LevelGenerator : MonoBehaviour
 {
     public List<GameObject> roomPrefabs; // List of RoomLayout prefabs to choose from
     public Tilemap wallTilemap; // Tilemap for the walls
+    public Tilemap floorTilemap; // Tilemap for the floors
     public Tilemap minimapTilemap; // Tilemap for the minimap
     public TileBase wallTile; // Tile to use for the walls
     public TileBase floorTile; // Tile to use for the floor
@@ -16,9 +17,13 @@ public class LevelGenerator : MonoBehaviour
     public int roomSpacing = 1; // Space between rooms in tiles
     public int outerBoundarySpacing = 2; // Space between the outer boundary and the rooms
 
+    public EnemyManager enemyManager; // Reference to the EnemyManager
+    private List<Transform> allSpawnPoints = new List<Transform>(); // Collect all spawn points
+
     void Start()
     {
         GenerateLevel();
+        TransferSpawnPointsToEnemyManager();
     }
 
     void GenerateLevel()
@@ -43,20 +48,31 @@ public class LevelGenerator : MonoBehaviour
                 // Apply random rotation or mirroring
                 ApplyRandomModifiers(room);
 
-                // Call the GenerateWalls method in RoomLayout
+                // Collect spawn points from the room
                 RoomLayout roomLayout = room.GetComponent<RoomLayout>();
                 if (roomLayout != null)
                 {
+                    allSpawnPoints.AddRange(roomLayout.EnemySpawnPosition);
                     roomLayout.GenerateWalls();
                 }
-
-                // Generate walls in the gap (roomSpacing) between rooms
-                GenerateGapWalls(x, y, roomPosition);
             }
         }
 
         // Generate the outer boundary around all rooms
         GenerateOuterBoundary();
+    }
+
+    void TransferSpawnPointsToEnemyManager()
+    {
+        if (enemyManager != null)
+        {
+            enemyManager.InitializeSpawnPoints(allSpawnPoints); // Use the new method in EnemyManager
+            Debug.Log($"Transferred {allSpawnPoints.Count} spawn points to EnemyManager.");
+        }
+        else
+        {
+            Debug.LogError("EnemyManager is not assigned in the LevelGenerator!");
+        }
     }
 
     void ApplyRandomModifiers(GameObject room)
@@ -72,27 +88,6 @@ public class LevelGenerator : MonoBehaviour
         scale.x *= mirrorX ? -1 : 1; // Flip X-axis if mirrorX is true
         scale.y *= mirrorY ? -1 : 1; // Flip Y-axis if mirrorY is true
         room.transform.localScale = scale;
-    }
-
-    void GenerateGapWalls(int x, int y, Vector3 roomPosition)
-    {
-        // Removed vertical wall generation
-        if (x < gridSize - 1) // If not the last column
-        {
-            // Code for vertical wall generation removed
-        }
-
-        // Removed horizontal wall generation
-        if (y < gridSize - 1) // If not the last row
-        {
-            // Code for horizontal wall generation removed
-        }
-
-        // Removed corner wall generation
-        if (x < gridSize - 1 && y < gridSize - 1) // If not the last column or row
-        {
-            // Code for corner wall generation removed
-        }
     }
 
     void GenerateOuterBoundary()
@@ -143,7 +138,7 @@ public class LevelGenerator : MonoBehaviour
         {
             for (int y = boundaryBottom + 1; y < boundaryTop; y++)
             {
-                wallTilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
+                floorTilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
             }
         }
     }

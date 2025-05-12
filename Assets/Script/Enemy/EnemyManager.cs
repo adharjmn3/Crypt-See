@@ -8,30 +8,24 @@ public class EnemyManager : MonoBehaviour
     public List<Transform> spawnPoints = new List<Transform>(); // List of spawn points for enemies
     public int maxEnemies = 5; // Maximum number of enemies to spawn
 
-    // public LevelGenerator levelGenerator; // Reference to the LevelGenerator
+    private bool spawnPointsReady = false; // Flag to indicate if spawn points are ready
 
-    private void Start()
+    public void InitializeSpawnPoints(List<Transform> points)
     {
-        if (levelGenerator != null)
-        {
-            // Collect spawn points from the LevelGenerator
-            spawnPoints.AddRange(levelGenerator.allSpawnPoints);
-        }
-
-        SpawnEnemies();
-    }
-
-    public void RegisterSpawnPoint(Transform spawnPoint)
-    {
-        if (!spawnPoints.Contains(spawnPoint))
-        {
-            spawnPoints.Add(spawnPoint);
-            Debug.Log($"Spawn point registered: {spawnPoint.position}");
-        }
+        spawnPoints.AddRange(points);
+        spawnPointsReady = true;
+        Debug.Log($"EnemyManager received {points.Count} spawn points.");
+        SpawnEnemies(); // Trigger enemy spawning after spawn points are ready
     }
 
     private void SpawnEnemies()
     {
+        if (!spawnPointsReady)
+        {
+            Debug.LogError("Spawn points are not ready. Cannot spawn enemies!");
+            return;
+        }
+
         if (enemyPrefab == null)
         {
             Debug.LogError("Enemy prefab is not assigned in EnemyManager!");
@@ -58,8 +52,23 @@ public class EnemyManager : MonoBehaviour
                 break;
             }
 
+            if (spawnPoint == null)
+            {
+                Debug.LogWarning("Spawn point is null. Skipping...");
+                continue;
+            }
+
+            // Instantiate the enemy prefab at the spawn point
             GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-            enemiesSpawned++;
+            if (enemyInstance != null)
+            {
+                Debug.Log($"Enemy spawned at position: {spawnPoint.position}");
+                enemiesSpawned++;
+            }
+            else
+            {
+                Debug.LogError("Failed to instantiate enemy prefab!");
+            }
         }
 
         Debug.Log($"Spawned {enemiesSpawned} enemies.");

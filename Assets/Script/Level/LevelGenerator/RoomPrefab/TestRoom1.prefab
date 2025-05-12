@@ -62,7 +62,7 @@ MonoBehaviour:
   bottomNeighbor: {fileID: 0}
   leftNeighbor: {fileID: 0}
   rightNeighbor: {fileID: 0}
-  spawnPoints:
+  EnemySpawnPosition:
   - {fileID: 3381710223853323494}
   - {fileID: 1067737689498713099}
   - {fileID: 8469689691702738601}

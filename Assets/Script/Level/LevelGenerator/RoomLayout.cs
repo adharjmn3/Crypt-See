@@ -21,6 +21,8 @@ public class RoomLayout : MonoBehaviour
     public RoomLayout leftNeighbor;
     public RoomLayout rightNeighbor;
 
+    public List<Transform> EnemySpawnPosition; 
+
     public void GenerateWalls()
     {
         if (middle == null)
