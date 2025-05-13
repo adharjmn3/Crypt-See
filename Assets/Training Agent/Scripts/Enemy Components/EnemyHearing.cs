@@ -7,8 +7,6 @@ public class EnemyHearing : MonoBehaviour
     [SerializeField] private AudioSource playerAudioSource;
     [SerializeField] private float hearingRadius = 2f;
 
-    private Vector3 agentPostionDebug;
-
     void Awake()
     {
         if(playerAudioSource == null){
@@ -24,8 +22,6 @@ public class EnemyHearing : MonoBehaviour
         if (playerAudioSource == null)
             return false;
 
-        agentPostionDebug = agentPosition;
-
         float distance = Vector3.Distance(agentPosition, playerPosition);
 
         return playerAudioSource.isPlaying && distance <= hearingRadius && playerAudioSource.volume > 0.01f;
@@ -33,6 +29,7 @@ public class EnemyHearing : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.DrawWireSphere(agentPostionDebug, hearingRadius);
+        Vector3 origin = transform.position;
+        Gizmos.DrawWireSphere(origin, hearingRadius);
     }
 }

@@ -15,8 +15,9 @@ public class EnemyVision : MonoBehaviour
 
     public bool CanSeeTarget(Vector3 agentPos, Vector3 playerPos)
     {
-        if (target == null)
+        if (target == null){
             return false;
+        }
 
         agentPosition = agentPos;
         targetPosition = playerPos;
@@ -63,9 +64,12 @@ public class EnemyVision : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (viewDirectionSource == null) return;
+        if (viewDirectionSource == null)
+        viewDirectionSource = transform;
 
         Gizmos.color = Color.yellow;
+
+        Vector3 origin = viewDirectionSource.position;
         Vector3 forward = viewDirectionSource.up;
 
         float halfFOV = viewAngle / 2f;
@@ -74,7 +78,7 @@ public class EnemyVision : MonoBehaviour
         Vector3 dirLeft = Quaternion.Euler(0, 0, -halfFOV) * forward;
         Vector3 dirRight = Quaternion.Euler(0, 0, halfFOV) * forward;
 
-        Gizmos.DrawRay(agentPosition, dirLeft * range);
-        Gizmos.DrawRay(agentPosition, dirRight * range);
+        Gizmos.DrawRay(origin, dirLeft * range);
+        Gizmos.DrawRay(origin, dirRight * range);
     }
 }

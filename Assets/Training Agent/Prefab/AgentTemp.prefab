@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 4624623082222681950}
   - component: {fileID: 5207167958867591044}
   - component: {fileID: 8935907737903990813}
+  - component: {fileID: 4626337352539936839}
   m_Layer: 6
   m_Name: AgentTemp
   m_TagString: Untagged
@@ -174,7 +175,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!114 &4242786529295833361
 MonoBehaviour:
@@ -189,7 +190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 15
+    VectorObservationSize: 14
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -282,10 +283,36 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   targetObj: {fileID: 0}
-  agentSpawnPoint: {fileID: 0}
+  agentSpawnPoint:
+  - {fileID: 0}
   targetSpawnPoints: []
-  tensionMeter: 0
+  tensionMeter: 5
   maxTensionMeter: 0
-  fillSpeed: 0.5
+  fillSpeed: 1
   drainSpeed: 0.2
   seeTimeThreshold: 2
+--- !u!114 &4626337352539936839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765458329065383543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f67c7e722ba14acd9153bb4488bff6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: RayPerceptionSensor
+  m_DetectableTags:
+  - Wall
+  m_RaysPerDirection: 3
+  m_MaxRayDegrees: 60
+  m_SphereCastRadius: 0.5
+  m_RayLength: 10
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967227
+  m_ObservationStacks: 1
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}

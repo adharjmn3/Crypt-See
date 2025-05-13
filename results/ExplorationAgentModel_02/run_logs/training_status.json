@@ -1,0 +1,47 @@
+{
+    "SeeTarget": {
+        "checkpoints": [
+            {
+                "steps": 426787,
+                "file_path": "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-426787.onnx",
+                "reward": 0.3996221323644644,
+                "creation_time": 1747126920.2903502,
+                "auxillary_file_paths": [
+                    "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-426787.pt"
+                ]
+            },
+            {
+                "steps": 499992,
+                "file_path": "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-499992.onnx",
+                "reward": 0.8989207610926208,
+                "creation_time": 1747127140.938182,
+                "auxillary_file_paths": [
+                    "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-499992.pt"
+                ]
+            },
+            {
+                "steps": 504962,
+                "file_path": "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-504962.onnx",
+                "reward": 0.8817304344049521,
+                "creation_time": 1747127158.6117363,
+                "auxillary_file_paths": [
+                    "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-504962.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 504962,
+            "file_path": "results\\ExplorationAgentModel_02\\SeeTarget.onnx",
+            "reward": 0.8817304344049521,
+            "creation_time": 1747127158.6117363,
+            "auxillary_file_paths": [
+                "results\\ExplorationAgentModel_02\\SeeTarget\\SeeTarget-504962.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu126"
+    }
+}

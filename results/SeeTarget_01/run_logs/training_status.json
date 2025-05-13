@@ -2,22 +2,22 @@
     "SeeTarget": {
         "checkpoints": [
             {
-                "steps": 300841,
-                "file_path": "results\\SeeTarget_01\\SeeTarget\\SeeTarget-300841.onnx",
-                "reward": 0.7840222604314072,
-                "creation_time": 1746855726.374638,
+                "steps": 320709,
+                "file_path": "results\\SeeTarget_01\\SeeTarget\\SeeTarget-320709.onnx",
+                "reward": 0.05360303255976319,
+                "creation_time": 1747099182.356746,
                 "auxillary_file_paths": [
-                    "results\\SeeTarget_01\\SeeTarget\\SeeTarget-300841.pt"
+                    "results\\SeeTarget_01\\SeeTarget\\SeeTarget-320709.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 300841,
+            "steps": 320709,
             "file_path": "results\\SeeTarget_01\\SeeTarget.onnx",
-            "reward": 0.7840222604314072,
-            "creation_time": 1746855726.374638,
+            "reward": 0.05360303255976319,
+            "creation_time": 1747099182.356746,
             "auxillary_file_paths": [
-                "results\\SeeTarget_01\\SeeTarget\\SeeTarget-300841.pt"
+                "results\\SeeTarget_01\\SeeTarget\\SeeTarget-320709.pt"
             ]
         }
     },

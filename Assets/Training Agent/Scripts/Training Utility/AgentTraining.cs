@@ -8,7 +8,7 @@ public class AgentTraining : Agent
 {
     [Header("Target Reference")]
     [SerializeField] private GameObject targetObj;
-    [SerializeField] GameObject agentSpawnPoint;
+    [SerializeField] GameObject[] agentSpawnPoint;
     [SerializeField] GameObject[] targetSpawnPoints;
 
     [Header("Agent Settings")]
@@ -19,7 +19,6 @@ public class AgentTraining : Agent
 
     [Header("Training Settings")]
     [SerializeField] float seeTimeThreshold = 2f;
-    private float seeTimer = 0f;
 
     private float lastTensionMeter = 0f;
 
@@ -33,61 +32,101 @@ public class AgentTraining : Agent
     private EnemyHearing enemyHearing;
     private EnemyMovement enemyMovement;
 
+    HashSet<Vector2Int> visitedTiles = new HashSet<Vector2Int>();
+
+    private float lastRotation = 0f;
+    private const float spinPenaltyThreshold = 45f; // Degrees
+    private const float spinPenaltyAmount = -0.1f;
+
     public override void Initialize()
     {
         enemyMovement = GetComponent<EnemyMovement>();
         enemyHearing = GetComponent<EnemyHearing>();
         enemyVision = GetComponent<EnemyVision>();
-
         enemyVision.SetTarget(targetObj);
     }
 
     void Update()
     {
-        agentPos = transform.localPosition;
-        targetPos = targetObj.transform.localPosition;
+        agentPos = transform.position;
+        targetPos = targetObj.transform.position;
 
         isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
 
-        if(isTargetInSight){
-            seeTimer += Time.deltaTime;
-            AddReward(0.0001f);
-            if(seeTimer >= seeTimeThreshold){
-                AddReward(1f);
-                EndEpisode();
+        HandleTensionMeter();
+        ExplorationReward();
+    }
+
+    private void HandleTensionMeter()
+    {
+        float distance = Vector3.Distance(agentPos, targetPos);
+        float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
+
+        if (isTargetInSight)
+        {
+            if (distance < 2f)
+                tensionMeter = maxTensionMeter;
+            else
+                tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+
+            if (IsTensionMeterFull())
+            {
+                // Reward semakin dekat ke player
+                float approachReward = (1f - distance / 5f) * 0.01f;
+                AddReward(approachReward);
+            }
+            else
+            {
+                AddReward(0.001f);
             }
         }
-        else{
-            seeTimer = 0f;
+        else
+        {
+            tensionMeter -= Time.deltaTime * drainSpeed;
+        }
+
+        tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
+    }
+
+    private void ExplorationReward()
+    {
+        Vector2Int tilePos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
+
+        if (!visitedTiles.Contains(tilePos))
+        {
+            visitedTiles.Add(tilePos);
+            AddReward(0.002f);
         }
     }
 
     public override void OnEpisodeBegin()
     {
         tensionMeter = 0f;
-        seeTimer = 0f;
-        transform.localPosition = agentSpawnPoint.transform.localPosition;
+        transform.localPosition = agentSpawnPoint[Random.Range(0, agentSpawnPoint.Length)].transform.localPosition;
         transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-180, 180));
 
         Vector3 newTargetPos = targetSpawnPoints[Random.Range(0, targetSpawnPoints.Length)].transform.localPosition;
         targetObj.transform.localPosition = newTargetPos;
+        visitedTiles.Clear();
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(agentPos);
-        sensor.AddObservation(targetPos);
-        sensor.AddObservation(transform.localRotation.z);
-
-        sensor.AddObservation(Vector2.Distance(agentPos, targetPos));
-        sensor.AddObservation((targetPos - agentPos).normalized);
-
         float playerVisible = isTargetInSight ? 1f : 0f;
         float canHear = isSoundDetected ? 1f : 0f;
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;
 
+        //Position & Rotation Observations
+        sensor.AddObservation(agentPos);
+        sensor.AddObservation(targetPos);
+        sensor.AddObservation(transform.localRotation.z);
+
+        //Distance Observation
+        sensor.AddObservation((targetPos - agentPos).normalized);
+
+        //Status Observations
         sensor.AddObservation(tensionChange);
         sensor.AddObservation(tensionFull);
         sensor.AddObservation(playerVisible);
@@ -100,6 +139,21 @@ public class AgentTraining : Agent
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
         enemyMovement.Move(moveAction, lookAction);
+
+        float currentRotation = transform.localRotation.eulerAngles.z;
+        float rotationDelta = Mathf.DeltaAngle(lastRotation, currentRotation); // gunakan DeltaAngle agar akurat
+
+        if (Mathf.Abs(rotationDelta) > spinPenaltyThreshold && moveAction < 0.1f)
+        {
+            AddReward(spinPenaltyAmount);  // Penalti hanya jika muter di tempat
+        }
+        lastRotation = currentRotation;
+
+        if (!isTargetInSight && !isSoundDetected && moveAction < 0.1f)
+        {
+            AddReward(-0.001f); // Penalti jika diam saja saat tidak tahu arah
+        }
+
         bool tensionFull = IsTensionMeterFull();
 
         if(moveAction >= 0.1f){
@@ -116,16 +170,19 @@ public class AgentTraining : Agent
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            AddReward(-0.5f);
-            EndEpisode();
-        }
-
         if (collision.gameObject.CompareTag("Player") && isTargetInSight && IsTensionMeterFull())
         {
             AddReward(1f);
             EndEpisode();
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            AddReward(-0.5f);
+            // EndEpisode();
         }
     }
 
