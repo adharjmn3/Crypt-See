@@ -20,6 +20,9 @@ public class EnemyNPC : Agent
 
     private Transform playerTransform;
 
+    bool isTargetInSight = false;
+    bool isSoundDetected = false;
+
     Vector3 agentPos;
     Vector3 targetPos;
 
@@ -33,84 +36,65 @@ public class EnemyNPC : Agent
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
+            Debug.Log(playerObj);
             playerTransform = playerObj.transform;
             enemyVision.SetTarget(playerObj);
-        }
-        else
-        {
-            Debug.LogWarning("Player dengan tag 'Player' tidak ditemukan!");
         }
     }
 
     void Update()
     {
-        if (playerTransform == null) return;
-
         agentPos = transform.position;
-        targetPos = playerTransform.position;
+        targetPos = playerTransform.transform.position;
 
-        bool canSee = enemyVision.CanSeeTarget(agentPos, targetPos);
-        bool canHear = enemyHearing.CanHearPlayer(agentPos, targetPos);
+        isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
+        isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
 
-        if (canSee || canHear)
+        Debug.Log(isTargetInSight);
+
+        HandleTensionMeter();
+    }
+
+    private void HandleTensionMeter()
+    {
+        float distance = Vector3.Distance(agentPos, targetPos);
+        float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
+
+        if (isTargetInSight)
         {
-            float distance = Vector3.Distance(agentPos, targetPos);
-            float proximityFactor = Mathf.Clamp01(1f - distance / 10f);
-            float adjustedFillSpeed = fillSpeed * (0.5f + proximityFactor);
-            tensionMeter = MathF.Min(maxTensionMeter, tensionMeter + adjustedFillSpeed * Time.deltaTime);
-
-            if (distance < 3f)
-            {
+            if (distance < 2f)
                 tensionMeter = maxTensionMeter;
-            }
+            else
+                tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
         }
         else
         {
-            tensionMeter = MathF.Max(0f, tensionMeter - drainSpeed * Time.deltaTime);
+            tensionMeter -= Time.deltaTime * drainSpeed;
         }
 
-        if (IsTensionMeterFull() && playerTransform != null)
-        {
-            Vector3 direction = (playerTransform.position - transform.position).normalized;
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90;
-            transform.rotation = Quaternion.Euler(0f, 0f, angle);
-        }
-
-        lastTensionMeter = tensionMeter;
+        tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        if (playerTransform == null)
-        {
-            sensor.AddObservation(Vector3.zero);
-            sensor.AddObservation(Vector3.zero);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
-            return;
-        }
-
-        Vector3 agentPos = transform.position;
-        Vector3 playerPos = playerTransform.position;
-
-        sensor.AddObservation(agentPos);
-        sensor.AddObservation(playerPos);
-        sensor.AddObservation(transform.rotation.z);
-        sensor.AddObservation(Vector2.Distance(playerPos, agentPos));
-        sensor.AddObservation((playerPos - agentPos).normalized);
-
+        float playerVisible = isTargetInSight ? 1f : 0f;
+        float canHear = isSoundDetected ? 1f : 0f;
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;
 
+        //Position & Rotation Observations
+        sensor.AddObservation(agentPos);
+        sensor.AddObservation(targetPos);
+        sensor.AddObservation(transform.localRotation.z);
+
+        //Distance Observation
+        sensor.AddObservation((targetPos - agentPos).normalized);
+
+        //Status Observations
         sensor.AddObservation(tensionChange);
         sensor.AddObservation(tensionFull);
-        sensor.AddObservation(enemyVision.CanSeeTarget(agentPos,targetPos) ? 1f : 0f);
-        sensor.AddObservation(enemyHearing.CanHearPlayer(agentPos, targetPos) ? 1f : 0f);
-
-        Debug.Log(enemyVision.CanSeeTarget(agentPos, targetPos));
-        Debug.Log(enemyHearing.CanHearPlayer(agentPos, playerPos));
+        sensor.AddObservation(playerVisible);
+        sensor.AddObservation(canHear);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -118,21 +102,9 @@ public class EnemyNPC : Agent
         float moveAction = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
         float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
-        if(IsTensionMeterFull()){
-            if(moveAction < 0.2f && enemyVision.CanSeeTarget(agentPos, targetPos)){
-                moveAction = 1f;
-            }
-            else if(!enemyVision.CanSeeTarget(agentPos, targetPos)){
-                moveAction = 0f;
-            }
-        }
-
-        if (moveAction < 0.2f && IsTensionMeterFull() && enemyVision.CanSeeTarget(agentPos, targetPos))
-        {
-            moveAction = 1f; // Paksa maju saat tension penuh
-        }
-
         enemyMovement.Move(moveAction, lookAction);
+
+
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

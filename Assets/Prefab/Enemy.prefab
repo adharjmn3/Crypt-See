@@ -471,7 +471,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 13
+    VectorObservationSize: 14
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -480,10 +480,10 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 91f789180fe0dc54cadeac06e9a70c9a, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 8676d7717fa30ff4e8ef85da89bcb597, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
-  m_BehaviorName: ExploreAgent
+  m_BehaviorName: SeeTarget
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -515,7 +515,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3204030412186873332}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6384038f12c2324489c10318d2575d4, type: 3}
   m_Name: 
@@ -523,7 +523,6 @@ MonoBehaviour:
   bulletPrefab: {fileID: 466748297758298726, guid: 9ba0edca13c2c12478990184850b9b4d, type: 3}
   bulletSpawnPoint: {fileID: 8277239109722871074}
   bulletSpeed: 30
-  fireRate: 8
   shootingRange: 30
   bulletDamage: 50
   muzzleFlash: {fileID: 7440191685052868192, guid: 5a936c83b1746f14f9100db745e94f04, type: 3}
@@ -613,9 +612,8 @@ MonoBehaviour:
   m_SensorName: RayPerceptionSensor
   m_DetectableTags:
   - Wall
-  - Player
   m_RaysPerDirection: 3
-  m_MaxRayDegrees: 70
+  m_MaxRayDegrees: 60
   m_SphereCastRadius: 0.5
   m_RayLength: 20
   m_RayLayerMask:
@@ -807,7 +805,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 37334
+  m_InstanceId: 35234
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
@@ -830,6 +828,8 @@ MonoBehaviour:
   attackPower: 10
   attackRange: 2
   attackCooldown: 1.5
+  accuracy: 0.9
+  rateOfFire: 1
   detectionRange: 10
   fieldOfView: 60
   hearingSensitivity: 5

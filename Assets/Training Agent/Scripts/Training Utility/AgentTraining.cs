@@ -3,6 +3,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class AgentTraining : Agent
 {
@@ -16,6 +17,10 @@ public class AgentTraining : Agent
     [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
+
+    [Header("Tilemap Settings")]
+    [SerializeField] private Tilemap groundTilemap;
+    [SerializeField] private LayerMask wallLayer;
 
     [Header("Training Settings")]
     [SerializeField] float seeTimeThreshold = 2f;
@@ -33,10 +38,14 @@ public class AgentTraining : Agent
     private EnemyMovement enemyMovement;
 
     HashSet<Vector2Int> visitedTiles = new HashSet<Vector2Int>();
+    Dictionary<Vector2Int, float> visitedTileTime = new Dictionary<Vector2Int, float>();
+    float revisitCooldown = 10f;
 
     private float lastRotation = 0f;
     private const float spinPenaltyThreshold = 45f; // Degrees
     private const float spinPenaltyAmount = -0.1f;
+    private float stuckTimer = 0f;
+    private float noMoveThreshold = 2f;
 
     public override void Initialize()
     {
@@ -55,7 +64,7 @@ public class AgentTraining : Agent
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
 
         HandleTensionMeter();
-        ExplorationReward();
+        RewardExploration();
     }
 
     private void HandleTensionMeter()
@@ -89,15 +98,31 @@ public class AgentTraining : Agent
         tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
     }
 
-    private void ExplorationReward()
+    private void RewardExploration()
     {
-        Vector2Int tilePos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
+        Vector2Int tilePos = Vector2Int.RoundToInt(transform.position);
+
+        if (!IsTileWalkable(tilePos))
+            return;
 
         if (!visitedTiles.Contains(tilePos))
         {
             visitedTiles.Add(tilePos);
-            AddReward(0.002f);
+            visitedTileTime[tilePos] = Time.time;
+            AddReward(0.005f); // reward besar untuk tile baru
         }
+        else
+        {
+            AddReward(-0.008f); // penalti ringan untuk diam di area yang sama
+        }
+    }
+
+    private bool IsTileWalkable(Vector2Int pos)
+    {
+        Vector3 worldPos = new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0f);
+        Vector3Int cellPos = groundTilemap.WorldToCell(worldPos);
+
+        return groundTilemap.HasTile(cellPos) && !Physics2D.OverlapPoint(worldPos, wallLayer);
     }
 
     public override void OnEpisodeBegin()
@@ -109,6 +134,9 @@ public class AgentTraining : Agent
         Vector3 newTargetPos = targetSpawnPoints[Random.Range(0, targetSpawnPoints.Length)].transform.localPosition;
         targetObj.transform.localPosition = newTargetPos;
         visitedTiles.Clear();
+
+        stuckTimer = 0f;
+        visitedTileTime.Clear();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -141,24 +169,37 @@ public class AgentTraining : Agent
         enemyMovement.Move(moveAction, lookAction);
 
         float currentRotation = transform.localRotation.eulerAngles.z;
-        float rotationDelta = Mathf.DeltaAngle(lastRotation, currentRotation); // gunakan DeltaAngle agar akurat
+        float rotationDelta = Mathf.DeltaAngle(lastRotation, currentRotation);
 
         if (Mathf.Abs(rotationDelta) > spinPenaltyThreshold && moveAction < 0.1f)
         {
-            AddReward(spinPenaltyAmount);  // Penalti hanya jika muter di tempat
+            AddReward(spinPenaltyAmount); // Penalti muter di tempat
         }
         lastRotation = currentRotation;
 
+        // Jika tidak melihat atau mendengar target dan tidak bergerak
         if (!isTargetInSight && !isSoundDetected && moveAction < 0.1f)
         {
-            AddReward(-0.001f); // Penalti jika diam saja saat tidak tahu arah
+            stuckTimer += Time.deltaTime;
+
+            if (stuckTimer >= noMoveThreshold)
+            {
+                AddReward(-0.01f); // Penalti keras jika diam terlalu lama
+                // Optional: EndEpisode(); // Bisa diaktifkan untuk hard reset
+            }
+        }
+        else
+        {
+            stuckTimer = 0f;
+        }
+
+        // Reward pergerakan kecil untuk encourage
+        if (moveAction >= 0.1f)
+        {
+            AddReward(0.0005f);
         }
 
         bool tensionFull = IsTensionMeterFull();
-
-        if(moveAction >= 0.1f){
-            AddReward(0.0001f);
-        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -172,7 +213,7 @@ public class AgentTraining : Agent
     {
         if (collision.gameObject.CompareTag("Player") && isTargetInSight && IsTensionMeterFull())
         {
-            AddReward(1f);
+            AddReward(2f);
             EndEpisode();
         }
     }

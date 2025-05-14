@@ -290,6 +290,10 @@ MonoBehaviour:
   maxTensionMeter: 0
   fillSpeed: 1
   drainSpeed: 0.2
+  groundTilemap: {fileID: 0}
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
   seeTimeThreshold: 2
 --- !u!114 &4626337352539936839
 MonoBehaviour:
