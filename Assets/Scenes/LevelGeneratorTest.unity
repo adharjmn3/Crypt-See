@@ -145,6 +145,10 @@ PrefabInstance:
       propertyPath: uiManager
       value: 
       objectReference: {fileID: 974240813}
+    - target: {fileID: 925341403246663959, guid: d28a99c0d151dbc4d9d5fca753b753e3, type: 3}
+      propertyPath: levelGenerator
+      value: 
+      objectReference: {fileID: 1582816676}
     - target: {fileID: 6224445777540455699, guid: d28a99c0d151dbc4d9d5fca753b753e3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 495.33878

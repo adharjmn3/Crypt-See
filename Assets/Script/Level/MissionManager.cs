@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,14 +10,17 @@ public class MissionManager : MonoBehaviour
     public UIManager uiManager; // Reference to the UIManager
     public GameObject finishTrigger; // Finish trigger GameObject
     public int maxObjectives = 3; // Maximum number of mandatory objectives to spawn
-    public LevelGenerator levelGenerator; // Reference to the LevelGenerator (optional)
+    public LevelGenerator levelGenerator; // Reference to the LevelGenerator
 
     private List<GameObject> activeMandatoryObjectives = new List<GameObject>(); // Active mandatory objectives
     private int completedMandatoryObjectives = 0; // Track completed mandatory objectives
     private bool allObjectivesCompleted = false; // Flag to track if all objectives are completed
 
-    private void Start()
+    private IEnumerator Start()
     {
+        // Wait for the LevelGenerator to finish generating the level
+        yield return new WaitUntil(() => levelGenerator.GetObjectiveSpawnPoints().Count > 0);
+
         if (levelGenerator != null)
         {
             Debug.Log("LevelGenerator is referenced. Collecting spawn points...");
@@ -32,16 +36,22 @@ public class MissionManager : MonoBehaviour
 
     private void CollectSpawnPointsFromLevelGenerator()
     {
+        if (levelGenerator == null)
+        {
+            Debug.LogError("LevelGenerator is not assigned in MissionManager!");
+            return;
+        }
+
         // Collect spawn points from the LevelGenerator
         spawnPoints = new List<Transform>(levelGenerator.GetObjectiveSpawnPoints());
-        Debug.Log($"Collected {spawnPoints.Count} spawn points from LevelGenerator.");
+        Debug.Log($"Collected {spawnPoints.Count} spawn points from LevelGenerator (Objective).");
     }
 
     private void GenerateObjectives()
     {
         if (spawnPoints.Count == 0)
         {
-            Debug.LogError("No spawn points available to generate objectives!");
+            Debug.LogError("No objective spawn points available to generate objectives!");
             return;
         }
 
@@ -57,14 +67,13 @@ public class MissionManager : MonoBehaviour
         for (int i = 0; i < Mathf.Min(maxObjectives, shuffledSpawnPoints.Count); i++)
         {
             GameObject objectivePrefab = shuffledObjectives[i];
-            Transform spawnPoint = shuffledSpawnPoints[i]; // Use a unique spawn point
+            Transform spawnPoint = shuffledSpawnPoints[i];
             GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
-            // Ensure the ObjectiveBehavior script is attached
             ObjectiveBehavior behavior = objectiveInstance.GetComponent<ObjectiveBehavior>();
             if (behavior != null)
             {
-                behavior.Initialize(this); // Initialize with the MissionManager reference
+                behavior.Initialize(this);
                 activeMandatoryObjectives.Add(objectiveInstance);
             }
             else
@@ -73,21 +82,19 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        // Move the finish trigger to one of the collected positions if LevelGenerator is referenced
         if (levelGenerator != null && finishTrigger != null && shuffledSpawnPoints.Count > 0)
         {
-            Transform finishPosition = shuffledSpawnPoints[shuffledSpawnPoints.Count - 1]; // Use the last shuffled spawn point
+            Transform finishPosition = shuffledSpawnPoints[shuffledSpawnPoints.Count - 1];
             finishTrigger.transform.position = finishPosition.position;
             Debug.Log($"Finish trigger moved to position: {finishPosition.position}");
         }
 
-        // Initialize the finish trigger
         if (finishTrigger != null)
         {
             FinishTriggerBehavior finishBehavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
             if (finishBehavior != null)
             {
-                finishBehavior.Initialize(this); // Assign the MissionManager to the finish trigger
+                finishBehavior.Initialize(this);
             }
             else
             {
@@ -95,14 +102,12 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        // Update the objective counter in the UI only if LevelGenerator is not referenced
         if (uiManager != null && levelGenerator == null)
         {
             uiManager.UpdateObjectiveCounter(maxObjectives);
         }
     }
 
-    // Utility method to shuffle a list
     private void ShuffleList<T>(List<T> list)
     {
         for (int i = 0; i < list.Count; i++)
@@ -220,5 +225,11 @@ public class MissionManager : MonoBehaviour
     {
         // Reload the current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public List<Transform> GetObjectiveSpawnPoints()
+    {
+        Debug.Log($"Returning {spawnPoints.Count} objective spawn points.");
+        return spawnPoints;
     }
 }

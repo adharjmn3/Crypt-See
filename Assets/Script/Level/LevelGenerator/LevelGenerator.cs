@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -20,6 +19,11 @@ public class LevelGenerator : MonoBehaviour
     public EnemyManager enemyManager; // Reference to the EnemyManager
     private List<Transform> enemySpawnPoints = new List<Transform>(); // Collect all enemy spawn points
     private List<Transform> objectiveSpawnPoints = new List<Transform>(); // Collect all objective spawn points
+
+    public List<Transform> GetObjectiveSpawnPoints()
+    {
+        return objectiveSpawnPoints;
+    }
 
     void Start()
     {
@@ -46,60 +50,39 @@ public class LevelGenerator : MonoBehaviour
                 // Instantiate the selected RoomLayout prefab
                 GameObject room = Instantiate(selectedRoomPrefab, roomPosition, Quaternion.identity, transform);
 
-                // Apply random rotation or mirroring
-                ApplyRandomModifiers(room);
-
                 // Collect spawn points from the room
                 RoomLayout roomLayout = room.GetComponent<RoomLayout>();
                 if (roomLayout != null)
                 {
                     enemySpawnPoints.AddRange(roomLayout.EnemySpawnPosition);
                     objectiveSpawnPoints.AddRange(roomLayout.ObjectiveSpawnPosition);
+                    Debug.Log($"Room at {roomPosition} added {roomLayout.ObjectiveSpawnPosition.Count} objective spawn points.");
                     roomLayout.GenerateWalls();
+                }
+                else
+                {
+                    Debug.LogWarning($"Room at {roomPosition} does not have a RoomLayout component!");
                 }
             }
         }
 
+        Debug.Log($"Total objective spawn points collected: {objectiveSpawnPoints.Count}");
+
         // Generate the outer boundary around all rooms
         GenerateOuterBoundary();
-    }
-
-    public List<Transform> GetEnemySpawnPoints()
-    {
-        return enemySpawnPoints;
-    }
-
-    public List<Transform> GetObjectiveSpawnPoints()
-    {
-        return objectiveSpawnPoints;
     }
 
     void TransferSpawnPointsToManagers()
     {
         if (enemyManager != null)
         {
-            enemyManager.InitializeSpawnPoints(enemySpawnPoints); // Use the new method in EnemyManager
+            enemyManager.InitializeSpawnPoints(enemySpawnPoints);
             Debug.Log($"Transferred {enemySpawnPoints.Count} enemy spawn points to EnemyManager.");
         }
         else
         {
             Debug.LogError("EnemyManager is not assigned in the LevelGenerator!");
         }
-    }
-
-    void ApplyRandomModifiers(GameObject room)
-    {
-        // Randomly rotate the room (0, 90, 180, or 270 degrees)
-        int randomRotation = Random.Range(0, 4) * 90; // 0, 90, 180, or 270
-        room.transform.Rotate(0, 0, randomRotation);
-
-        // Randomly mirror the room layout (flip on X or Y axis)
-        bool mirrorX = Random.value > 0.5f; // 50% chance to flip on X-axis
-        bool mirrorY = Random.value > 0.5f; // 50% chance to flip on Y-axis
-        Vector3 scale = room.transform.localScale;
-        scale.x *= mirrorX ? -1 : 1; // Flip X-axis if mirrorX is true
-        scale.y *= mirrorY ? -1 : 1; // Flip Y-axis if mirrorY is true
-        room.transform.localScale = scale;
     }
 
     void GenerateOuterBoundary()
@@ -124,25 +107,21 @@ public class LevelGenerator : MonoBehaviour
         // Generate top and bottom boundary walls
         for (int x = boundaryLeft; x <= boundaryRight; x++)
         {
-            // Top boundary
             wallTilemap.SetTile(new Vector3Int(x, boundaryTop, 0), wallTile);
-            minimapTilemap.SetTile(new Vector3Int(x, boundaryTop, 0), minimapWallTile); // Copy to minimap
+            minimapTilemap.SetTile(new Vector3Int(x, boundaryTop, 0), minimapWallTile);
 
-            // Bottom boundary
             wallTilemap.SetTile(new Vector3Int(x, boundaryBottom, 0), wallTile);
-            minimapTilemap.SetTile(new Vector3Int(x, boundaryBottom, 0), minimapWallTile); // Copy to minimap
+            minimapTilemap.SetTile(new Vector3Int(x, boundaryBottom, 0), minimapWallTile);
         }
 
         // Generate left and right boundary walls
         for (int y = boundaryBottom; y <= boundaryTop; y++)
         {
-            // Left boundary
             wallTilemap.SetTile(new Vector3Int(boundaryLeft, y, 0), wallTile);
-            minimapTilemap.SetTile(new Vector3Int(boundaryLeft, y, 0), minimapWallTile); // Copy to minimap
+            minimapTilemap.SetTile(new Vector3Int(boundaryLeft, y, 0), minimapWallTile);
 
-            // Right boundary
             wallTilemap.SetTile(new Vector3Int(boundaryRight, y, 0), wallTile);
-            minimapTilemap.SetTile(new Vector3Int(boundaryRight, y, 0), minimapWallTile); // Copy to minimap
+            minimapTilemap.SetTile(new Vector3Int(boundaryRight, y, 0), minimapWallTile);
         }
 
         // Fill the inner area of the boundary with floor tiles
