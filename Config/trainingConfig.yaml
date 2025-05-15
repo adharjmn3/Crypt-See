@@ -1,8 +1,8 @@
 behaviors:
-  ExploreAgent:
+  EnemyNPC:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 1024
+      batch_size: 512
       buffer_size: 10240
       learning_rate: 3.0e-4
       beta: 5.0e-4
@@ -14,47 +14,15 @@ behaviors:
       normalize: true
       hidden_units: 128
       num_layers: 2
-      activation: tanh
 
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
 
-    max_steps: 2.0e6
+    max_steps: 500000
     time_horizon: 64
     summary_freq: 10000
-
     keep_checkpoints: 5
     checkpoint_interval: 500000
-
-environment_parameters:
-  difficulty:
-    curriculum:
-      - name: Level 1 - Pemain Selalu Terlihat
-        completion_criteria:
-          measure: reward
-          behavior: ExploreAgent
-          signal_smoothing: true
-          min_lesson_length: 200
-          threshold: 0.4
-        value: 1.0
-
-      - name: Level 2 - Lokasi Acak Tapi Dalam Cahaya
-        completion_criteria:
-          measure: reward
-          behavior: ExploreAgent
-          signal_smoothing: true
-          min_lesson_length: 200
-          threshold: 0.7
-        value: 2.0
-
-      - name: Level 3 - Gunakan Pendengaran & Cahaya
-        completion_criteria:
-          measure: reward
-          behavior: ExploreAgent
-          signal_smoothing: true
-          min_lesson_length: 200
-          threshold: 0.85
-        value: 3.0
 

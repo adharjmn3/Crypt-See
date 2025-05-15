@@ -190,19 +190,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 14
+    VectorObservationSize: 16
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 2
-      BranchSizes: 
-    VectorActionSize: 02000000
+      m_NumContinuousActions: 0
+      BranchSizes: 0200000003000000
+    VectorActionSize: 0200000003000000
     VectorActionDescriptions: []
-    VectorActionSpaceType: 1
+    VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: SeeTarget
+  m_BehaviorName: EnemyNPC
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -283,17 +283,11 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   targetObj: {fileID: 0}
-  agentSpawnPoint:
-  - {fileID: 0}
-  targetSpawnPoints: []
+  spawnPoints: []
   tensionMeter: 5
   maxTensionMeter: 0
   fillSpeed: 1
   drainSpeed: 0.2
-  groundTilemap: {fileID: 0}
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 128
   seeTimeThreshold: 2
 --- !u!114 &4626337352539936839
 MonoBehaviour:
@@ -310,10 +304,10 @@ MonoBehaviour:
   m_SensorName: RayPerceptionSensor
   m_DetectableTags:
   - Wall
-  m_RaysPerDirection: 3
+  m_RaysPerDirection: 10
   m_MaxRayDegrees: 60
-  m_SphereCastRadius: 0.5
-  m_RayLength: 10
+  m_SphereCastRadius: 0.2
+  m_RayLength: 5
   m_RayLayerMask:
     serializedVersion: 2
     m_Bits: 4294967227

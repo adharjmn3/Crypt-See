@@ -263,7 +263,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  trainingManager: {fileID: 0}
+  targetObj: {fileID: 0}
   tensionMeter: 0
   maxTensionMeter: 0
   fillSpeed: 0.5
