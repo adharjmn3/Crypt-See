@@ -3,7 +3,6 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class AgentTraining : Agent
 {
@@ -16,6 +15,7 @@ public class AgentTraining : Agent
     [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
+    [SerializeField] private float memoryDuration = 5f;
 
     [Header("Training Settings")]
     [SerializeField] float seeTimeThreshold = 2f;
@@ -27,11 +27,15 @@ public class AgentTraining : Agent
 
     Vector3 agentPos;
     Vector3 targetPos;
+    Vector3 targetLastPosition = Vector3.zero;
 
     private EnemyVision enemyVision;
     private EnemyHearing enemyHearing;
     private EnemyMovement enemyMovement;
     List<Transform> spawnPointsList = new List<Transform>();
+    private float lastHeardTime = -Mathf.Infinity;
+    private float reachedSoundRadius = 3f;
+    float previousDistanceToTarget;
 
     public override void Initialize()
     {
@@ -49,7 +53,25 @@ public class AgentTraining : Agent
         isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
 
+        if (isSoundDetected)
+        {
+            targetLastPosition = targetPos;
+            lastHeardTime = Time.time;
+        }
+
         HandleTensionMeter();
+
+        // if (!isTargetInSight && Time.time - lastHeardTime < memoryDuration && IsTensionMeterFull())
+        // {
+        //     float distanceToLastHeard = Vector3.Distance(agentPos, targetLastPosition);
+        //     float approachReward = (1f - distanceToLastHeard / 5f) * 0.01f;
+        //     AddReward(approachReward);
+        //     if (distanceToLastHeard < reachedSoundRadius)
+        //     {
+        //         AddReward(0.1f); // Reward saat mencapai posisi suara terakhir
+        //         lastHeardTime = -Mathf.Infinity;
+        //     }
+        // }
     }
 
     private void HandleTensionMeter()
@@ -57,12 +79,22 @@ public class AgentTraining : Agent
         float distance = Vector3.Distance(agentPos, targetPos);
         float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
 
-        if (isTargetInSight)
+        if (isTargetInSight || isSoundDetected)
         {
-            if (distance < 2f)
-                tensionMeter = maxTensionMeter;
-            else
-                tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+            if (isTargetInSight)
+            {
+                if (distance < 4f)
+                    tensionMeter = maxTensionMeter;
+                else
+                    tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+            }
+            else if (isSoundDetected)
+            {
+                if (distance < 6f)
+                    tensionMeter = maxTensionMeter;
+                else
+                    tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+            }
 
             if (IsTensionMeterFull())
             {
@@ -75,9 +107,10 @@ public class AgentTraining : Agent
                 AddReward(0.001f);
             }
         }
-        else
+        else if (tensionMeter != 0)
         {
             tensionMeter -= Time.deltaTime * drainSpeed;
+            AddReward(-0.02f);
         }
 
         tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
@@ -111,11 +144,28 @@ public class AgentTraining : Agent
 
         //Position & Rotation Observations
         sensor.AddObservation(agentPos);
-        sensor.AddObservation(targetPos);
         sensor.AddObservation(transform.up.normalized);
 
-        //Distance Observation
-        sensor.AddObservation((targetPos - agentPos).normalized);
+        if (canHear == 1f || playerVisible == 1f)
+        {
+            sensor.AddObservation(targetPos);
+            Vector3 targetRelativePosition = targetPos - agentPos;
+            sensor.AddObservation(targetRelativePosition.normalized);
+            sensor.AddObservation(targetRelativePosition.magnitude);
+        }
+        else if (Time.time - lastHeardTime < memoryDuration)
+        {
+            sensor.AddObservation(targetLastPosition);
+            Vector3 targetRelativePosition = targetLastPosition - agentPos;
+            sensor.AddObservation(targetRelativePosition.normalized);
+            sensor.AddObservation(targetRelativePosition.magnitude);
+        }
+        else
+        {
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0f);
+        }
 
         //Status Observations
         sensor.AddObservation(tensionChange);
@@ -141,7 +191,7 @@ public class AgentTraining : Agent
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player") && isTargetInSight && IsTensionMeterFull())
+        if (collision.gameObject.CompareTag("Player") && IsTensionMeterFull())
         {
             AddReward(1f);
             EndEpisode();
