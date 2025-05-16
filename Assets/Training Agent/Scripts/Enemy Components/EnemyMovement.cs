@@ -20,10 +20,18 @@ public class EnemyMovement : MonoBehaviour
         Vector2 move = moveAction * moveSpeed * Time.deltaTime * transform.up;
         rb.MovePosition(rb.position + move);
 
-        rb.MoveRotation(rb.rotation + lookAction * lookSpeed * Time.deltaTime);
-    }
+        float rotationAmount = 0f;
 
-    public void Stop(){
-        rb.velocity = Vector2.zero;
+        if (lookAction == 1)
+        {
+            rotationAmount = lookSpeed * Time.deltaTime; // Rotasi ke kiri
+        }
+        else if (lookAction == 2)
+        {
+            rotationAmount = -lookSpeed * Time.deltaTime; // Rotasi ke kanan
+        }
+        // Jika lookAction == 0, rotationAmount tetap 0 (tidak ada rotasi)
+
+        rb.MoveRotation(rb.rotation + rotationAmount);
     }
 }

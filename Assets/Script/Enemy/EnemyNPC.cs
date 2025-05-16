@@ -138,7 +138,7 @@ public class EnemyNPC : Agent
         //Position & Rotation Observations
         sensor.AddObservation(agentPos);
         sensor.AddObservation(targetPos);
-        sensor.AddObservation(transform.localRotation.z);
+        sensor.AddObservation(transform.up.normalized);
 
         //Distance Observation
         sensor.AddObservation((targetPos - agentPos).normalized);
@@ -160,12 +160,10 @@ public class EnemyNPC : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float moveAction = Mathf.Clamp(actions.ContinuousActions[0], 0f, 1f);
-        float lookAction = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        float moveAction = actions.DiscreteActions[0];
+        float lookAction = actions.DiscreteActions[1];
 
         enemyMovement.Move(moveAction, lookAction);
-
-
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
