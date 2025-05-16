@@ -34,6 +34,8 @@ public class EnemyStats : MonoBehaviour
     [Header("Miscellaneous")]
     public float stamina = 100f; // Energy for actions like running or attacking
     public float fearLevel = 0f; // Fear level (optional mechanic)
+    public float maxFearLevel = 10f; // Maximum fear level
+    public float fearIncreaseOnHit = 1f; // Amount fear increases when hit
 
     // Start is called before the first frame update
     void Start()
@@ -58,10 +60,19 @@ public class EnemyStats : MonoBehaviour
         float effectiveDamage = Mathf.Max(0, damage - armor); // Reduce damage by armor
         health -= effectiveDamage;
 
+        IncreaseFear(fearIncreaseOnHit); // Increase fear when taking damage
+
         if (health <= 0)
         {
             Die();
         }
+    }
+
+    // Method to increase fear
+    public void IncreaseFear(float amount)
+    {
+        fearLevel = Mathf.Clamp(fearLevel + amount, 0f, maxFearLevel);
+        Debug.Log($"{gameObject.name} fear level: {fearLevel}");
     }
 
     // Method to handle death

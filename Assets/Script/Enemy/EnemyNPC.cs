@@ -11,6 +11,7 @@ public class EnemyNPC : Agent
     [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
+    private EnemyStats enemyStats;
 
     private float lastTensionMeter = 0f;
 
@@ -20,17 +21,29 @@ public class EnemyNPC : Agent
 
     private Transform playerTransform;
 
+    private bool isGettingShot = false;
+
     bool isTargetInSight = false;
     bool isSoundDetected = false;
 
     Vector3 agentPos;
     Vector3 targetPos;
 
+    private float fallbackTimer = 0f;
+
     public override void Initialize()
     {
         enemyMovement = GetComponent<EnemyMovement>();
         enemyHearing = GetComponent<EnemyHearing>();
         enemyVision = GetComponent<EnemyVision>();
+        enemyStats = GetComponent<EnemyStats>();
+
+        GameObject bulletObj = GameObject.FindGameObjectWithTag("Bullet");
+        if (bulletObj != null)
+        {
+            // enemyVision.SetBullet(bulletObj);
+            
+        }
 
         // Otomatis cari Player berdasarkan tag
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -53,6 +66,46 @@ public class EnemyNPC : Agent
         Debug.Log(isTargetInSight);
 
         HandleTensionMeter();
+
+        // Fallback logic
+        if (isGettingShot)
+        {
+            fallbackTimer -= Time.deltaTime;
+            FallbackFromPlayer();
+            if (fallbackTimer <= 0f)
+            {
+                isGettingShot = false;
+            }
+        }
+    }
+
+    // Call this method when the enemy is hit by a bullet
+    public void OnBulletHit()
+    {
+        isGettingShot = true;
+        if (enemyStats != null)
+        {
+            // Instead of directly setting fallbackTimer with fearLevel here,
+            // we now let EnemyStats handle its own fear level.
+            // The TakeDamage method in EnemyStats will call IncreaseFear.
+            // If you also want to trigger TakeDamage from here:
+            // enemyStats.TakeDamage(0); // Assuming a hit means some form of "damage" event even if no health lost
+
+            // Fallback duration can still be influenced by the current fear level
+            fallbackTimer = enemyStats.fearLevel; // Or some scaled version: enemyStats.fearLevel * 0.5f;
+        }
+        else
+        {
+            fallbackTimer = 1.5f; // Default fallback duration
+        }
+    }
+
+    // Move away from the player
+    private void FallbackFromPlayer()
+    {
+        Vector3 directionAway = (agentPos - targetPos).normalized;
+        float fallbackSpeed = enemyStats != null ? enemyStats.speed : 3f;
+        transform.position += directionAway * fallbackSpeed * Time.deltaTime;
     }
 
     private void HandleTensionMeter()
@@ -95,6 +148,14 @@ public class EnemyNPC : Agent
         sensor.AddObservation(tensionFull);
         sensor.AddObservation(playerVisible);
         sensor.AddObservation(canHear);
+        if (enemyStats != null)
+        {
+            sensor.AddObservation(enemyStats.fearLevel / enemyStats.maxFearLevel); // Normalize fear level
+        }
+        else
+        {
+            sensor.AddObservation(0f); // Default if no stats
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -116,6 +177,15 @@ public class EnemyNPC : Agent
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.gameObject.CompareTag("Bullet"))
+        {
+            // Assuming the bullet script itself calls TakeDamage on the EnemyStats component.
+            // If not, you might need to get the damage from the bullet and call:
+            // enemyStats.TakeDamage(bulletDamage); 
+            // For now, OnBulletHit will be called, which can then use the current fear level for fallback.
+            OnBulletHit(); 
+        }
+
         if (collision.gameObject.CompareTag("Wall") ||
             (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget(agentPos, targetPos) && IsTensionMeterFull()))
         {
