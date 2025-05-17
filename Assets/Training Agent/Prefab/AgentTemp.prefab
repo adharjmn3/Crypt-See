@@ -190,7 +190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 16
+    VectorObservationSize: 17
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -265,7 +265,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAudioSource: {fileID: 0}
-  hearingRadius: 10
+  hearingRadius: 9
 --- !u!114 &8935907737903990813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,6 +288,7 @@ MonoBehaviour:
   maxTensionMeter: 0
   fillSpeed: 1
   drainSpeed: 0.2
+  memoryDuration: 10
   seeTimeThreshold: 2
 --- !u!114 &4626337352539936839
 MonoBehaviour:

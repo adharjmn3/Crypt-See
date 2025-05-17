@@ -1,0 +1,47 @@
+{
+    "EnemyNPC": {
+        "checkpoints": [
+            {
+                "steps": 111434,
+                "file_path": "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-111434.onnx",
+                "reward": 0.9677615751929552,
+                "creation_time": 1747393139.9284391,
+                "auxillary_file_paths": [
+                    "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-111434.pt"
+                ]
+            },
+            {
+                "steps": 499989,
+                "file_path": "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-499989.onnx",
+                "reward": 0.3263112268775601,
+                "creation_time": 1747394246.7926857,
+                "auxillary_file_paths": [
+                    "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-499989.pt"
+                ]
+            },
+            {
+                "steps": 500053,
+                "file_path": "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-500053.onnx",
+                "reward": 0.3263112268775601,
+                "creation_time": 1747394246.8888083,
+                "auxillary_file_paths": [
+                    "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-500053.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 500053,
+            "file_path": "results\\AgentVisionHearingModel_01\\EnemyNPC.onnx",
+            "reward": 0.3263112268775601,
+            "creation_time": 1747394246.8888083,
+            "auxillary_file_paths": [
+                "results\\AgentVisionHearingModel_01\\EnemyNPC\\EnemyNPC-500053.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu126"
+    }
+}
