@@ -213,22 +213,56 @@ public class UIManager : MonoBehaviour
     {
         if (restartButton != null)
         {
-            restartButton.onClick.RemoveAllListeners();
-            restartButton.onClick.AddListener(() => onRestart?.Invoke());
+            restartButton.onClick.RemoveAllListeners(); // Good practice
+            if (onRestart != null)
+            {
+                restartButton.onClick.AddListener(() => {
+                    Debug.Log("UIManager: Restart button listener triggered. Invoking onRestart action.");
+                    onRestart.Invoke();
+                });
+                Debug.Log("UIManager: Restart button listener configured.");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager: onRestart action provided to SetupEndStoryButtons is null. Restart button will do nothing.");
+            }
+        }
+        else
+        {
+            Debug.LogError("UIManager: restartButton is not assigned in the Inspector.");
         }
 
         if (exitButton != null)
         {
-            exitButton.onClick.RemoveAllListeners();
-            exitButton.onClick.AddListener(() => onExit?.Invoke());
+            exitButton.onClick.RemoveAllListeners(); // Good practice
+            if (onExit != null)
+            {
+                exitButton.onClick.AddListener(() => {
+                    Debug.Log("UIManager: Exit button listener triggered. Invoking onExit action.");
+                    onExit.Invoke();
+                });
+                Debug.Log("UIManager: Exit button listener configured.");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager: onExit action provided to SetupEndStoryButtons is null. Exit button will do nothing.");
+            }
+        }
+        else
+        {
+            Debug.LogError("UIManager: exitButton is not assigned in the Inspector.");
         }
     }
 
-    // Example methods for restart and exit functionality
     public void RestartGame()
     {
-        Debug.Log("Restarting the game...");
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        Debug.Log("UIManager: RestartGame() method called. Attempting to reload scene.");
+        // If you pause the game by setting Time.timeScale to 0, reset it here.
+        // Time.timeScale = 1f; 
+
+        string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        Debug.Log($"UIManager: Reloading scene: {sceneName}");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
     }
 
     public void ExitGame()

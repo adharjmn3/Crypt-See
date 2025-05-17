@@ -53,6 +53,26 @@ namespace Player.Stats
             }
         }
 
+        private void Awake()
+        {
+            // Ensure the UIManager is assigned
+            if (uiManager == null)
+            {
+                uiManager = FindObjectOfType<UIManager>();
+                if (uiManager == null)
+                {
+                    Debug.LogError("UIManager not found in the scene!");
+                }
+            }
+
+            // Ensure the AudioSource is assigned
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                Debug.LogError("AudioSource component not found on this GameObject!");
+            }
+        }
+
         public void TakeDamage(int damage)
         {
             currentHealth -= damage;

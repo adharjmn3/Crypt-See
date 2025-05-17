@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class MissionManager : MonoBehaviour
 {
     public List<GameObject> objectivePrefabs; // List of objective prefabs
-    public List<Transform> spawnPoints; // Predetermined spawn points
+    public List<Transform> spawnPoints; // Predetermined spawn points for fixed levels, or populated by LevelGenerator
     public UIManager uiManager; // Reference to the UIManager
     public GameObject finishTrigger; // Finish trigger GameObject
     public int maxObjectives = 3; // Maximum number of mandatory objectives to spawn
@@ -18,40 +18,63 @@ public class MissionManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // Wait for the LevelGenerator to finish generating the level
-        yield return new WaitUntil(() => levelGenerator.GetObjectiveSpawnPoints().Count > 0);
-
-        if (levelGenerator != null)
+        if (levelGenerator != null) // Scenario: Random generated level
         {
-            Debug.Log("LevelGenerator is referenced. Collecting spawn points...");
+            Debug.Log("LevelGenerator is referenced. Waiting for it to initialize spawn points...");
+            // Wait for the LevelGenerator to have collected its spawn points.
+            // Ensure LevelGenerator.GetObjectiveSpawnPoints() returns a non-null list.
+            yield return new WaitUntil(() => levelGenerator.GetObjectiveSpawnPoints() != null && 
+                                           levelGenerator.GetObjectiveSpawnPoints().Count > 0);
+            
+            Debug.Log("LevelGenerator has spawn points. Collecting spawn points...");
             CollectSpawnPointsFromLevelGenerator();
         }
-        else
+        else // Scenario: Fixed level (no LevelGenerator)
         {
-            Debug.Log("No LevelGenerator referenced. Using predefined spawn points.");
+            Debug.Log("No LevelGenerator referenced. Using predefined spawn points for a fixed level.");
+            // For fixed levels, 'spawnPoints' (the public List<Transform>)
+            // should already be populated via the Inspector.
+            // We add a check here to ensure they are.
+            if (this.spawnPoints == null || this.spawnPoints.Count == 0)
+            {
+                Debug.LogError("MissionManager: LevelGenerator is NOT assigned, AND no predefined spawnPoints are set in the Inspector for the fixed level! Objectives cannot be spawned.");
+                yield break; // Stop the coroutine if no spawn points are available for a fixed level.
+            }
+            Debug.Log($"Using {this.spawnPoints.Count} predefined spawn points for fixed level.");
         }
 
+        // This will be called for both scenarios.
+        // 'spawnPoints' will either be the predefined ones (if levelGenerator is null)
+        // or the ones collected from LevelGenerator.
         GenerateObjectives();
     }
 
     private void CollectSpawnPointsFromLevelGenerator()
     {
-        if (levelGenerator == null)
+        // This method is only called if levelGenerator is not null.
+        if (levelGenerator == null) 
         {
-            Debug.LogError("LevelGenerator is not assigned in MissionManager!");
+            // This case should ideally not be reached due to the check in Start().
+            Debug.LogError("LevelGenerator is not assigned in MissionManager when trying to collect spawn points!");
             return;
         }
 
-        // Collect spawn points from the LevelGenerator
-        spawnPoints = new List<Transform>(levelGenerator.GetObjectiveSpawnPoints());
-        Debug.Log($"Collected {spawnPoints.Count} spawn points from LevelGenerator (Objective).");
+        // Collect spawn points from the LevelGenerator, overwriting any inspector-assigned ones.
+        this.spawnPoints = new List<Transform>(levelGenerator.GetObjectiveSpawnPoints());
+        Debug.Log($"Collected {this.spawnPoints.Count} spawn points from LevelGenerator (Objective).");
     }
 
     private void GenerateObjectives()
     {
-        if (spawnPoints.Count == 0)
+        if (objectivePrefabs == null || objectivePrefabs.Count == 0)
         {
-            Debug.LogError("No objective spawn points available to generate objectives!");
+            Debug.LogError("No objective prefabs assigned in MissionManager!");
+            return;
+        }
+
+        if (this.spawnPoints == null || this.spawnPoints.Count == 0)
+        {
+            Debug.LogError("No objective spawn points available (either predefined or from LevelGenerator) to generate objectives!");
             return;
         }
 
@@ -60,20 +83,21 @@ public class MissionManager : MonoBehaviour
         shuffledObjectives.Sort((a, b) => Random.Range(-1, 2));
 
         // Shuffle the spawn points to ensure randomness
-        List<Transform> shuffledSpawnPoints = new List<Transform>(spawnPoints);
+        List<Transform> shuffledSpawnPoints = new List<Transform>(this.spawnPoints);
         ShuffleList(shuffledSpawnPoints);
 
         // Spawn objectives at unique spawn points
         for (int i = 0; i < Mathf.Min(maxObjectives, shuffledSpawnPoints.Count); i++)
         {
             GameObject objectivePrefab = shuffledObjectives[i];
-            Transform spawnPoint = shuffledSpawnPoints[i];
+            Transform spawnPoint = shuffledSpawnPoints[i]; // Use a unique spawn point
             GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
+            // Ensure the ObjectiveBehavior script is attached
             ObjectiveBehavior behavior = objectiveInstance.GetComponent<ObjectiveBehavior>();
             if (behavior != null)
             {
-                behavior.Initialize(this);
+                behavior.Initialize(this); // Initialize with the MissionManager reference
                 activeMandatoryObjectives.Add(objectiveInstance);
             }
             else
@@ -82,19 +106,21 @@ public class MissionManager : MonoBehaviour
             }
         }
 
+        // Move the finish trigger to one of the collected positions if LevelGenerator is referenced
         if (levelGenerator != null && finishTrigger != null && shuffledSpawnPoints.Count > 0)
         {
-            Transform finishPosition = shuffledSpawnPoints[shuffledSpawnPoints.Count - 1];
+            Transform finishPosition = shuffledSpawnPoints[shuffledSpawnPoints.Count - 1]; // Use the last shuffled spawn point
             finishTrigger.transform.position = finishPosition.position;
             Debug.Log($"Finish trigger moved to position: {finishPosition.position}");
         }
 
+        // Initialize the finish trigger
         if (finishTrigger != null)
         {
             FinishTriggerBehavior finishBehavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
             if (finishBehavior != null)
             {
-                finishBehavior.Initialize(this);
+                finishBehavior.Initialize(this); // Assign the MissionManager to the finish trigger
             }
             else
             {
@@ -102,6 +128,7 @@ public class MissionManager : MonoBehaviour
             }
         }
 
+        // Update the objective counter in the UI only if LevelGenerator is not referenced
         if (uiManager != null && levelGenerator == null)
         {
             uiManager.UpdateObjectiveCounter(maxObjectives);
@@ -229,7 +256,7 @@ public class MissionManager : MonoBehaviour
 
     public List<Transform> GetObjectiveSpawnPoints()
     {
-        Debug.Log($"Returning {spawnPoints.Count} objective spawn points.");
-        return spawnPoints;
+        Debug.Log($"Returning {this.spawnPoints.Count} objective spawn points used by MissionManager.");
+        return this.spawnPoints;
     }
 }

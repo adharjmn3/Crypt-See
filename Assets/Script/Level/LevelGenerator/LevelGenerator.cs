@@ -50,6 +50,9 @@ public class LevelGenerator : MonoBehaviour
                 // Instantiate the selected RoomLayout prefab
                 GameObject room = Instantiate(selectedRoomPrefab, roomPosition, Quaternion.identity, transform);
 
+                // Apply random rotation to the room and its children
+                ApplyRandomRotation(room);
+
                 // Collect spawn points from the room
                 RoomLayout roomLayout = room.GetComponent<RoomLayout>();
                 if (roomLayout != null)
@@ -70,6 +73,14 @@ public class LevelGenerator : MonoBehaviour
 
         // Generate the outer boundary around all rooms
         GenerateOuterBoundary();
+    }
+
+    void ApplyRandomRotation(GameObject roomObject)
+    {
+        // Randomly choose a rotation: 0, 90, 180, or 270 degrees around the Z-axis
+        int rotationAngle = Random.Range(0, 4) * 90;
+        roomObject.transform.Rotate(0, 0, rotationAngle);
+        Debug.Log($"Room {roomObject.name} rotated by {rotationAngle} degrees.");
     }
 
     void TransferSpawnPointsToManagers()
