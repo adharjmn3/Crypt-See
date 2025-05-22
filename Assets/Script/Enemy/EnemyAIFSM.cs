@@ -408,11 +408,11 @@ public class EnemyAIFSM : MonoBehaviour
             // Calculate angle to face player
             float targetAngle = Mathf.Atan2(directionToPlayer.y, directionToPlayer.x) * Mathf.Rad2Deg - 90f;
             
-            // Rotate towards player
+            // Rotate towards player - increased rotation speed to turn faster when chasing
             transform.rotation = Quaternion.RotateTowards(
                 transform.rotation,
                 Quaternion.Euler(0, 0, targetAngle),
-                rotationSpeed * Time.fixedDeltaTime * 100f
+                rotationSpeed * Time.fixedDeltaTime * 150f // Increased from 100f for faster turning
             );
             
             // Check if we have a clear path to player
@@ -425,7 +425,7 @@ public class EnemyAIFSM : MonoBehaviour
             // Get optimal distance for shooting
             float optimalDistance = shootComponent != null ? shootComponent.shootingRange * 0.7f : 5f;
             
-            // Toggle shooting on/off based on line of sight and cooldown
+            // SHOOTING LOGIC
             if (shootComponent != null)
             {
                 // Only enable shooting if we have direct line of sight
@@ -448,23 +448,21 @@ public class EnemyAIFSM : MonoBehaviour
                 }
             }
             
-            // Always move toward player regardless of distance when in Combat state
+            // MOVEMENT LOGIC - PRIORITIZE GETTING TO PLAYER
+            
+            // Calculate effective chase speed - always use max multiplier when actively chasing
+            float effectiveSpeed = combatSpeed * chaseSpeedMultiplier;
+            
+            // Direct path to player is clear
             if (hit.collider == null)
             {
-                // Only stop if we're at point-blank range (too close to player)
-                if (currentDistance > 1.0f)
+                // Move directly to player, only stop at very close range
+                if (currentDistance > 0.5f) // Reduced from 1.0f to get closer
                 {
-                    // Move faster when farther away, slow down when approaching optimal range
-                    float distanceMultiplier = Mathf.Clamp(currentDistance / optimalDistance, 0.5f, 2.0f);
-                    
-                    // Apply chase speed multiplier - faster movement in chase mode
-                    float effectiveSpeed = combatSpeed * chaseSpeedMultiplier;
-                    
-                    // Always move toward player
-                    Vector2 moveVector = (Vector2)transform.up * effectiveSpeed * distanceMultiplier * Time.fixedDeltaTime;
+                    // Always move at full speed when chasing
+                    Vector2 moveVector = (Vector2)transform.up * effectiveSpeed * Time.fixedDeltaTime;
                     rb.MovePosition(rb.position + moveVector);
                     
-                    // Debug chasing
                     if (showDebugRays)
                     {
                         Debug.DrawRay(transform.position, transform.up * 2f, Color.red);
@@ -473,39 +471,75 @@ public class EnemyAIFSM : MonoBehaviour
             }
             else
             {
-                // Path is blocked, try to maneuver around obstacles
-                // Simple obstacle avoidance - cast rays to sides
+                // Path to player is blocked - try to find a way around
+                
+                // Cast more rays to find a path (increased from 45° to 60° for wider search)
                 RaycastHit2D leftHit = Physics2D.Raycast(transform.position, 
-                    RotateVector2(directionToPlayer, -45f), raycastDistance, obstacleLayer);
+                    RotateVector2(directionToPlayer, -60f), raycastDistance * 1.5f, obstacleLayer);
                 RaycastHit2D rightHit = Physics2D.Raycast(transform.position, 
-                    RotateVector2(directionToPlayer, 45f), raycastDistance, obstacleLayer);
+                    RotateVector2(directionToPlayer, 60f), raycastDistance * 1.5f, obstacleLayer);
                 
-                // Apply chase speed multiplier here too
-                float effectiveSpeed = combatSpeed * chaseSpeedMultiplier * 0.7f;
+                // Also try more extreme angles if needed
+                RaycastHit2D farLeftHit = Physics2D.Raycast(transform.position, 
+                    RotateVector2(directionToPlayer, -90f), raycastDistance, obstacleLayer);
+                RaycastHit2D farRightHit = Physics2D.Raycast(transform.position, 
+                    RotateVector2(directionToPlayer, 90f), raycastDistance, obstacleLayer);
                 
-                // Choose the direction with more space
+                // Choose best direction to move:
+                // 1. First preference: standard 60° rays
+                // 2. Second preference: extreme 90° rays
+                // 3. Last resort: back up
+                
+                bool foundPath = false;
+                Vector2 moveDir = Vector2.zero;
+                float moveSpeed = effectiveSpeed * 0.8f; // Slightly reduced speed for navigation
+                
+                // Try primary directions first (60° rays)
                 if (leftHit.collider == null || (rightHit.collider != null && leftHit.distance > rightHit.distance))
                 {
                     // Move left
-                    Vector2 moveDir = RotateVector2(transform.up, -20f);
-                    rb.MovePosition(rb.position + moveDir * effectiveSpeed * Time.fixedDeltaTime);
+                    moveDir = RotateVector2(transform.up, -30f); // Less extreme turning for smoother path
+                    foundPath = true;
                 }
                 else if (rightHit.collider == null || (leftHit.collider != null && rightHit.distance > leftHit.distance))
                 {
                     // Move right
-                    Vector2 moveDir = RotateVector2(transform.up, 20f);
-                    rb.MovePosition(rb.position + moveDir * effectiveSpeed * Time.fixedDeltaTime);
-                }
-                else
-                {
-                    // Both directions blocked, back up slightly
-                    rb.MovePosition(rb.position - (Vector2)transform.up * effectiveSpeed * 0.5f * Time.fixedDeltaTime);
+                    moveDir = RotateVector2(transform.up, 30f); // Less extreme turning for smoother path
+                    foundPath = true;
                 }
                 
+                // If no path found, try more extreme angles
+                if (!foundPath)
+                {
+                    if (farLeftHit.collider == null)
+                    {
+                        moveDir = RotateVector2(transform.up, -45f);
+                        foundPath = true;
+                    }
+                    else if (farRightHit.collider == null)
+                    {
+                        moveDir = RotateVector2(transform.up, 45f);
+                        foundPath = true;
+                    }
+                    else
+                    {
+                        // All directions blocked, back up to reposition
+                        moveDir = -transform.up;
+                        moveSpeed = effectiveSpeed * 0.5f; // Half speed when backing up
+                    }
+                }
+                
+                // Apply the movement
+                rb.MovePosition(rb.position + moveDir * moveSpeed * Time.fixedDeltaTime);
+                
+                // Visual debugging
                 if (showDebugRays)
                 {
-                    Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, -45f) * raycastDistance, Color.cyan);
-                    Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, 45f) * raycastDistance, Color.cyan);
+                    Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, -60f) * raycastDistance * 1.5f, Color.cyan);
+                    Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, 60f) * raycastDistance * 1.5f, Color.cyan);
+                    Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, -90f) * raycastDistance, Color.blue);
+                    Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, 90f) * raycastDistance, Color.blue);
+                    Debug.DrawRay(transform.position, moveDir * 1.5f, Color.green);
                 }
             }
         }
