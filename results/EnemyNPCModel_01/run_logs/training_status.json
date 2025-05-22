@@ -2,22 +2,49 @@
     "EnemyNPC": {
         "checkpoints": [
             {
-                "steps": 201979,
-                "file_path": "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-201979.onnx",
-                "reward": 0.9645660576805324,
-                "creation_time": 1747305268.2844665,
+                "steps": 326964,
+                "file_path": "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-326964.onnx",
+                "reward": 0.990701206683356,
+                "creation_time": 1747912819.6773465,
                 "auxillary_file_paths": [
-                    "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-201979.pt"
+                    "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-326964.pt"
+                ]
+            },
+            {
+                "steps": 479560,
+                "file_path": "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-479560.onnx",
+                "reward": 0.889789557120278,
+                "creation_time": 1747913770.6604013,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-479560.pt"
+                ]
+            },
+            {
+                "steps": 499998,
+                "file_path": "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-499998.onnx",
+                "reward": 0.4539999994149247,
+                "creation_time": 1747914118.0095518,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-499998.pt"
+                ]
+            },
+            {
+                "steps": 500062,
+                "file_path": "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-500062.onnx",
+                "reward": 0.4539999994149247,
+                "creation_time": 1747914118.116334,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-500062.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 201979,
+            "steps": 500062,
             "file_path": "results\\EnemyNPCModel_01\\EnemyNPC.onnx",
-            "reward": 0.9645660576805324,
-            "creation_time": 1747305268.2844665,
+            "reward": 0.4539999994149247,
+            "creation_time": 1747914118.116334,
             "auxillary_file_paths": [
-                "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-201979.pt"
+                "results\\EnemyNPCModel_01\\EnemyNPC\\EnemyNPC-500062.pt"
             ]
         }
     },

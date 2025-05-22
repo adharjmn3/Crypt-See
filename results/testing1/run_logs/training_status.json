@@ -1,0 +1,65 @@
+{
+    "EnemyNPC": {
+        "checkpoints": [
+            {
+                "steps": 69650,
+                "file_path": "results\\testing1\\EnemyNPC\\EnemyNPC-69650.onnx",
+                "reward": 1.0,
+                "creation_time": 1747907399.6284502,
+                "auxillary_file_paths": [
+                    "results\\testing1\\EnemyNPC\\EnemyNPC-69650.pt"
+                ]
+            },
+            {
+                "steps": 182539,
+                "file_path": "results\\testing1\\EnemyNPC\\EnemyNPC-182539.onnx",
+                "reward": 0.8823529410011628,
+                "creation_time": 1747908142.1675448,
+                "auxillary_file_paths": [
+                    "results\\testing1\\EnemyNPC\\EnemyNPC-182539.pt"
+                ]
+            },
+            {
+                "steps": 283004,
+                "file_path": "results\\testing1\\EnemyNPC\\EnemyNPC-283004.onnx",
+                "reward": 0.9421052630794676,
+                "creation_time": 1747908848.314738,
+                "auxillary_file_paths": [
+                    "results\\testing1\\EnemyNPC\\EnemyNPC-283004.pt"
+                ]
+            },
+            {
+                "steps": 499973,
+                "file_path": "results\\testing1\\EnemyNPC\\EnemyNPC-499973.onnx",
+                "reward": 0.9335666693401031,
+                "creation_time": 1747910301.1906211,
+                "auxillary_file_paths": [
+                    "results\\testing1\\EnemyNPC\\EnemyNPC-499973.pt"
+                ]
+            },
+            {
+                "steps": 500028,
+                "file_path": "results\\testing1\\EnemyNPC\\EnemyNPC-500028.onnx",
+                "reward": 0.9353621647633436,
+                "creation_time": 1747910301.295634,
+                "auxillary_file_paths": [
+                    "results\\testing1\\EnemyNPC\\EnemyNPC-500028.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 500028,
+            "file_path": "results\\testing1\\EnemyNPC.onnx",
+            "reward": 0.9353621647633436,
+            "creation_time": 1747910301.295634,
+            "auxillary_file_paths": [
+                "results\\testing1\\EnemyNPC\\EnemyNPC-500028.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu126"
+    }
+}

@@ -380,7 +380,7 @@ public class AgentTrainingSmthSmth : Agent
 
         if (enemyMovement != null)
         {
-            enemyMovement.Move(moveAction, lookAction); 
+            //enemyMovement.Move(moveAction, lookAction); 
         }
 
         // If agent decides to shoot

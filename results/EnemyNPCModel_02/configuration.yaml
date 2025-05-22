@@ -7,9 +7,9 @@ behaviors:
       buffer_size: 10240
       learning_rate: 0.0003
       beta: 0.0005
-      epsilon: 0.2
+      epsilon: 0.3
       lambd: 0.95
-      num_epoch: 3
+      num_epoch: 5
       shared_critic: false
       learning_rate_schedule: linear
       beta_schedule: linear
@@ -35,7 +35,7 @@ behaviors:
           memory: null
           goal_conditioning_type: hyper
           deterministic: false
-    init_path: results\EnemyNPCModel_01\EnemyNPC\checkpoint.pt
+    init_path: null
     keep_checkpoints: 5
     even_checkpoints: false
     max_steps: 500000
@@ -45,10 +45,10 @@ behaviors:
     self_play: null
     behavioral_cloning: null
 env_settings:
-  env_path: null
+  env_path: C:\Users\trist\Documents\Crypt-SeeTraining
   env_args: null
   base_port: 5005
-  num_envs: 1
+  num_envs: 6
   num_areas: 1
   timeout_wait: 60
   seed: -1
@@ -67,13 +67,13 @@ engine_settings:
 environment_parameters: null
 checkpoint_settings:
   run_id: EnemyNPCModel_02
-  initialize_from: EnemyNPCModel_01
+  initialize_from: null
   load_model: false
-  resume: false
+  resume: true
   force: false
   train_model: false
   inference: false
   results_dir: results
 torch_settings:
-  device: cuda
+  device: null
 debug: false
