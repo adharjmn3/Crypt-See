@@ -40,6 +40,10 @@ public class EnemyAIFSM : MonoBehaviour
     public float randomTurnAngleMin = 20f;
     public float randomTurnAngleMax = 90f;
     
+    [Header("Combat Settings")]
+    public float chaseSpeedMultiplier = 1.5f;    // How much faster the enemy moves when chasing
+    public float shootingCooldown = 0.5f;        // Time between enabling/disabling shooting while in combat
+    
     [Header("Debug")]
     public bool showDebugRays = true;
     public Color roamingColor = Color.green;
@@ -68,6 +72,7 @@ public class EnemyAIFSM : MonoBehaviour
     private EnemyShoot shootComponent;
     private EnemyStats statsComponent;
     private bool isPlayerInSight = false;
+    private float lastShootToggleTime = 0f;      // Track when we last toggled shooting
     
     void Start()
     {
@@ -204,7 +209,11 @@ public class EnemyAIFSM : MonoBehaviour
                 break;
                 
             case EnemyState.Combat:
-                // Nothing special needed
+                // Disable shooting when leaving combat state
+                if (shootComponent != null)
+                {
+                    shootComponent.enabled = false;
+                }
                 break;
         }
         
@@ -224,7 +233,8 @@ public class EnemyAIFSM : MonoBehaviour
                 break;
                 
             case EnemyState.Combat:
-                // Nothing special needed
+                // Initialize combat variables
+                lastShootToggleTime = 0f; // Reset shooting toggle timer
                 break;
         }
         
@@ -415,6 +425,29 @@ public class EnemyAIFSM : MonoBehaviour
             // Get optimal distance for shooting
             float optimalDistance = shootComponent != null ? shootComponent.shootingRange * 0.7f : 5f;
             
+            // Toggle shooting on/off based on line of sight and cooldown
+            if (shootComponent != null)
+            {
+                // Only enable shooting if we have direct line of sight
+                if (Time.time > lastShootToggleTime + shootingCooldown)
+                {
+                    // Toggle shooting state
+                    if (hit.collider == null && currentDistance < shootComponent.shootingRange)
+                    {
+                        // Enable shooting when in range with clear line of sight
+                        shootComponent.enabled = true;
+                    }
+                    else
+                    {
+                        // Disable shooting when path is blocked or out of range
+                        shootComponent.enabled = false;
+                    }
+                    
+                    // Update toggle time
+                    lastShootToggleTime = Time.time;
+                }
+            }
+            
             // Always move toward player regardless of distance when in Combat state
             if (hit.collider == null)
             {
@@ -422,10 +455,13 @@ public class EnemyAIFSM : MonoBehaviour
                 if (currentDistance > 1.0f)
                 {
                     // Move faster when farther away, slow down when approaching optimal range
-                    float speedMultiplier = Mathf.Clamp(currentDistance / optimalDistance, 0.5f, 1.5f);
+                    float distanceMultiplier = Mathf.Clamp(currentDistance / optimalDistance, 0.5f, 2.0f);
+                    
+                    // Apply chase speed multiplier - faster movement in chase mode
+                    float effectiveSpeed = combatSpeed * chaseSpeedMultiplier;
                     
                     // Always move toward player
-                    Vector2 moveVector = (Vector2)transform.up * combatSpeed * speedMultiplier * Time.fixedDeltaTime;
+                    Vector2 moveVector = (Vector2)transform.up * effectiveSpeed * distanceMultiplier * Time.fixedDeltaTime;
                     rb.MovePosition(rb.position + moveVector);
                     
                     // Debug chasing
@@ -444,23 +480,26 @@ public class EnemyAIFSM : MonoBehaviour
                 RaycastHit2D rightHit = Physics2D.Raycast(transform.position, 
                     RotateVector2(directionToPlayer, 45f), raycastDistance, obstacleLayer);
                 
+                // Apply chase speed multiplier here too
+                float effectiveSpeed = combatSpeed * chaseSpeedMultiplier * 0.7f;
+                
                 // Choose the direction with more space
                 if (leftHit.collider == null || (rightHit.collider != null && leftHit.distance > rightHit.distance))
                 {
                     // Move left
                     Vector2 moveDir = RotateVector2(transform.up, -20f);
-                    rb.MovePosition(rb.position + moveDir * combatSpeed * 0.7f * Time.fixedDeltaTime);
+                    rb.MovePosition(rb.position + moveDir * effectiveSpeed * Time.fixedDeltaTime);
                 }
                 else if (rightHit.collider == null || (leftHit.collider != null && rightHit.distance > leftHit.distance))
                 {
                     // Move right
                     Vector2 moveDir = RotateVector2(transform.up, 20f);
-                    rb.MovePosition(rb.position + moveDir * combatSpeed * 0.7f * Time.fixedDeltaTime);
+                    rb.MovePosition(rb.position + moveDir * effectiveSpeed * Time.fixedDeltaTime);
                 }
                 else
                 {
                     // Both directions blocked, back up slightly
-                    rb.MovePosition(rb.position - (Vector2)transform.up * combatSpeed * 0.5f * Time.fixedDeltaTime);
+                    rb.MovePosition(rb.position - (Vector2)transform.up * effectiveSpeed * 0.5f * Time.fixedDeltaTime);
                 }
                 
                 if (showDebugRays)
@@ -469,8 +508,6 @@ public class EnemyAIFSM : MonoBehaviour
                     Debug.DrawRay(transform.position, RotateVector2(directionToPlayer, 45f) * raycastDistance, Color.cyan);
                 }
             }
-            
-            // Shooting logic is handled by EnemyShoot component
         }
         else
         {
