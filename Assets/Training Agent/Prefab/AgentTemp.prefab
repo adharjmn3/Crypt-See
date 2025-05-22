@@ -19,7 +19,9 @@ GameObject:
   - component: {fileID: 4624623082222681950}
   - component: {fileID: 5207167958867591044}
   - component: {fileID: 8935907737903990813}
-  - component: {fileID: 4626337352539936839}
+  - component: {fileID: 7685071692662471609}
+  - component: {fileID: 4765313286911956334}
+  - component: {fileID: 5387710243924321609}
   m_Layer: 6
   m_Name: AgentTemp
   m_TagString: Untagged
@@ -190,7 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 17
+    VectorObservationSize: 18
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -199,9 +201,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: bc6165a45d3120143b05e9a758145706, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: EnemyNPC
   TeamId: 0
   m_UseChildSensors: 1
@@ -281,16 +283,49 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 1000
+  spawnerTraining: {fileID: 0}
   targetObj: {fileID: 0}
-  spawnPoints: []
   tensionMeter: 5
   maxTensionMeter: 0
   fillSpeed: 1
   drainSpeed: 0.2
   memoryDuration: 10
-  seeTimeThreshold: 2
---- !u!114 &4626337352539936839
+  timePast: 0
+--- !u!114 &7685071692662471609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765458329065383543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1979dc1d0c31e2846b945ac78b65a081, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 100
+  maxHealth: 100
+  armor: 0
+  speed: 3
+  attackPower: 10
+  attackRange: 2
+  attackCooldown: 1.5
+  accuracy: 0.9
+  rateOfFire: 1
+  detectionRange: 10
+  fieldOfView: 60
+  hearingSensitivity: 5
+  isAlert: 0
+  isCallingForHelp: 0
+  lastKnownPlayerPosition: {x: 0, y: 0, z: 0}
+  specialAbilityCooldown: 10
+  specialAbilityCharges: 1
+  stamina: 100
+  fearLevel: 0
+  maxFearLevel: 10
+  fearIncreaseOnHit: 1
+--- !u!114 &4765313286911956334
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -302,16 +337,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f67c7e722ba14acd9153bb4488bff6e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: RayPerceptionSensor
+  m_SensorName: Main Vision
   m_DetectableTags:
   - Wall
-  m_RaysPerDirection: 10
+  - Player
+  m_RaysPerDirection: 6
   m_MaxRayDegrees: 60
   m_SphereCastRadius: 0.2
-  m_RayLength: 5
+  m_RayLength: 6
   m_RayLayerMask:
     serializedVersion: 2
     m_Bits: 4294967227
   m_ObservationStacks: 1
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
-  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
+  rayMissColor: {r: 0, g: 0.5849056, b: 0.07110983, a: 1}
+--- !u!114 &5387710243924321609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765458329065383543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f67c7e722ba14acd9153bb4488bff6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: Surrounding Sensor
+  m_DetectableTags:
+  - Wall
+  - Player
+  m_RaysPerDirection: 3
+  m_MaxRayDegrees: 180
+  m_SphereCastRadius: 0.5
+  m_RayLength: 12
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967227
+  m_ObservationStacks: 1
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 0, g: 0.9623766, b: 1, a: 1}

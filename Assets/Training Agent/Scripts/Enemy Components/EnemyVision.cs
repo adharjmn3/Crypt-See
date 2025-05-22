@@ -45,9 +45,9 @@ public class EnemyVision : MonoBehaviour
                 Visible visible = hit.collider.gameObject.GetComponent<Visible>();
                 if (visible == null) return true;
 
-                if (distanceToTarget < 5f && visible.LightLevel <= 1)
+                if (distanceToTarget < 5f && visible.LightLevel <= 0.6)
                     return true;
-                else if (visible.LightLevel >= 1)
+                else if (visible.LightLevel >= 0.7)
                     return true;
 
                 return false;

@@ -6,19 +6,23 @@ using UnityEngine;
 
 public class AgentTraining : Agent
 {
+    [Header("Training Manager Gameobject")]
+    [SerializeField] SpawnerTraining spawnerTraining;
+
     [Header("Target Reference")]
     [SerializeField] private GameObject targetObj;
-    [SerializeField] Transform[] spawnPoints;
 
     [Header("Agent Settings")]
     [SerializeField] public float tensionMeter;
     [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
-    [SerializeField] private float memoryDuration = 5f;
+    [SerializeField] private float memoryDuration = 10f;
+    private float currentMemoryTimer = 0f;
+    private bool hasPlayerMemory = false;
 
     [Header("Training Settings")]
-    [SerializeField] float seeTimeThreshold = 2f;
+    [SerializeField] float timePast = 0;
 
     private float lastTensionMeter = 0f;
 
@@ -27,21 +31,20 @@ public class AgentTraining : Agent
 
     Vector3 agentPos;
     Vector3 targetPos;
-    Vector3 targetLastPosition = Vector3.zero;
 
     private EnemyVision enemyVision;
     private EnemyHearing enemyHearing;
     private EnemyMovement enemyMovement;
-    List<Transform> spawnPointsList = new List<Transform>();
-    private float lastHeardTime = -Mathf.Infinity;
-    private float reachedSoundRadius = 3f;
-    float previousDistanceToTarget;
+    private EnemyStats enemyStats;
+    float previousDistanceToTarget = 0f;
+    float normalizedHealth = 0f;
 
     public override void Initialize()
     {
         enemyMovement = GetComponent<EnemyMovement>();
         enemyHearing = GetComponent<EnemyHearing>();
         enemyVision = GetComponent<EnemyVision>();
+        enemyStats = GetComponent<EnemyStats>();
         enemyVision.SetTarget(targetObj);
     }
 
@@ -55,84 +58,34 @@ public class AgentTraining : Agent
 
         if (isSoundDetected)
         {
-            targetLastPosition = targetPos;
-            lastHeardTime = Time.time;
+            currentMemoryTimer = memoryDuration;
+            hasPlayerMemory = true;
         }
 
-        HandleTensionMeter();
-
-        // if (!isTargetInSight && Time.time - lastHeardTime < memoryDuration && IsTensionMeterFull())
-        // {
-        //     float distanceToLastHeard = Vector3.Distance(agentPos, targetLastPosition);
-        //     float approachReward = (1f - distanceToLastHeard / 5f) * 0.01f;
-        //     AddReward(approachReward);
-        //     if (distanceToLastHeard < reachedSoundRadius)
-        //     {
-        //         AddReward(0.1f); // Reward saat mencapai posisi suara terakhir
-        //         lastHeardTime = -Mathf.Infinity;
-        //     }
-        // }
-    }
-
-    private void HandleTensionMeter()
-    {
-        float distance = Vector3.Distance(agentPos, targetPos);
-        float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
-
-        if (isTargetInSight || isSoundDetected)
+        if (hasPlayerMemory)
         {
-            if (isTargetInSight)
+            if (previousDistanceToTarget == 0f)
             {
-                if (distance < 4f)
-                    tensionMeter = maxTensionMeter;
-                else
-                    tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
-            }
-            else if (isSoundDetected)
-            {
-                if (distance < 6f)
-                    tensionMeter = maxTensionMeter;
-                else
-                    tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+                previousDistanceToTarget = Vector2.Distance(agentPos, targetPos);
             }
 
-            if (IsTensionMeterFull())
+            currentMemoryTimer -= Time.deltaTime;
+            if (currentMemoryTimer <= 0)
             {
-                // Reward semakin dekat ke player
-                float approachReward = (1f - distance / 5f) * 0.01f;
-                AddReward(approachReward);
-            }
-            else
-            {
-                AddReward(0.001f);
+                hasPlayerMemory = false;
             }
         }
-        else if (tensionMeter != 0)
+        else
         {
-            tensionMeter -= Time.deltaTime * drainSpeed;
-            AddReward(-0.02f);
+            previousDistanceToTarget = 0f;
         }
-
-        tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
     }
 
     public override void OnEpisodeBegin()
     {
         tensionMeter = 0f;
-
-        foreach (var point in spawnPoints)
-        {
-            spawnPointsList.Add(point);
-        }
-
-        int index = Random.Range(0, spawnPointsList.Count);
-        transform.localPosition = spawnPointsList[index].localPosition;
-        spawnPointsList.RemoveAt(index);
-
-        index = Random.Range(0, spawnPointsList.Count);
-        targetObj.transform.localPosition = spawnPointsList[index].localPosition;
-
-        spawnPointsList.Clear();
+        previousDistanceToTarget = 0f;
+        spawnerTraining.ResetStartPosition();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -141,24 +94,18 @@ public class AgentTraining : Agent
         float canHear = isSoundDetected ? 1f : 0f;
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;
+        normalizedHealth = enemyStats.health / enemyStats.maxHealth;
 
         //Position & Rotation Observations
         sensor.AddObservation(agentPos);
         sensor.AddObservation(transform.up.normalized);
 
-        if (canHear == 1f || playerVisible == 1f)
+        if (isSoundDetected || hasPlayerMemory)
         {
             sensor.AddObservation(targetPos);
             Vector3 targetRelativePosition = targetPos - agentPos;
             sensor.AddObservation(targetRelativePosition.normalized);
-            sensor.AddObservation(targetRelativePosition.magnitude);
-        }
-        else if (Time.time - lastHeardTime < memoryDuration)
-        {
-            sensor.AddObservation(targetLastPosition);
-            Vector3 targetRelativePosition = targetLastPosition - agentPos;
-            sensor.AddObservation(targetRelativePosition.normalized);
-            sensor.AddObservation(targetRelativePosition.magnitude);
+            sensor.AddObservation(targetRelativePosition.magnitude/5f);
         }
         else
         {
@@ -172,14 +119,43 @@ public class AgentTraining : Agent
         sensor.AddObservation(tensionFull);
         sensor.AddObservation(playerVisible);
         sensor.AddObservation(canHear);
+        sensor.AddObservation(normalizedHealth);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float moveAction = actions.DiscreteActions[0];
-        float lookAction = actions.DiscreteActions[1];
+        Vector3 move;
+        float rotation;
 
-        enemyMovement.Move(moveAction, lookAction);
+        var discreteActions = actions.DiscreteActions;
+        move = discreteActions[0] == 1 ? transform.up : Vector3.zero;
+        rotation = discreteActions[1] == 1 ? 1f : discreteActions[1] == 2 ? -1f : 0f;
+
+        enemyMovement.Move(move, rotation);
+        HandleTensionMeter();
+
+        if (normalizedHealth < 0.3)
+        {
+            float distToTarget = Vector2.Distance(agentPos, targetPos);
+            if (distToTarget < previousDistanceToTarget)
+            {
+                AddReward(-0.01f); // penalti karena masih mendekat padahal darah rendah
+            }
+            else
+            {
+                AddReward(0.01f); // reward karena menjauh
+            }
+        }
+
+        if (hasPlayerMemory)
+        {
+            float distToTarget = Vector2.Distance(agentPos, targetPos);
+            if (distToTarget < previousDistanceToTarget)
+            {
+                previousDistanceToTarget = distToTarget;
+                AddReward(0.0002f);
+            }
+        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -203,11 +179,33 @@ public class AgentTraining : Agent
         if (collision.gameObject.CompareTag("Wall"))
         {
             AddReward(-0.2f);
-            //EndEpisode();
+            EndEpisode();
         }
     }
 
-    private bool IsTensionMeterFull(){
+    private bool IsTensionMeterFull()
+    {
         return tensionMeter >= maxTensionMeter;
     }
+
+    private void HandleTensionMeter()
+    {
+        float distance = Vector3.Distance(agentPos, targetPos);
+        float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
+
+        if (isSoundDetected || isTargetInSight)
+        {
+            if (distance < 3f)
+                tensionMeter = maxTensionMeter;
+            else
+                tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+        }
+        else if (tensionMeter != 0)
+        {
+            tensionMeter -= Time.deltaTime * drainSpeed;
+        }
+
+        tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
+    }
+
 }

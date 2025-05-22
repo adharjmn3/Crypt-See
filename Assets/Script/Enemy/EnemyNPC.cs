@@ -163,7 +163,7 @@ public class EnemyNPC : Agent
         float moveAction = actions.DiscreteActions[0];
         float lookAction = actions.DiscreteActions[1];
 
-        enemyMovement.Move(moveAction, lookAction);
+        //enemyMovement.Move(moveAction, lookAction);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

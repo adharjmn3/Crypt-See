@@ -2,22 +2,31 @@
     "EnemyNPC": {
         "checkpoints": [
             {
-                "steps": 398832,
-                "file_path": "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-398832.onnx",
-                "reward": 0.8633810582434914,
-                "creation_time": 1747306338.1551154,
+                "steps": 184114,
+                "file_path": "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-184114.onnx",
+                "reward": 0.7991345495086121,
+                "creation_time": 1747915430.768579,
                 "auxillary_file_paths": [
-                    "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-398832.pt"
+                    "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-184114.pt"
+                ]
+            },
+            {
+                "steps": 316123,
+                "file_path": "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-316123.onnx",
+                "reward": 0.9293726532548765,
+                "creation_time": 1747916370.8844016,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-316123.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 398832,
+            "steps": 316123,
             "file_path": "results\\EnemyNPCModel_02\\EnemyNPC.onnx",
-            "reward": 0.8633810582434914,
-            "creation_time": 1747306338.1551154,
+            "reward": 0.9293726532548765,
+            "creation_time": 1747916370.8844016,
             "auxillary_file_paths": [
-                "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-398832.pt"
+                "results\\EnemyNPCModel_02\\EnemyNPC\\EnemyNPC-316123.pt"
             ]
         }
     },

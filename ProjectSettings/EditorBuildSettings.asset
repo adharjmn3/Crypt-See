@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LevelGeneratorTest.unity
     guid: c712221407c41b94b8ab0c4a77fce8f0
+  - enabled: 0
+    path: Assets/Training Agent/TrainingEnv2.unity
+    guid: 816e6cbf1e0d1ca4392957e4d31a47d3
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 8dc3ec936f9ed4c46b357a7663171729, type: 2}
