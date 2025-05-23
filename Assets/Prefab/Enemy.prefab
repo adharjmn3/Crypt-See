@@ -481,7 +481,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 9b98a92a54976624887f8201839926fd, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 5f4e5186e0cc8ef498a20c0a98c593ed, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: EnemyNPC
@@ -649,7 +649,7 @@ MonoBehaviour:
   m_RayLength: 12
   m_RayLayerMask:
     serializedVersion: 2
-    m_Bits: 4294962363
+    m_Bits: 4294959291
   m_ObservationStacks: 1
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
   rayMissColor: {r: 0, g: 0.89433956, b: 0.87222767, a: 1}
@@ -836,7 +836,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 67968
+  m_InstanceId: 63728
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
