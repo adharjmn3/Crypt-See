@@ -1,0 +1,56 @@
+{
+    "EnemyNPC": {
+        "checkpoints": [
+            {
+                "steps": 13006,
+                "file_path": "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-13006.onnx",
+                "reward": 2.0545000164210796,
+                "creation_time": 1747998019.1893294,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-13006.pt"
+                ]
+            },
+            {
+                "steps": 173100,
+                "file_path": "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-173100.onnx",
+                "reward": 0.15970400451873498,
+                "creation_time": 1747999191.6336486,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-173100.pt"
+                ]
+            },
+            {
+                "steps": 263697,
+                "file_path": "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-263697.onnx",
+                "reward": 0.5033962291406814,
+                "creation_time": 1748000431.3296754,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-263697.pt"
+                ]
+            },
+            {
+                "steps": 312869,
+                "file_path": "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-312869.onnx",
+                "reward": 1.5926351749905387,
+                "creation_time": 1748000842.6710298,
+                "auxillary_file_paths": [
+                    "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-312869.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 312869,
+            "file_path": "results\\EnemyNPCModel_07\\EnemyNPC.onnx",
+            "reward": 1.5926351749905387,
+            "creation_time": 1748000842.6710298,
+            "auxillary_file_paths": [
+                "results\\EnemyNPCModel_07\\EnemyNPC\\EnemyNPC-312869.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu126"
+    }
+}

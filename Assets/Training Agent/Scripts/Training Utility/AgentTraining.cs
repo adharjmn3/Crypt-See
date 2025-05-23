@@ -88,6 +88,7 @@ public class AgentTraining : Agent
         tensionMeter = 0f;
         previousDistanceToTarget = 0f;
         spawnerTraining.ResetStartPosition();
+        enemyStats.health = Random.Range(10, enemyStats.maxHealth);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -97,6 +98,8 @@ public class AgentTraining : Agent
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;
         normalizedHealth = enemyStats.health / enemyStats.maxHealth;
+
+        Debug.Log($"Current health {normalizedHealth}");
 
         //Position & Rotation Observations
         sensor.AddObservation(agentPos);
@@ -141,11 +144,11 @@ public class AgentTraining : Agent
             float distToTarget = Vector2.Distance(agentPos, targetPos);
             if (distToTarget < previousDistanceToTarget)
             {
-                AddReward(-0.01f); // penalti karena masih mendekat padahal darah rendah
+                AddReward(-0.5f); // penalti karena masih mendekat padahal darah rendah
             }
             else
             {
-                AddReward(0.01f); // reward karena menjauh
+                AddReward(0.05f); // reward karena menjauh
             }
         }
 
@@ -176,7 +179,14 @@ public class AgentTraining : Agent
     {
         if (collision.gameObject.CompareTag("Player") && IsTensionMeterFull())
         {
-            AddReward(2f);
+            if (normalizedHealth > 0.3)
+            {
+                AddReward(2f);
+            }
+            else
+            {
+                AddReward(0.01f);
+            }
             EndEpisode();
         }
     }
