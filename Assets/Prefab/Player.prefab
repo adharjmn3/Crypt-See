@@ -634,14 +634,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 192af8f3b108aa14ab17e5b18f6345c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  linePrefab: {fileID: 3559387557661105647, guid: 17724a42d324d7a439a8c0e04c5da703, type: 3}
+  lineDuration: 5
+  maxLines: 100
   speed: 100
   speedIncrement: 1
   maxSpeed: 500
   minSpeed: 100
   minVolume: 0.1
   maxVolume: 1
-  linePrefab: {fileID: 3559387557661105647, guid: 17724a42d324d7a439a8c0e04c5da703, type: 3}
-  lineDuration: 5
 --- !u!114 &4609502540538104302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -686,6 +687,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355fb7522b707814e9d2aec62f4b96a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDetectionPercentage: 100
+  kills: 0
+  shadowTime: 0
+  lightTime: 0
+  visibilityStatus: hide
+  visibilityLevel: 0
 --- !u!114 &4418345325666489435
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -783,7 +790,7 @@ GameObject:
   - component: {fileID: 9069512930586531818}
   m_Layer: 3
   m_Name: Sprite
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -837,7 +844,7 @@ MonoBehaviour:
   - {x: 0.16948456, y: -0.068841904, z: 0}
   m_ShapePathHash: 1967505706
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1464
+  m_InstanceId: 58536
   m_LocalBounds:
     m_Center: {x: -0.005456403, y: 0.022109114, z: 0}
     m_Extent: {x: 0.17494094, y: 0.09095102, z: 0}

@@ -6,22 +6,22 @@ using UnityEngine;
 
 public class EnemyNPC : Agent
 {
+    [Header("Target Reference")]
+    [SerializeField] private GameObject targetObj;
+
     [Header("Agent Settings")]
     [SerializeField] public float tensionMeter;
     [SerializeField] public float maxTensionMeter;
     [SerializeField] private float fillSpeed = 0.5f;
     [SerializeField] private float drainSpeed = 0.2f;
-    private EnemyStats enemyStats;
+    [SerializeField] private float memoryDuration = 10f;
+    private float currentMemoryTimer = 0f;
+    private bool hasPlayerMemory = false;
+
+    [Header("Training Settings")]
+    [SerializeField] float timePast = 0;
 
     private float lastTensionMeter = 0f;
-
-    private EnemyVision enemyVision;
-    private EnemyHearing enemyHearing;
-    private EnemyMovement enemyMovement;
-
-    private Transform playerTransform;
-
-    private bool isGettingShot = false;
 
     bool isTargetInSight = false;
     bool isSoundDetected = false;
@@ -29,7 +29,12 @@ public class EnemyNPC : Agent
     Vector3 agentPos;
     Vector3 targetPos;
 
-    private float fallbackTimer = 0f;
+    private EnemyVision enemyVision;
+    private EnemyHearing enemyHearing;
+    private EnemyMovement enemyMovement;
+    private EnemyStats enemyStats;
+    float previousDistanceToTarget = 0f;
+    float normalizedHealth = 0f;
 
     public override void Initialize()
     {
@@ -37,95 +42,48 @@ public class EnemyNPC : Agent
         enemyHearing = GetComponent<EnemyHearing>();
         enemyVision = GetComponent<EnemyVision>();
         enemyStats = GetComponent<EnemyStats>();
+        enemyVision.SetTarget(targetObj);
 
-        GameObject bulletObj = GameObject.FindGameObjectWithTag("Bullet");
-        if (bulletObj != null)
-        {
-            // enemyVision.SetBullet(bulletObj);
-            
-        }
-
-        // Otomatis cari Player berdasarkan tag
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-        {
-            Debug.Log(playerObj);
-            playerTransform = playerObj.transform;
-            enemyVision.SetTarget(playerObj);
-        }
+        targetObj = GameObject.FindGameObjectWithTag("Player");
     }
 
     void Update()
     {
         agentPos = transform.position;
-        targetPos = playerTransform.transform.position;
+        targetPos = targetObj.transform.position;
 
         isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
 
-        Debug.Log(isTargetInSight);
-
-        HandleTensionMeter();
-
-        // Fallback logic
-        if (isGettingShot)
+        if (isSoundDetected)
         {
-            fallbackTimer -= Time.deltaTime;
-            FallbackFromPlayer();
-            if (fallbackTimer <= 0f)
+            currentMemoryTimer = memoryDuration;
+            hasPlayerMemory = true;
+        }
+
+        if (hasPlayerMemory)
+        {
+            if (previousDistanceToTarget == 0f)
             {
-                isGettingShot = false;
+                previousDistanceToTarget = Vector2.Distance(agentPos, targetPos);
+            }
+
+            currentMemoryTimer -= Time.deltaTime;
+            if (currentMemoryTimer <= 0)
+            {
+                hasPlayerMemory = false;
             }
         }
-    }
-
-    // Call this method when the enemy is hit by a bullet
-    public void OnBulletHit()
-    {
-        isGettingShot = true;
-        if (enemyStats != null)
-        {
-            // Instead of directly setting fallbackTimer with fearLevel here,
-            // we now let EnemyStats handle its own fear level.
-            // The TakeDamage method in EnemyStats will call IncreaseFear.
-            // If you also want to trigger TakeDamage from here:
-            // enemyStats.TakeDamage(0); // Assuming a hit means some form of "damage" event even if no health lost
-
-            // Fallback duration can still be influenced by the current fear level
-            fallbackTimer = enemyStats.fearLevel; // Or some scaled version: enemyStats.fearLevel * 0.5f;
-        }
         else
         {
-            fallbackTimer = 1.5f; // Default fallback duration
+            previousDistanceToTarget = 0f;
         }
     }
 
-    // Move away from the player
-    private void FallbackFromPlayer()
+    public override void OnEpisodeBegin()
     {
-        Vector3 directionAway = (agentPos - targetPos).normalized;
-        float fallbackSpeed = enemyStats != null ? enemyStats.speed : 3f;
-        transform.position += directionAway * fallbackSpeed * Time.deltaTime;
-    }
-
-    private void HandleTensionMeter()
-    {
-        float distance = Vector3.Distance(agentPos, targetPos);
-        float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
-
-        if (isTargetInSight)
-        {
-            if (distance < 2f)
-                tensionMeter = maxTensionMeter;
-            else
-                tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
-        }
-        else
-        {
-            tensionMeter -= Time.deltaTime * drainSpeed;
-        }
-
-        tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
+        tensionMeter = 0f;
+        previousDistanceToTarget = 0f;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -134,65 +92,84 @@ public class EnemyNPC : Agent
         float canHear = isSoundDetected ? 1f : 0f;
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;
+        normalizedHealth = enemyStats.health / enemyStats.maxHealth;
 
         //Position & Rotation Observations
         sensor.AddObservation(agentPos);
-        sensor.AddObservation(targetPos);
         sensor.AddObservation(transform.up.normalized);
 
-        //Distance Observation
-        sensor.AddObservation((targetPos - agentPos).normalized);
+        if (isTargetInSight || hasPlayerMemory)
+        {
+            sensor.AddObservation(targetPos);
+            Vector3 targetRelativePosition = targetPos - agentPos;
+            sensor.AddObservation(targetRelativePosition.normalized);
+            sensor.AddObservation(targetRelativePosition.magnitude/5f);
+        }
+        else
+        {
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0f);
+        }
 
         //Status Observations
         sensor.AddObservation(tensionChange);
         sensor.AddObservation(tensionFull);
         sensor.AddObservation(playerVisible);
         sensor.AddObservation(canHear);
-        if (enemyStats != null)
-        {
-            sensor.AddObservation(enemyStats.fearLevel / enemyStats.maxFearLevel); // Normalize fear level
-        }
-        else
-        {
-            sensor.AddObservation(0f); // Default if no stats
-        }
+        sensor.AddObservation(normalizedHealth);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float moveAction = actions.DiscreteActions[0];
-        float lookAction = actions.DiscreteActions[1];
+        Vector3 move;
+        float rotation;
 
-        //enemyMovement.Move(moveAction, lookAction);
+        var discreteActions = actions.DiscreteActions;
+        move = discreteActions[0] == 1 ? transform.up : Vector3.zero;
+        rotation = discreteActions[1] == 1 ? 1f : discreteActions[1] == 2 ? -1f : 0f;
+
+        enemyMovement.Move(move, rotation);
+        HandleTensionMeter();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var cont = actionsOut.ContinuousActions;
-        cont[0] = Input.GetKey(KeyCode.W) ? 1f : 0f;
-        cont[1] = Input.GetKey(KeyCode.A) ? 1f : Input.GetKey(KeyCode.D) ? -1f : 0f;
+        var cont = actionsOut.DiscreteActions;
+        cont[0] = Input.GetKey(KeyCode.W) ? 1 : 0;
+        cont[1] = Input.GetKey(KeyCode.A) ? 1 : Input.GetKey(KeyCode.D) ? 2 : 0;
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Bullet"))
+        if (collision.gameObject.CompareTag("Player") && IsTensionMeterFull())
         {
-            // Assuming the bullet script itself calls TakeDamage on the EnemyStats component.
-            // If not, you might need to get the damage from the bullet and call:
-            // enemyStats.TakeDamage(bulletDamage); 
-            // For now, OnBulletHit will be called, which can then use the current fear level for fallback.
-            OnBulletHit(); 
-        }
-
-        if (collision.gameObject.CompareTag("Wall") ||
-            (collision.gameObject.CompareTag("Player") && enemyVision.CanSeeTarget(agentPos, targetPos) && IsTensionMeterFull()))
-        {
-            EndEpisode();
+            
         }
     }
 
-    public bool IsTensionMeterFull()
+    private bool IsTensionMeterFull()
     {
         return tensionMeter >= maxTensionMeter;
+    }
+
+    private void HandleTensionMeter()
+    {
+        float distance = Vector3.Distance(agentPos, targetPos);
+        float distanceFactor = Mathf.Clamp01(1f - (distance / 5f));
+
+        if (isSoundDetected || isTargetInSight)
+        {
+            if (distance < 3f)
+                tensionMeter = maxTensionMeter;
+            else
+                tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;
+        }
+        else if (tensionMeter != 0)
+        {
+            tensionMeter -= Time.deltaTime * drainSpeed;
+        }
+
+        tensionMeter = Mathf.Clamp(tensionMeter, 0f, maxTensionMeter);
     }
 }
