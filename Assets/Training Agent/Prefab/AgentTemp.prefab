@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAudioSource: {fileID: 0}
-  hearingRadius: 9
+  hearingRadius: 6
 --- !u!114 &8935907737903990813
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -50,6 +50,7 @@ public class AgentTraining : Agent
 
     void Update()
     {
+        Debug.Log(hasPlayerMemory);
         agentPos = transform.position;
         targetPos = targetObj.transform.position;
 
@@ -100,7 +101,7 @@ public class AgentTraining : Agent
         sensor.AddObservation(agentPos);
         sensor.AddObservation(transform.up.normalized);
 
-        if (isSoundDetected || hasPlayerMemory)
+        if (isTargetInSight || hasPlayerMemory)
         {
             sensor.AddObservation(targetPos);
             Vector3 targetRelativePosition = targetPos - agentPos;
@@ -147,13 +148,18 @@ public class AgentTraining : Agent
             }
         }
 
-        if (hasPlayerMemory)
+        if (hasPlayerMemory && normalizedHealth > 0.3)
         {
             float distToTarget = Vector2.Distance(agentPos, targetPos);
             if (distToTarget < previousDistanceToTarget)
             {
                 previousDistanceToTarget = distToTarget;
                 AddReward(0.0002f);
+            }
+
+            if (distToTarget > previousDistanceToTarget)
+            {
+                AddReward(-0.002f);
             }
         }
     }
@@ -169,7 +175,7 @@ public class AgentTraining : Agent
     {
         if (collision.gameObject.CompareTag("Player") && IsTensionMeterFull())
         {
-            AddReward(1f);
+            AddReward(2f);
             EndEpisode();
         }
     }
