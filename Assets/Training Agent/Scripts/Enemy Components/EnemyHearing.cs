@@ -9,11 +9,14 @@ public class EnemyHearing : MonoBehaviour
 
     void Awake()
     {
-        if(playerAudioSource == null){
+        if (playerAudioSource == null)
+        {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if(player != null){
+            if (player != null)
+            {
                 playerAudioSource = player.GetComponent<AudioSource>();
             }
+            Debug.Log($"Enemy hearing component get gameobject for audiosource from: {player}");
         }
     }
 

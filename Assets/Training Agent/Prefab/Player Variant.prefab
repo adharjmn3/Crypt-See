@@ -20,6 +20,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 3625872708170072908, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
+      propertyPath: Loop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3625872708170072908, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: b8aeb2d2194bd844b8c05738cec94cfc, type: 3}
     - target: {fileID: 4609502540538104302, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -66,7 +74,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6433389256284646427, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
       propertyPath: m_InstanceId
-      value: -93482
+      value: -4124
+      objectReference: {fileID: 0}
+    - target: {fileID: 6965022715788980801, guid: 0ac5dfe2bbde8434f9cd5a497503c938, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
