@@ -15,11 +15,15 @@ public class EnemyNavM : MonoBehaviour
     [SerializeField] private float combatRange = 10f;
     [SerializeField] private float stateUpdateInterval = 0.5f;
     [SerializeField] private float timeToForgetPlayer = 5f;
+    [SerializeField] private float combatEngageDelay = 1.5f; // Time before actually shooting after entering combat mode
     
     [Header("Movement Settings")]
     [SerializeField] private float patrolSpeed = 2f;
     [SerializeField] private float suspiciousSpeed = 3f;
     [SerializeField] private float combatSpeed = 3.5f;
+    [SerializeField] private float rotationSpeed = 5f; // Rotation speed for smooth turning
+    [SerializeField] private float turnThreshold = 30f; // Angle threshold for slowing down movement
+    [SerializeField] private float minimumSpeedFactor = 0.2f; // Minimum speed factor when turning
 
     // AI States
     private enum AIState { Patrol, Suspicious, Combat }
@@ -33,8 +37,14 @@ public class EnemyNavM : MonoBehaviour
     private Vector3 lastKnownPlayerPosition;
     private float suspiciousTimer;
     
-    // Combat control
+    // Combat variables
     private EnemyShoot shootComponent;
+    private float combatEngageTimer = 0f;
+    
+    // Movement and rotation variables
+    private Vector2 movementDirection;
+    private float currentSpeed;
+    private float baseSpeed;
 
     private void Awake()
     {
@@ -54,7 +64,12 @@ public class EnemyNavM : MonoBehaviour
     {
         // Begin state updates
         StartCoroutine(UpdateAIState());
-        agent.speed = patrolSpeed;
+        baseSpeed = patrolSpeed;
+        agent.speed = baseSpeed;
+        
+        // Configure NavMeshAgent for 2D
+        agent.updateRotation = false;
+        agent.updateUpAxis = false;
     }
 
     void Update()
@@ -72,6 +87,82 @@ public class EnemyNavM : MonoBehaviour
                 HandleCombatState();
                 break;
         }
+        
+        // First update facing direction, then adjust movement speed based on rotation
+        UpdateFacingDirection();
+    }
+    
+    private void UpdateFacingDirection()
+    {
+        Vector2 desiredDirection = Vector2.zero;
+        bool shouldRotate = false;
+        
+        // Determine the direction we want to face
+        if (currentState == AIState.Combat && player != null && 
+            Vector2.Distance(transform.position, player.position) < combatRange) 
+        {
+            // Face the player directly
+            desiredDirection = player.position - transform.position;
+            shouldRotate = true;
+        }
+        // Otherwise rotate based on our nav target direction
+        else if (agent.velocity.magnitude > 0.01f)
+        {
+            // Get the 2D direction we want to move in
+            desiredDirection = new Vector2(agent.desiredVelocity.x, agent.desiredVelocity.z);
+            shouldRotate = true;
+        }
+        else
+        {
+            // If not moving, allow speed to return to normal
+            AdjustSpeedBasedOnTurning(0);
+            return;
+        }
+        
+        if (shouldRotate && desiredDirection != Vector2.zero)
+        {
+            // Store this for speed adjustments
+            movementDirection = desiredDirection.normalized;
+            
+            // Calculate the target angle in degrees
+            float targetAngle = Mathf.Atan2(movementDirection.y, movementDirection.x) * Mathf.Rad2Deg;
+            targetAngle -= 90; // -90 adjusts for sprite facing up by default
+            
+            // Get current rotation as an angle
+            float currentAngle = transform.rotation.eulerAngles.z;
+            
+            // Find the shortest rotation path
+            float angleDifference = Mathf.DeltaAngle(currentAngle, targetAngle);
+            
+            // Adjust agent speed based on how much we need to turn
+            AdjustSpeedBasedOnTurning(Mathf.Abs(angleDifference));
+            
+            // Calculate smooth rotation amount
+            float rotationAmount = Mathf.Sign(angleDifference) * 
+                                   Mathf.Min(Mathf.Abs(angleDifference), 
+                                             rotationSpeed * Time.deltaTime);
+            
+            // Apply the rotation
+            float newAngle = currentAngle + rotationAmount;
+            transform.rotation = Quaternion.Euler(0, 0, newAngle);
+        }
+    }
+    
+    private void AdjustSpeedBasedOnTurning(float turnAngle)
+    {
+        // Only slow down for significant turns
+        if (turnAngle > turnThreshold)
+        {
+            // The larger the turn, the slower we go (down to minimum speed)
+            float speedFactor = Mathf.Lerp(1f, minimumSpeedFactor, 
+                                         (turnAngle - turnThreshold) / (180f - turnThreshold));
+            agent.speed = baseSpeed * speedFactor;
+        }
+        else
+        {
+            // When not turning sharply, gradually return to full speed
+            agent.speed = Mathf.Lerp(agent.speed, baseSpeed, 2f * Time.deltaTime);
+        }
     }
 
     private IEnumerator UpdateAIState()
@@ -88,7 +179,7 @@ public class EnemyNavM : MonoBehaviour
         // Can't do anything without a player reference
         if (player == null) return;
         
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         
         // Determine the new state based on distance to player
         if (distanceToPlayer <= combatRange)
@@ -125,16 +216,24 @@ public class EnemyNavM : MonoBehaviour
         switch (newState)
         {
             case AIState.Patrol:
-                agent.speed = patrolSpeed;
+                baseSpeed = patrolSpeed;
                 patrolPointSet = false;
-                break;
-            case AIState.Suspicious:
-                agent.speed = suspiciousSpeed;
-                break;
-            case AIState.Combat:
-                agent.speed = combatSpeed;
                 if (shootComponent != null)
-                    shootComponent.enabled = true;
+                    shootComponent.enabled = false;
+                break;
+                
+            case AIState.Suspicious:
+                baseSpeed = suspiciousSpeed;
+                if (shootComponent != null)
+                    shootComponent.enabled = false;
+                break;
+                
+            case AIState.Combat:
+                baseSpeed = combatSpeed;
+                // Don't enable shooting immediately - set timer
+                combatEngageTimer = combatEngageDelay;
+                if (shootComponent != null)
+                    shootComponent.enabled = false;
                 break;
         }
         
@@ -169,7 +268,20 @@ public class EnemyNavM : MonoBehaviour
     {
         if (player != null)
         {
+            // In combat, we want to move toward the player
             agent.SetDestination(player.position);
+            
+            // Update combat engagement timer
+            if (combatEngageTimer > 0)
+            {
+                combatEngageTimer -= Time.deltaTime;
+                
+                // Enable shooting after delay
+                if (combatEngageTimer <= 0 && shootComponent != null)
+                {
+                    shootComponent.enabled = true;
+                }
+            }
         }
         else
         {
@@ -179,12 +291,12 @@ public class EnemyNavM : MonoBehaviour
 
     private void SearchForPatrolPoint()
     {
-        // Generate random point within patrol radius
-        Vector3 randomDirection = Random.insideUnitSphere * patrolRadius;
-        randomDirection += transform.position;
+        // Generate random point within patrol radius (2D)
+        Vector2 randomDirection = Random.insideUnitCircle * patrolRadius;
+        Vector3 randomPoint = new Vector3(transform.position.x + randomDirection.x, transform.position.y, transform.position.z + randomDirection.y);
         
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomDirection, out hit, patrolRadius, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(randomPoint, out hit, patrolRadius, NavMesh.AllAreas))
         {
             patrolPoint = hit.position;
             agent.SetDestination(patrolPoint);

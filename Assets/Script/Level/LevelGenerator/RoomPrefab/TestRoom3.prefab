@@ -86,7 +86,7 @@ MonoBehaviour:
   decorPrefabs:
   - {fileID: 7315635223969459670, guid: bca3621530595504681d2fbdd5cfcb97, type: 3}
   - {fileID: 403394099734679382, guid: 96bac332224cb69468823e8c1e91a77d, type: 3}
-  decorCount: 3
+  decorCount: 0
 --- !u!1 &1335407454196018172
 GameObject:
   m_ObjectHideFlags: 0
