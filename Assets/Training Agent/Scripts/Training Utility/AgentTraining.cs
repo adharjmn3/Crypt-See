@@ -50,12 +50,13 @@ public class AgentTraining : Agent
 
     void Update()
     {
-        Debug.Log(hasPlayerMemory);
         agentPos = transform.position;
         targetPos = targetObj.transform.position;
 
         isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
+
+        Debug.Log(isTargetInSight);
 
         if (isSoundDetected)
         {

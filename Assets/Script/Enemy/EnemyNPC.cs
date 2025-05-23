@@ -38,13 +38,12 @@ public class EnemyNPC : Agent
 
     public override void Initialize()
     {
+        targetObj = GameObject.FindGameObjectWithTag("Player");
         enemyMovement = GetComponent<EnemyMovement>();
         enemyHearing = GetComponent<EnemyHearing>();
         enemyVision = GetComponent<EnemyVision>();
         enemyStats = GetComponent<EnemyStats>();
         enemyVision.SetTarget(targetObj);
-
-        targetObj = GameObject.FindGameObjectWithTag("Player");
     }
 
     void Update()
@@ -54,6 +53,8 @@ public class EnemyNPC : Agent
 
         isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
+
+        Debug.Log(isTargetInSight);
 
         if (isSoundDetected)
         {

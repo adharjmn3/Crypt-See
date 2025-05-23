@@ -519,7 +519,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3204030412186873332}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6384038f12c2324489c10318d2575d4, type: 3}
   m_Name: 
@@ -649,7 +649,7 @@ MonoBehaviour:
   m_RayLength: 12
   m_RayLayerMask:
     serializedVersion: 2
-    m_Bits: 4294962363
+    m_Bits: 4294959291
   m_ObservationStacks: 1
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
   rayMissColor: {r: 0, g: 0.89433956, b: 0.87222767, a: 1}
@@ -836,7 +836,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 56888
+  m_InstanceId: 40160
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
