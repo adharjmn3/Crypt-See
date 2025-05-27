@@ -299,6 +299,7 @@ GameObject:
   - component: {fileID: 5399690480583840027}
   - component: {fileID: 728719599856989647}
   - component: {fileID: 8654850078736777742}
+  - component: {fileID: 1756844411908079401}
   m_Layer: 6
   m_Name: Model
   m_TagString: Enemy
@@ -512,6 +513,7 @@ MonoBehaviour:
   drainSpeed: 0.2
   memoryDuration: 10
   timePast: 0
+  isTargetInSight: 0
 --- !u!114 &5322457110476933443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -836,7 +838,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 63728
+  m_InstanceId: 34740
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
@@ -887,6 +889,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   primaryWeaponData: {fileID: 11400000, guid: b006cc1671936dd4e9eb5f9a27ac29e6, type: 2}
   secondaryWeaponData: {fileID: 11400000, guid: b006cc1671936dd4e9eb5f9a27ac29e6, type: 2}
+--- !u!114 &1756844411908079401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3204030412186873332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d426723e73790494bb8c2f073850376b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6759365727180296014
 GameObject:
   m_ObjectHideFlags: 0

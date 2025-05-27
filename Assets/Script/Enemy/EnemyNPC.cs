@@ -23,7 +23,7 @@ public class EnemyNPC : Agent
 
     private float lastTensionMeter = 0f;
 
-    bool isTargetInSight = false;
+    public bool isTargetInSight = false;
     bool isSoundDetected = false;
 
     Vector3 agentPos;
