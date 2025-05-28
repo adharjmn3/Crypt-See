@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -19,6 +20,9 @@ public class LevelGenerator : MonoBehaviour
     public EnemyManager enemyManager; // Reference to the EnemyManager
     private List<Transform> enemySpawnPoints = new List<Transform>(); // Collect all enemy spawn points
     private List<Transform> objectiveSpawnPoints = new List<Transform>(); // Collect all objective spawn points
+    
+    [SerializeField] 
+    private NavMeshBaker navMeshBaker; // Reference to the NavMeshBaker
 
     public List<Transform> GetObjectiveSpawnPoints()
     {
@@ -28,6 +32,7 @@ public class LevelGenerator : MonoBehaviour
     void Start()
     {
         GenerateLevel();
+        BakeNavMesh();
         TransferSpawnPointsToManagers();
     }
 
@@ -142,6 +147,27 @@ public class LevelGenerator : MonoBehaviour
             {
                 floorTilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
             }
+        }
+    }
+
+    // Add this method to bake the NavMesh after level generation
+    void BakeNavMesh()
+    {
+        // Find the NavMeshBaker if not assigned in the inspector
+        if (navMeshBaker == null)
+        {
+            navMeshBaker = FindObjectOfType<NavMeshBaker>();
+        }
+        
+        if (navMeshBaker != null)
+        {
+            Debug.Log("Baking NavMesh after level generation...");
+            // Use async version to avoid freezing the game
+            navMeshBaker.BakeNavMeshAsync();
+        }
+        else
+        {
+            Debug.LogWarning("NavMeshBaker not found! Cannot bake NavMesh.");
         }
     }
 }
