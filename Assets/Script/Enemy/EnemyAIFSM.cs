@@ -756,6 +756,22 @@ public class EnemyAIFSM : MonoBehaviour
             Gizmos.DrawRay(transform.position, targetDir * 1.5f);
         }
     }
+    
+    // Add this method at the end of the class, before the closing brace
+    public bool IsPlayerVisible()
+    {
+        return isPlayerInSight;
+    }
+
+    // You can also add this method to expose detection time
+    public float GetTimeToDetection()
+    {
+        if (currentState == EnemyState.Combat && hasPlayerBeenSeen)
+        {
+            return lastSeenPlayerTime - Time.time;
+        }
+        return -1f; // No detection yet
+    }
 }
 
 // Simple extension class for debug drawing

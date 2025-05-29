@@ -35,7 +35,7 @@ public class EnemyNavM : MonoBehaviour
     
     // Target visibility
     [Header("Target Detection")]
-    [SerializeField] private bool isTargetInSight = false;
+    [SerializeField] public bool isTargetInSight = false; // Changed to public
     [SerializeField] private LayerMask obstaclesMask; // Layers that block sight
 
     // AI States

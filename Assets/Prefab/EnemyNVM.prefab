@@ -269,7 +269,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -10
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
-  m_Color: {r: 1, g: 0.90825653, b: 0, a: 1}
+  m_Color: {r: 1, g: 0, b: 0.84667015, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -724,7 +724,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 35826
+  m_InstanceId: 39810
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
@@ -1153,7 +1153,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -10
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 0.90825653, b: 0, a: 1}
+  m_Color: {r: 1, g: 0, b: 0.84667015, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1348,7 +1348,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5464028126380996044}
   m_Layer: 0
-  m_Name: EnemyFSM
+  m_Name: EnemyNVM
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
