@@ -74,11 +74,30 @@ public class EnemyAIFSM : MonoBehaviour
     private bool isPlayerInSight = false;
     private float lastShootToggleTime = 0f;      // Track when we last toggled shooting
     
+    // Add these new fields for stuck detection
+    [Header("Stuck Detection")]
+    public float stuckDetectionTime = 2.0f;    // How long the AI must be in place to be considered stuck
+    public float stuckDetectionThreshold = 0.1f; // Minimum distance moved to not be considered stuck
+    public float unstuckTurnAngle = 135f;      // How much to turn when stuck
+    
+    // Private variables for stuck detection
+    private Vector3 lastPositionCheck;
+    private float timeSinceLastMovement = 0f;
+    private bool isStuck = false;
+    private bool isAttemptingUnstuck = false;
+    private int unstuckAttempts = 0;
+    private const int MAX_UNSTUCK_ATTEMPTS = 3;
+
     void Start()
     {
+        // Keep existing Start code
         rb = GetComponent<Rigidbody2D>();
         shootComponent = GetComponent<EnemyShoot>();
         statsComponent = GetComponent<EnemyStats>();
+        
+        // Initialize stuck detection
+        lastPositionCheck = transform.position;
+        timeSinceLastMovement = 0f;
         
         if (rb == null)
         {
@@ -116,11 +135,14 @@ public class EnemyAIFSM : MonoBehaviour
         // Update state timer
         currentStateTime += Time.deltaTime;
         
-        // Check for player visibility
+        // Improved player detection
         CheckForPlayer();
         
         // State transitions based on player detection
         UpdateState();
+        
+        // Check if enemy is stuck
+        CheckIfStuck();
         
         // Debug visualization
         if (showDebugRays)
@@ -251,7 +273,7 @@ public class EnemyAIFSM : MonoBehaviour
     {
         if (playerTransform == null) return;
         
-        // Check direct line of sight to player
+        // Reset sight detection
         isPlayerInSight = false;
         
         // Calculate distance to player
@@ -268,17 +290,10 @@ public class EnemyAIFSM : MonoBehaviour
             
             if (angleToPlayer <= sightAngle / 2f)
             {
-                // Cast a ray to check for obstacles between enemy and player
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, directionToPlayer, distanceToPlayer, obstacleLayer | playerLayer);
+                // Use a more precise check with multiple raycasts for better detection
+                bool hasLineOfSight = CheckLineOfSightToPlayer(directionToPlayer, distanceToPlayer);
                 
-                // Draw debug ray
-                if (showDebugRays)
-                {
-                    Debug.DrawRay(transform.position, directionToPlayer * distanceToPlayer, Color.magenta);
-                }
-                
-                // If we hit something and it's the player, we have line of sight
-                if (hit.collider != null && hit.collider.gameObject.layer == Mathf.Log(playerLayer.value, 2))
+                if (hasLineOfSight)
                 {
                     isPlayerInSight = true;
                     lastKnownPlayerPosition = playerTransform.position;
@@ -300,6 +315,67 @@ public class EnemyAIFSM : MonoBehaviour
                 lastSeenPlayerTime = Time.time;
             }
         }
+    }
+    
+    // More accurate line of sight check using multiple raycasts
+    bool CheckLineOfSightToPlayer(Vector2 directionToPlayer, float distance)
+    {
+        // Try center raycast first (most important)
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position, 
+            directionToPlayer, 
+            distance, 
+            obstacleLayer | playerLayer
+        );
+        
+        if (hit.collider != null && hit.collider.gameObject.layer == Mathf.Log(playerLayer.value, 2))
+        {
+            if (showDebugRays)
+            {
+                Debug.DrawRay(transform.position, directionToPlayer * distance, Color.green);
+            }
+            return true;
+        }
+        
+        // If center ray missed, try additional raycasts to handle edge cases
+        // This helps detect the player when they're partially behind cover
+        
+        // Slightly offset positions for additional raycasts (check left/right of center)
+        Vector2 perpendicularDir = new Vector2(-directionToPlayer.y, directionToPlayer.x).normalized;
+        float rayOffset = 0.3f;  // Small offset, about character width/2
+        
+        // Try left offset
+        Vector2 leftStart = (Vector2)transform.position + perpendicularDir * rayOffset;
+        hit = Physics2D.Raycast(leftStart, directionToPlayer, distance, obstacleLayer | playerLayer);
+        
+        if (hit.collider != null && hit.collider.gameObject.layer == Mathf.Log(playerLayer.value, 2))
+        {
+            if (showDebugRays)
+            {
+                Debug.DrawRay(leftStart, directionToPlayer * distance, Color.green);
+            }
+            return true;
+        }
+        
+        // Try right offset
+        Vector2 rightStart = (Vector2)transform.position - perpendicularDir * rayOffset;
+        hit = Physics2D.Raycast(rightStart, directionToPlayer, distance, obstacleLayer | playerLayer);
+        
+        if (hit.collider != null && hit.collider.gameObject.layer == Mathf.Log(playerLayer.value, 2))
+        {
+            if (showDebugRays)
+            {
+                Debug.DrawRay(rightStart, directionToPlayer * distance, Color.green);
+            }
+            return true;
+        }
+        
+        // No hits found
+        if (showDebugRays)
+        {
+            Debug.DrawRay(transform.position, directionToPlayer * distance, Color.red);
+        }
+        return false;
     }
     
     #endregion
@@ -568,6 +644,13 @@ public class EnemyAIFSM : MonoBehaviour
         {
             isTurningAround = false;
             lastDirectionChangeTime = Time.time + randomDirectionChangeInterval; // Delay next random change
+            
+            // If we were turning to unstuck, go straight for a bit
+            if (isAttemptingUnstuck)
+            {
+                // Apply a slight force forward to help break free
+                rb.AddForce(transform.up * 2f, ForceMode2D.Impulse);
+            }
         }
     }
     
@@ -771,6 +854,93 @@ public class EnemyAIFSM : MonoBehaviour
             return lastSeenPlayerTime - Time.time;
         }
         return -1f; // No detection yet
+    }
+
+    // Also expose player visibility for the EnemyStatistic script
+    public bool IsInPlayerSight()
+    {
+        return isPlayerInSight && currentState == EnemyState.Combat;
+    }
+
+    // Check if the enemy is stuck and try to resolve it
+    void CheckIfStuck()
+    {
+        // Don't check for stuck status if we're already handling it
+        if (isChangingDirection || isTurningAround || isAttemptingUnstuck)
+            return;
+            
+        // Calculate how far we've moved since last check
+        float distanceMoved = Vector3.Distance(transform.position, lastPositionCheck);
+        
+        // If we've hardly moved, increment stuck timer
+        if (distanceMoved < stuckDetectionThreshold)
+        {
+            timeSinceLastMovement += Time.deltaTime;
+            
+            // Been stuck for too long?
+            if (timeSinceLastMovement > stuckDetectionTime && !isStuck)
+            {
+                isStuck = true;
+                AttemptToUnstuck();
+            }
+        }
+        else
+        {
+            // Reset stuck detection if we're moving
+            timeSinceLastMovement = 0f;
+            lastPositionCheck = transform.position;
+            isStuck = false;
+            unstuckAttempts = 0;
+        }
+    }
+    
+    // Try to get unstuck by making different turns
+    void AttemptToUnstuck()
+    {
+        if (unstuckAttempts >= MAX_UNSTUCK_ATTEMPTS)
+        {
+            // We've tried multiple times and are still stuck
+            // As a last resort, try a reverse direction
+            Debug.Log($"{gameObject.name} tried {unstuckAttempts} times to unstuck. Reversing direction.");
+            isAttemptingUnstuck = true;
+            isTurningAround = true;
+            turnAroundTargetAngle = transform.eulerAngles.z + 180f;
+            unstuckAttempts = 0;
+            return;
+        }
+        
+        isAttemptingUnstuck = true;
+        
+        // Try different turn angles based on how many attempts we've made
+        float turnAngle = unstuckTurnAngle;
+        if (unstuckAttempts % 2 == 0)
+        {
+            // Alternate direction each attempt
+            turnAngle = -turnAngle;
+        }
+        
+        // More drastic turn angle on successive attempts
+        turnAngle *= (1f + (unstuckAttempts * 0.2f));
+        
+        Debug.Log($"{gameObject.name} is stuck! Attempting to unstuck (attempt {unstuckAttempts+1})");
+        
+        // Initialize the turn
+        isTurningAround = true;
+        turnAroundTargetAngle = transform.eulerAngles.z + turnAngle;
+        
+        // Increment attempts
+        unstuckAttempts++;
+        
+        // Reset after turn completes
+        Invoke("ResetUnstuckAttempt", 1.0f);
+    }
+    
+    // Reset the unstuck attempt after giving it time to work
+    void ResetUnstuckAttempt()
+    {
+        isAttemptingUnstuck = false;
+        lastPositionCheck = transform.position;
+        timeSinceLastMovement = 0f;
     }
 }
 
