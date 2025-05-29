@@ -51,6 +51,7 @@ public class EnemyNavM : MonoBehaviour
     private bool patrolPointSet;
     private Vector3 startPosition; // Original position for returning after patrols
     
+    
     // Suspicious state variables
     private Vector3 lastKnownPlayerPosition;
     private float suspiciousTimer;
@@ -67,6 +68,7 @@ public class EnemyNavM : MonoBehaviour
     private bool isRotating = false;
     private bool isWaitingAtPatrolPoint = false;
     private float targetAngle;
+    
     
     // Stuck detection
     private Vector3 lastPosition;
@@ -471,11 +473,15 @@ public class EnemyNavM : MonoBehaviour
     private void UpdateState()
     {
         // Can't do anything without a player reference
-        if (player == null) return;
+        if (player == null) 
+        {
+            isTargetInSight = false;
+            return;
+        }
         
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         
-        // Update target visibility status
+        // Update target visibility status - ensure this happens every frame
         isTargetInSight = IsPlayerInSight();
         
         // Determine the new state based on distance to player and visibility
@@ -499,27 +505,36 @@ public class EnemyNavM : MonoBehaviour
         }
     }
     
+    // Improve the IsPlayerInSight method to be more accurate
     private bool IsPlayerInSight()
     {
         if (player == null) return false;
         
         // Get direction to player
         Vector2 directionToPlayer = player.position - transform.position;
-        float angle = Vector2.Angle(transform.up, directionToPlayer);
+        float distanceToPlayer = directionToPlayer.magnitude;
         
-        // Check if player is within field of view
-        if (angle <= fieldOfViewAngle * 0.5f)
+        // If player is beyond our maximum sight range, can't see
+        if (distanceToPlayer > suspiciousRange)
+            return false;
+        
+        // Check if player is within field of view angle
+        float angle = Vector2.Angle(transform.up, directionToPlayer);
+        if (angle > fieldOfViewAngle * 0.5f)
+            return false;
+        
+        // Raycast to check for obstacles between us and player
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position, 
+            directionToPlayer.normalized, 
+            distanceToPlayer,
+            obstaclesMask
+        );
+        
+        // True only if nothing blocks the view OR if the first thing hit is the player
+        if (hit.collider == null || hit.collider.CompareTag("Player"))
         {
-            // Raycast to check for obstacles
-            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, directionToPlayer, 
-                                              distanceToPlayer, obstaclesMask);
-            
-            // If nothing is hit, or the first thing hit is the player, the player is visible
-            if (hit.collider == null || hit.collider.CompareTag("Player"))
-            {
-                return true;
-            }
+            return true;
         }
         
         return false;
