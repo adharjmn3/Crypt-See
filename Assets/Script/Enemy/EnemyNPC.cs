@@ -34,7 +34,6 @@ public class EnemyNPC : Agent
     private EnemyMovement enemyMovement;
     private EnemyStats enemyStats;
     float previousDistanceToTarget = 0f;
-    float normalizedHealth = 0f;
 
     public override void Initialize()
     {
@@ -44,41 +43,6 @@ public class EnemyNPC : Agent
         enemyVision = GetComponent<EnemyVision>();
         enemyStats = GetComponent<EnemyStats>();
         enemyVision.SetTarget(targetObj);
-    }
-
-    void Update()
-    {
-        agentPos = transform.position;
-        targetPos = targetObj.transform.position;
-
-        isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
-        isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
-
-        Debug.Log(isTargetInSight);
-
-        if (isSoundDetected)
-        {
-            currentMemoryTimer = memoryDuration;
-            hasPlayerMemory = true;
-        }
-
-        if (hasPlayerMemory)
-        {
-            if (previousDistanceToTarget == 0f)
-            {
-                previousDistanceToTarget = Vector2.Distance(agentPos, targetPos);
-            }
-
-            currentMemoryTimer -= Time.deltaTime;
-            if (currentMemoryTimer <= 0)
-            {
-                hasPlayerMemory = false;
-            }
-        }
-        else
-        {
-            previousDistanceToTarget = 0f;
-        }
     }
 
     public override void OnEpisodeBegin()
@@ -93,7 +57,6 @@ public class EnemyNPC : Agent
         float canHear = isSoundDetected ? 1f : 0f;
         float tensionFull = IsTensionMeterFull() ? 1f : 0f;
         float tensionChange = tensionMeter - lastTensionMeter;
-        normalizedHealth = enemyStats.health / enemyStats.maxHealth;
 
         //Position & Rotation Observations
         sensor.AddObservation(agentPos);
@@ -118,11 +81,11 @@ public class EnemyNPC : Agent
         sensor.AddObservation(tensionFull);
         sensor.AddObservation(playerVisible);
         sensor.AddObservation(canHear);
-        sensor.AddObservation(normalizedHealth);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        StatusUpdate();
         Vector3 move;
         float rotation;
 
@@ -132,6 +95,39 @@ public class EnemyNPC : Agent
 
         enemyMovement.Move(move, rotation);
         HandleTensionMeter();
+    }
+
+    private void StatusUpdate()
+    {
+        agentPos = transform.position;
+        targetPos = targetObj.transform.position;
+
+        isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
+        isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
+
+        if (isSoundDetected)
+        {
+            currentMemoryTimer = memoryDuration;
+            hasPlayerMemory = true;
+        }
+
+        if (hasPlayerMemory)
+        {
+            if (previousDistanceToTarget == 0f)
+            {
+                previousDistanceToTarget = Vector2.Distance(agentPos, targetPos);
+            }
+
+            currentMemoryTimer -= Time.deltaTime;
+            if (currentMemoryTimer <= 0)
+            {
+                hasPlayerMemory = false;
+            }
+        }
+        else
+        {
+            previousDistanceToTarget = 0f;
+        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
