@@ -7,7 +7,8 @@ public enum EnemyAIType
 {
     FiniteStateMachine,
     NavMeshAgent,
-    MLAgent
+    MLAgent,
+    Combined // New option to spawn one of each type
 }
 
 public class EnemyManager : MonoBehaviour
@@ -38,6 +39,10 @@ public class EnemyManager : MonoBehaviour
                     return navMeshAgentPrefab;
                 case EnemyAIType.MLAgent:
                     return mlAgentPrefab;
+                case EnemyAIType.Combined:
+                    // For Combined mode, this property isn't used directly
+                    // but we'll return FSM as a fallback
+                    return finiteStateMachinePrefab;
                 default:
                     return finiteStateMachinePrefab;
             }
@@ -46,11 +51,8 @@ public class EnemyManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // Validate the selected prefab is assigned
-        if (enemyPrefab == null)
-        {
-            Debug.LogError($"EnemyManager: No prefab assigned for the selected AI type: {selectedAIType}");
-        }
+        // Validate the selected prefabs are assigned
+        ValidatePrefabs();
         
         // Wait a frame. This gives LevelGenerator (if present) a chance to call InitializeSpawnPoints
         // during its own Start/Awake lifecycle.
@@ -74,6 +76,24 @@ public class EnemyManager : MonoBehaviour
         }
         // If spawnPointsReady is true at this point, it means LevelGenerator called InitializeSpawnPoints,
         // which would have already triggered SpawnEnemies.
+    }
+
+    private void ValidatePrefabs()
+    {
+        if (selectedAIType == EnemyAIType.Combined)
+        {
+            // For Combined mode, check all prefabs
+            if (finiteStateMachinePrefab == null)
+                Debug.LogError("EnemyManager: FiniteStateMachinePrefab is not assigned");
+            if (navMeshAgentPrefab == null)
+                Debug.LogError("EnemyManager: NavMeshAgentPrefab is not assigned");
+            if (mlAgentPrefab == null)
+                Debug.LogError("EnemyManager: MLAgentPrefab is not assigned");
+        }
+        else if (enemyPrefab == null)
+        {
+            Debug.LogError($"EnemyManager: No prefab assigned for the selected AI type: {selectedAIType}");
+        }
     }
 
     public void InitializeSpawnPoints(List<Transform> pointsFromGenerator)
@@ -110,13 +130,13 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        if (enemyPrefab == null)
+        if (selectedAIType != EnemyAIType.Combined && enemyPrefab == null)
         {
             Debug.LogError($"EnemyManager: No prefab assigned for the selected AI type: {selectedAIType}");
             return;
         }
 
-        if (this.spawnPoints.Count == 0) // Check the actual list being used
+        if (this.spawnPoints.Count == 0)
         {
             Debug.LogError("EnemyManager: No spawn points available (either predefined or from LevelGenerator)!");
             return;
@@ -126,6 +146,20 @@ public class EnemyManager : MonoBehaviour
         List<Transform> shuffledSpawnPoints = new List<Transform>(this.spawnPoints);
         shuffledSpawnPoints.Sort((a, b) => Random.Range(-1, 2)); // Using your existing shuffle method
 
+        // Handle combined mode differently
+        if (selectedAIType == EnemyAIType.Combined)
+        {
+            SpawnCombinedEnemies(shuffledSpawnPoints);
+        }
+        else
+        {
+            // Standard spawning for a single AI type
+            SpawnSingleTypeEnemies(shuffledSpawnPoints);
+        }
+    }
+
+    private void SpawnSingleTypeEnemies(List<Transform> shuffledSpawnPoints)
+    {
         int enemiesSpawned = 0;
         Debug.Log($"EnemyManager: Attempting to spawn up to {maxEnemies} {selectedAIType} enemies from {shuffledSpawnPoints.Count} available spawn points.");
 
@@ -163,6 +197,116 @@ public class EnemyManager : MonoBehaviour
         }
 
         Debug.Log($"EnemyManager: Actually spawned {enemiesSpawned} {selectedAIType} enemies.");
+    }
+
+    private void SpawnCombinedEnemies(List<Transform> shuffledSpawnPoints)
+    {
+        int enemiesSpawned = 0;
+        int spawnCount = Mathf.Min(shuffledSpawnPoints.Count, 3); // Need at least 3 spawn points for one of each type
+        
+        Debug.Log($"EnemyManager: Combined mode - attempting to spawn one of each AI type (total: 3) from {shuffledSpawnPoints.Count} available spawn points.");
+
+        // Check if we have enough spawn points for one of each type
+        if (shuffledSpawnPoints.Count < 3)
+        {
+            Debug.LogWarning($"EnemyManager: Combined mode requires at least 3 spawn points, but only {shuffledSpawnPoints.Count} available. Some AI types won't be spawned.");
+        }
+
+        // Spawn FSM Enemy
+        if (finiteStateMachinePrefab != null && enemiesSpawned < spawnCount && enemiesSpawned < shuffledSpawnPoints.Count)
+        {
+            Transform spawnPoint = shuffledSpawnPoints[enemiesSpawned];
+            GameObject enemyInstance = Instantiate(finiteStateMachinePrefab, spawnPoint.position, spawnPoint.rotation);
+            if (enemyInstance != null)
+            {
+                if (enemyInstance.GetComponent<EnemyStatistic>() == null)
+                {
+                    enemyInstance.AddComponent<EnemyStatistic>();
+                }
+                Debug.Log($"EnemyManager: FSM enemy spawned at position: {spawnPoint.position}");
+                enemiesSpawned++;
+            }
+        }
+
+        // Spawn NavMesh Enemy
+        if (navMeshAgentPrefab != null && enemiesSpawned < spawnCount && enemiesSpawned < shuffledSpawnPoints.Count)
+        {
+            Transform spawnPoint = shuffledSpawnPoints[enemiesSpawned];
+            GameObject enemyInstance = Instantiate(navMeshAgentPrefab, spawnPoint.position, spawnPoint.rotation);
+            if (enemyInstance != null)
+            {
+                if (enemyInstance.GetComponent<EnemyStatistic>() == null)
+                {
+                    enemyInstance.AddComponent<EnemyStatistic>();
+                }
+                Debug.Log($"EnemyManager: NavMesh enemy spawned at position: {spawnPoint.position}");
+                enemiesSpawned++;
+            }
+        }
+
+        // Spawn ML Agent Enemy
+        if (mlAgentPrefab != null && enemiesSpawned < spawnCount && enemiesSpawned < shuffledSpawnPoints.Count)
+        {
+            Transform spawnPoint = shuffledSpawnPoints[enemiesSpawned];
+            GameObject enemyInstance = Instantiate(mlAgentPrefab, spawnPoint.position, spawnPoint.rotation);
+            if (enemyInstance != null)
+            {
+                if (enemyInstance.GetComponent<EnemyStatistic>() == null)
+                {
+                    enemyInstance.AddComponent<EnemyStatistic>();
+                }
+                Debug.Log($"EnemyManager: ML-Agent enemy spawned at position: {spawnPoint.position}");
+                enemiesSpawned++;
+            }
+        }
+
+        // Spawn additional enemies of random types if we still have maxEnemies > 3
+        int additionalEnemies = maxEnemies - enemiesSpawned;
+        if (additionalEnemies > 0 && enemiesSpawned < shuffledSpawnPoints.Count)
+        {
+            Debug.Log($"EnemyManager: Combined mode - spawning {additionalEnemies} additional random enemies.");
+            
+            for (int i = enemiesSpawned; i < shuffledSpawnPoints.Count && (i - enemiesSpawned) < additionalEnemies; i++)
+            {
+                Transform spawnPoint = shuffledSpawnPoints[i];
+                
+                // Randomly select which enemy type to spawn
+                int randomType = Random.Range(0, 3);
+                GameObject prefabToSpawn = null;
+                string enemyType = "";
+                
+                switch (randomType)
+                {
+                    case 0:
+                        prefabToSpawn = finiteStateMachinePrefab;
+                        enemyType = "FSM";
+                        break;
+                    case 1:
+                        prefabToSpawn = navMeshAgentPrefab;
+                        enemyType = "NavMesh";
+                        break;
+                    case 2:
+                        prefabToSpawn = mlAgentPrefab;
+                        enemyType = "ML-Agent";
+                        break;
+                }
+                
+                if (prefabToSpawn != null)
+                {
+                    GameObject enemyInstance = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
+                    if (enemyInstance != null)
+                    {
+                        if (enemyInstance.GetComponent<EnemyStatistic>() == null)
+                        {
+                            enemyInstance.AddComponent<EnemyStatistic>();
+                        }
+                        Debug.Log($"EnemyManager: Additional {enemyType} enemy spawned at position: {spawnPoint.position}");
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"EnemyManager: Combined mode - spawned a total of {enemiesSpawned} enemies ({Mathf.Min(enemiesSpawned, 3)} different types).");
     }
 
     // Method to change AI type at runtime (useful for debugging or game mechanics)

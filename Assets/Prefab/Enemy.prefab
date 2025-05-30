@@ -584,7 +584,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50911e09d1d884d4284ed69e6f505369, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 10
+  moveSpeed: 4
   lookSpeed: 180
 --- !u!114 &2327460749324773114
 MonoBehaviour:
@@ -838,7 +838,7 @@ MonoBehaviour:
   - {x: 0.55117524, y: -0.10172164, z: 0}
   m_ShapePathHash: 1689948718
   m_Mesh: {fileID: 0}
-  m_InstanceId: 43852
+  m_InstanceId: 39372
   m_LocalBounds:
     m_Center: {x: 0.006220937, y: -0.006424032, z: 0}
     m_Extent: {x: 0.553929, y: 0.11602698, z: 0}
