@@ -16,6 +16,7 @@ public class LevelGenerator : MonoBehaviour
     public int gridSize = 3; // 3x3 grid
     public int roomSpacing = 1; // Space between rooms in tiles
     public int outerBoundarySpacing = 2; // Space between the outer boundary and the rooms
+    public int cornerMarkerOffset = 2; // Offset from corners for placing corner markers
 
     public EnemyManager enemyManager; // Reference to the EnemyManager
     private List<Transform> enemySpawnPoints = new List<Transform>(); // Collect all enemy spawn points
@@ -23,6 +24,12 @@ public class LevelGenerator : MonoBehaviour
     
     [SerializeField] 
     private NavMeshBaker navMeshBaker; // Reference to the NavMeshBaker
+
+    // Store references to the corner markers
+    public GameObject topLeftCorner;
+    public GameObject topRightCorner;
+    public GameObject bottomLeftCorner;
+    public GameObject bottomRightCorner;
 
     public List<Transform> GetObjectiveSpawnPoints()
     {
@@ -34,6 +41,7 @@ public class LevelGenerator : MonoBehaviour
         GenerateLevel();
         BakeNavMesh();
         TransferSpawnPointsToManagers();
+        PlaceCornerMarkers();
     }
 
     void GenerateLevel()
@@ -150,6 +158,144 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    // Add this method to place corner markers on valid floor tiles
+    void PlaceCornerMarkers()
+    {
+        // Calculate the total size of the grid including spacing
+        int totalWidth = gridSize * (roomSize + roomSpacing);
+        int totalHeight = gridSize * (roomSize + roomSpacing);
+
+        // Calculate boundary positions
+        int boundaryLeft = -outerBoundarySpacing;
+        int boundaryRight = totalWidth + outerBoundarySpacing;
+        int boundaryBottom = -outerBoundarySpacing;
+        int boundaryTop = totalHeight + outerBoundarySpacing;
+
+        // Create parent object to keep hierarchy clean
+        GameObject cornersParent = new GameObject("Corner Markers");
+        cornersParent.transform.SetParent(transform);
+
+        // Find valid floor tile positions for the corners
+        // We'll use cornerMarkerOffset to place them inside the level, away from walls
+        
+        // Top Left Corner - inside the level
+        Vector3Int topLeftPos = new Vector3Int(
+            boundaryLeft + cornerMarkerOffset, 
+            boundaryTop - cornerMarkerOffset, 
+            0
+        );
+        
+        // Ensure we're placing on a floor tile - move inward if needed
+        while (!IsValidFloorTile(topLeftPos) && topLeftPos.x < boundaryRight && topLeftPos.y > boundaryBottom)
+        {
+            topLeftPos.x += 1;
+            topLeftPos.y -= 1;
+        }
+        
+        // Top Right Corner - inside the level
+        Vector3Int topRightPos = new Vector3Int(
+            boundaryRight - cornerMarkerOffset,
+            boundaryTop - cornerMarkerOffset,
+            0
+        );
+        
+        // Ensure we're placing on a floor tile - move inward if needed
+        while (!IsValidFloorTile(topRightPos) && topRightPos.x > boundaryLeft && topRightPos.y > boundaryBottom)
+        {
+            topRightPos.x -= 1;
+            topRightPos.y -= 1;
+        }
+        
+        // Bottom Left Corner - inside the level
+        Vector3Int bottomLeftPos = new Vector3Int(
+            boundaryLeft + cornerMarkerOffset,
+            boundaryBottom + cornerMarkerOffset,
+            0
+        );
+        
+        // Ensure we're placing on a floor tile - move inward if needed
+        while (!IsValidFloorTile(bottomLeftPos) && bottomLeftPos.x < boundaryRight && bottomLeftPos.y < boundaryTop)
+        {
+            bottomLeftPos.x += 1;
+            bottomLeftPos.y += 1;
+        }
+        
+        // Bottom Right Corner - inside the level
+        Vector3Int bottomRightPos = new Vector3Int(
+            boundaryRight - cornerMarkerOffset,
+            boundaryBottom + cornerMarkerOffset,
+            0
+        );
+        
+        // Ensure we're placing on a floor tile - move inward if needed
+        while (!IsValidFloorTile(bottomRightPos) && bottomRightPos.x > boundaryLeft && bottomRightPos.y < boundaryTop)
+        {
+            bottomRightPos.x -= 1;
+            bottomRightPos.y += 1;
+        }
+        
+        // Create the corner markers at the valid positions
+        topLeftCorner = CreateCornerMarker("Corner Top Left", 
+            floorTilemap.GetCellCenterWorld(topLeftPos),
+            cornersParent.transform);
+        
+        topRightCorner = CreateCornerMarker("Corner Top Right", 
+            floorTilemap.GetCellCenterWorld(topRightPos),
+            cornersParent.transform);
+        
+        bottomLeftCorner = CreateCornerMarker("Corner Bottom Left", 
+            floorTilemap.GetCellCenterWorld(bottomLeftPos),
+            cornersParent.transform);
+        
+        bottomRightCorner = CreateCornerMarker("Corner Bottom Right", 
+            floorTilemap.GetCellCenterWorld(bottomRightPos),
+            cornersParent.transform);
+
+        Debug.Log("Corner markers placed at the four corners of the level on valid floor tiles.");
+    }
+
+    // Helper method to check if a position has a valid floor tile
+    private bool IsValidFloorTile(Vector3Int position)
+    {
+        // Check if this position has a floor tile
+        TileBase tile = floorTilemap.GetTile(position);
+        
+        // Also check that there's no wall tile at this position
+        TileBase wallAtPosition = wallTilemap.GetTile(position);
+        
+        return tile == floorTile && wallAtPosition == null;
+    }
+
+    // Helper method to create a corner marker GameObject
+    private GameObject CreateCornerMarker(string name, Vector3 position, Transform parent)
+    {
+        GameObject marker = new GameObject(name);
+        marker.transform.position = position;
+        marker.transform.SetParent(parent);
+        
+        // Add a tag for easier finding by other systems
+        marker.tag = "SpawnPoint";
+        
+        // Add a visual indicator for debugging if needed
+        if (Application.isEditor) 
+        {
+            // Add a sprite renderer for visibility in the editor
+            SpriteRenderer renderer = marker.AddComponent<SpriteRenderer>();
+            renderer.color = new Color(1f, 0.5f, 0f, 0.5f); // Orange semi-transparent
+            renderer.sprite = Resources.FindObjectsOfTypeAll<Sprite>().Length > 0 ? 
+                Resources.FindObjectsOfTypeAll<Sprite>()[0] : null;
+            
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.sortingOrder = 100; // Make sure it renders on top
+            
+            // Scale down the sprite
+            marker.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        }
+        
+        Debug.Log($"Created corner marker '{name}' at position {position}");
+        return marker;
+    }
+
     // Add this method to bake the NavMesh after level generation
     void BakeNavMesh()
     {
@@ -169,5 +315,22 @@ public class LevelGenerator : MonoBehaviour
         {
             Debug.LogWarning("NavMeshBaker not found! Cannot bake NavMesh.");
         }
+    }
+    
+    // Public getter methods for corner markers
+    public Transform GetTopLeftCorner() => topLeftCorner?.transform;
+    public Transform GetTopRightCorner() => topRightCorner?.transform;
+    public Transform GetBottomLeftCorner() => bottomLeftCorner?.transform;
+    public Transform GetBottomRightCorner() => bottomRightCorner?.transform;
+    
+    // Get all corners as a list
+    public List<Transform> GetAllCorners()
+    {
+        List<Transform> corners = new List<Transform>();
+        if (topLeftCorner) corners.Add(topLeftCorner.transform);
+        if (topRightCorner) corners.Add(topRightCorner.transform);
+        if (bottomLeftCorner) corners.Add(bottomLeftCorner.transform);
+        if (bottomRightCorner) corners.Add(bottomRightCorner.transform);
+        return corners;
     }
 }

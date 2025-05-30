@@ -19,6 +19,7 @@ public class PlayerManager : MonoBehaviour
 
     [Header("UI and Managers")]
     public UIManager uiManager;
+    public LevelGenerator levelGenerator; // Added reference to LevelGenerator
 
     public PlayerInput playerInput;
 
@@ -32,9 +33,24 @@ public class PlayerManager : MonoBehaviour
     private bool isShooting = false;
     private bool isReloading = false; // Prevent shooting during reload
 
-    private bool isTakingDamage = false; // Whether the player is currently taking damage
-    private float damageMultiplier = 1.0f; // Multiplier for incremental damage
-    private Coroutine damageCoroutine; // Coroutine to handle incremental damage
+    private bool isTakingDamage = false;
+    private float damageMultiplier = 1.0f;
+    private Coroutine damageCoroutine;
+    private Transform selectedCorner;
+    
+    // Flag to indicate if player position has been set
+    private bool hasPositionBeenSet = false;
+
+    void Awake()
+    {
+        // Try to find LevelGenerator if not assigned
+        if (levelGenerator == null)
+        {
+            levelGenerator = FindObjectOfType<LevelGenerator>();
+        }
+        
+        // Initial setup but don't try to spawn yet - LevelGenerator corners aren't ready
+    }
 
     void Start()
     {
@@ -57,13 +73,66 @@ public class PlayerManager : MonoBehaviour
             {
                 triggerCollider.isTrigger = true; // Ensure the collider is set as a trigger
             }
+        }
+        
+        // Set position using corners after a slight delay to ensure LevelGenerator has completed
+        StartCoroutine(SetPlayerPositionDelayed());
+    }
+    
+    // Coroutine to set player position with a slight delay
+    private IEnumerator SetPlayerPositionDelayed()
+    {
+        // Wait a small amount to ensure LevelGenerator has completed its Start() method
+        yield return new WaitForSeconds(0.1f);
+        
+        // Now try to position the player
+        if (!hasPositionBeenSet)
+        {
+            SelectRandomCorner();
+            if (selectedCorner != null)
+            {
+                // Position player at the selected corner
+                transform.position = selectedCorner.position;
+                Debug.Log($"Player spawned at {selectedCorner.name} - Position: {transform.position}");
+                hasPositionBeenSet = true;
+            }
             else
             {
-                // Debug.LogError("No Collider2D found on the player! Please assign a trigger collider.");
+                Debug.LogWarning("No corner was selected for player spawn point!");
             }
         }
     }
+    
+    // Method to select a random corner from the level
+    private void SelectRandomCorner()
+    {
+        if (levelGenerator == null) 
+        {
+            Debug.LogError("LevelGenerator is null! Cannot select a corner.");
+            return;
+        }
+        
+        List<Transform> corners = levelGenerator.GetAllCorners();
+        
+        if (corners != null && corners.Count > 0)
+        {
+            // Select a random corner
+            selectedCorner = corners[Random.Range(0, corners.Count)];
+            Debug.Log($"Selected corner for player spawn: {selectedCorner.name} at position: {selectedCorner.position}");
+        }
+        else
+        {
+            Debug.LogWarning("No corner markers available from LevelGenerator! Player will spawn at default position.");
+        }
+    }
+    
+    // Method to get the selected corner (can be used by other systems)
+    public Transform GetSelectedCorner()
+    {
+        return selectedCorner;
+    }
 
+    // All existing methods remain the same below this point
     void Update()
     {
         // Handle weapon switching

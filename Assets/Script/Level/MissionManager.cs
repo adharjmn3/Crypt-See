@@ -22,31 +22,33 @@ public class MissionManager : MonoBehaviour
         {
             Debug.Log("LevelGenerator is referenced. Waiting for it to initialize spawn points...");
             // Wait for the LevelGenerator to have collected its spawn points.
-            // Ensure LevelGenerator.GetObjectiveSpawnPoints() returns a non-null list.
             yield return new WaitUntil(() => levelGenerator.GetObjectiveSpawnPoints() != null && 
                                            levelGenerator.GetObjectiveSpawnPoints().Count > 0);
             
             Debug.Log("LevelGenerator has spawn points. Collecting spawn points...");
             CollectSpawnPointsFromLevelGenerator();
+            
+            // NEW: Make sure corners are ready before placing the finish trigger
+            yield return new WaitForSeconds(0.2f); // Small delay to ensure all corners are created
         }
         else // Scenario: Fixed level (no LevelGenerator)
         {
             Debug.Log("No LevelGenerator referenced. Using predefined spawn points for a fixed level.");
             // For fixed levels, 'spawnPoints' (the public List<Transform>)
             // should already be populated via the Inspector.
-            // We add a check here to ensure they are.
             if (this.spawnPoints == null || this.spawnPoints.Count == 0)
             {
                 Debug.LogError("MissionManager: LevelGenerator is NOT assigned, AND no predefined spawnPoints are set in the Inspector for the fixed level! Objectives cannot be spawned.");
-                yield break; // Stop the coroutine if no spawn points are available for a fixed level.
+                yield break;
             }
             Debug.Log($"Using {this.spawnPoints.Count} predefined spawn points for fixed level.");
         }
 
-        // This will be called for both scenarios.
-        // 'spawnPoints' will either be the predefined ones (if levelGenerator is null)
-        // or the ones collected from LevelGenerator.
+        // Generate objectives and place the finish trigger
         GenerateObjectives();
+        
+        // NEW: Verify the finish trigger was placed and initialized correctly
+        VerifyFinishTrigger();
     }
 
     private void CollectSpawnPointsFromLevelGenerator()
@@ -89,7 +91,7 @@ public class MissionManager : MonoBehaviour
         // Spawn objectives at unique spawn points
         for (int i = 0; i < Mathf.Min(maxObjectives, shuffledSpawnPoints.Count); i++)
         {
-            GameObject objectivePrefab = shuffledObjectives[i];
+            GameObject objectivePrefab = shuffledObjectives[i % shuffledObjectives.Count]; // Cycle through prefabs if needed
             Transform spawnPoint = shuffledSpawnPoints[i]; // Use a unique spawn point
             GameObject objectiveInstance = Instantiate(objectivePrefab, spawnPoint.position, spawnPoint.rotation);
 
@@ -106,30 +108,112 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        // Move the finish trigger to one of the collected positions if LevelGenerator is referenced
-        if (levelGenerator != null && finishTrigger != null && shuffledSpawnPoints.Count > 0)
+        // Enhanced finish trigger placement
+        if (finishTrigger == null)
         {
-            Transform finishPosition = shuffledSpawnPoints[shuffledSpawnPoints.Count - 1]; // Use the last shuffled spawn point
-            finishTrigger.transform.position = finishPosition.position;
-            Debug.Log($"Finish trigger moved to position: {finishPosition.position}");
+            Debug.LogError("Finish trigger GameObject is not assigned in the inspector!");
+            return;
         }
 
-        // Initialize the finish trigger
-        if (finishTrigger != null)
+        // Place the finish trigger at a corner if using LevelGenerator
+        if (levelGenerator != null)
         {
-            FinishTriggerBehavior finishBehavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
-            if (finishBehavior != null)
+            List<Transform> corners = null;
+            
+            try
             {
-                finishBehavior.Initialize(this); // Assign the MissionManager to the finish trigger
+                corners = levelGenerator.GetAllCorners();
+                Debug.Log($"Retrieved {corners?.Count ?? 0} corners from LevelGenerator");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Error getting corners from LevelGenerator: {e.Message}");
+            }
+            
+            if (corners != null && corners.Count > 0)
+            {
+                // Choose a random corner for the finish trigger
+                Transform finishPosition = corners[Random.Range(0, corners.Count)];
+                
+                // Get player's corner
+                Transform playerCorner = null;
+                PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+                if (playerManager != null)
+                {
+                    try
+                    {
+                        playerCorner = playerManager.GetSelectedCorner();
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogError($"Error getting player's corner: {e.Message}");
+                    }
+                }
+                
+                // Make sure the chosen corner is different from player's position
+                if (playerCorner != null && finishPosition == playerCorner && corners.Count > 1)
+                {
+                    List<Transform> availableCorners = new List<Transform>(corners);
+                    availableCorners.Remove(playerCorner);
+                    finishPosition = availableCorners[Random.Range(0, availableCorners.Count)];
+                }
+                
+                // Position and activate the finish trigger
+                finishTrigger.transform.position = finishPosition.position;
+                Debug.Log($"Finish trigger placed at corner: {finishPosition.name}, Position: {finishPosition.position}");
+                
+                // Make sure it's visually distinctive
+                SpriteRenderer renderer = finishTrigger.GetComponent<SpriteRenderer>();
+                if (renderer == null)
+                {
+                    renderer = finishTrigger.AddComponent<SpriteRenderer>();
+                    renderer.sprite = Resources.FindObjectsOfTypeAll<Sprite>().Length > 0 ? 
+                        Resources.FindObjectsOfTypeAll<Sprite>()[0] : null;
+                    renderer.color = Color.green; // Make it green to stand out
+                }
+                
+                // Initially hide the finish trigger until objectives are completed
+                finishTrigger.SetActive(false);
             }
             else
             {
-                Debug.LogError("FinishTriggerBehavior script is missing on the finish trigger!");
+                Debug.LogWarning("No corners available from LevelGenerator. Using fallback position.");
+                
+                // Fallback to using the last spawn point if no corners are available
+                if (this.spawnPoints != null && this.spawnPoints.Count > 0)
+                {
+                    Transform fallbackPosition = this.spawnPoints[this.spawnPoints.Count - 1];
+                    finishTrigger.transform.position = fallbackPosition.position;
+                    Debug.Log($"Finish trigger placed at fallback position: {fallbackPosition.position}");
+                }
+                else
+                {
+                    Debug.LogError("No valid position found for finish trigger! Placing at origin.");
+                    finishTrigger.transform.position = Vector3.zero;
+                }
             }
         }
+        else
+        {
+            // For fixed levels, the finish trigger should already be placed in the scene
+            Debug.Log($"Using predefined finish trigger position at {finishTrigger.transform.position}");
+        }
 
-        // Update the objective counter in the UI only if LevelGenerator is not referenced
-        if (uiManager != null && levelGenerator == null)
+        // Initialize the finish trigger behavior
+        FinishTriggerBehavior finishBehavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
+        if (finishBehavior == null)
+        {
+            finishBehavior = finishTrigger.AddComponent<FinishTriggerBehavior>();
+            Debug.LogWarning("FinishTriggerBehavior was missing and has been added automatically.");
+        }
+        
+        finishBehavior.Initialize(this);
+        
+        // Hide the trigger initially until all objectives are completed
+        finishTrigger.SetActive(false);
+
+        // Update the objective counter in the UI
+        if (uiManager != null)
         {
             uiManager.UpdateObjectiveCounter(maxObjectives);
         }
@@ -192,6 +276,14 @@ public class MissionManager : MonoBehaviour
             if (finishTrigger != null)
             {
                 finishTrigger.SetActive(true);
+                Debug.Log($"Finish trigger activated at position: {finishTrigger.transform.position}");
+                
+                // Add a visual indicator to make it more noticeable
+                StartCoroutine(PulseFinishTrigger());
+            }
+            else
+            {
+                Debug.LogError("Tried to activate finish trigger but it's null!");
             }
         }
     }
@@ -258,5 +350,68 @@ public class MissionManager : MonoBehaviour
     {
         Debug.Log($"Returning {this.spawnPoints.Count} objective spawn points used by MissionManager.");
         return this.spawnPoints;
+    }
+
+    // NEW: Add a method to verify the finish trigger setup
+    private void VerifyFinishTrigger()
+    {
+        if (finishTrigger == null)
+        {
+            Debug.LogError("Finish trigger is null! Please assign a finish trigger prefab in the inspector.");
+            return;
+        }
+        
+        // Log the current state of the finish trigger
+        Debug.Log($"Finish trigger state: Active={finishTrigger.activeSelf}, Position={finishTrigger.transform.position}");
+        
+        // Ensure it has the necessary component
+        FinishTriggerBehavior behavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
+        if (behavior == null)
+        {
+            Debug.LogError("Finish trigger doesn't have a FinishTriggerBehavior component!");
+        }
+        
+        // Initially hide it (regardless of whether objectives are complete)
+        finishTrigger.SetActive(false);
+        
+        // Make sure it has a collider
+        Collider2D collider = finishTrigger.GetComponent<Collider2D>();
+        if (collider == null)
+        {
+            Debug.LogWarning("Finish trigger doesn't have a Collider2D component. Adding one...");
+            collider = finishTrigger.AddComponent<BoxCollider2D>();
+            if (collider is BoxCollider2D boxCollider)
+            {
+                boxCollider.size = new Vector2(2f, 2f); // Set a reasonable size
+                boxCollider.isTrigger = true;
+            }
+        }
+        else
+        {
+            // Ensure it's set as a trigger
+            collider.isTrigger = true;
+        }
+    }
+
+    // NEW: Add a visual pulse effect to make the finish trigger more noticeable
+    private IEnumerator PulseFinishTrigger()
+    {
+        SpriteRenderer renderer = finishTrigger.GetComponent<SpriteRenderer>();
+        if (renderer == null) yield break;
+        
+        float duration = 3.0f;
+        float elapsed = 0f;
+        Color baseColor = renderer.color;
+        Color brightColor = new Color(1f, 1f, 0.5f, 1f); // Bright yellow-ish
+        
+        while (elapsed < duration)
+        {
+            float t = Mathf.PingPong(elapsed * 4f, 1.0f);
+            renderer.color = Color.Lerp(baseColor, brightColor, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        renderer.color = baseColor;
     }
 }
