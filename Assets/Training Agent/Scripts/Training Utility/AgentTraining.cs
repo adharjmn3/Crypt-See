@@ -37,7 +37,6 @@ public class AgentTraining : Agent
     private EnemyMovement enemyMovement;
     private EnemyStats enemyStats;
     float previousDistanceToTarget = 0f;
-    float normalizedHealth = 0f;
 
     public override void Initialize()
     {
@@ -48,15 +47,80 @@ public class AgentTraining : Agent
         enemyVision.SetTarget(targetObj);
     }
 
-    void Update()
+    public override void OnEpisodeBegin()
+    {
+        tensionMeter = 0f;
+        previousDistanceToTarget = 0f;
+        spawnerTraining.ResetStartPosition();
+        enemyStats.health = Random.Range(10, enemyStats.maxHealth);
+    }
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        float playerVisible = isTargetInSight ? 1f : 0f;
+        float canHear = isSoundDetected ? 1f : 0f;
+        float tensionFull = IsTensionMeterFull() ? 1f : 0f;
+        float tensionChange = tensionMeter - lastTensionMeter;
+
+        //Position & Rotation Observations
+        sensor.AddObservation(agentPos);
+        sensor.AddObservation(transform.up.normalized);
+
+        if (isTargetInSight || hasPlayerMemory)
+        {
+            sensor.AddObservation(targetPos);
+            Vector3 targetRelativePosition = targetPos - agentPos;
+            sensor.AddObservation(targetRelativePosition.normalized);
+            sensor.AddObservation(targetRelativePosition.magnitude/5f);
+        }
+        else
+        {
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0f);
+        }
+
+        //Status Observations
+        sensor.AddObservation(tensionChange);
+        sensor.AddObservation(tensionFull);
+        sensor.AddObservation(playerVisible);
+        sensor.AddObservation(canHear);
+    }
+
+    public override void OnActionReceived(ActionBuffers actions)
+    {
+        StatusUpdate();
+
+        Vector3 move;
+        float rotation;
+
+        var discreteActions = actions.DiscreteActions;
+        move = discreteActions[0] == 1 ? transform.up : Vector3.zero;
+        rotation = discreteActions[1] == 1 ? 1f : discreteActions[1] == 2 ? -1f : 0f;
+
+        enemyMovement.Move(move, rotation);
+        HandleTensionMeter();
+
+        if (hasPlayerMemory)
+        {
+            float distToTarget = Vector2.Distance(agentPos, targetPos);
+            if (distToTarget < previousDistanceToTarget)
+            {
+                previousDistanceToTarget = distToTarget;
+                AddReward(0.002f);
+            }
+        }
+
+        AddReward(-0.001f);
+    }
+
+    private void StatusUpdate()
     {
         agentPos = transform.position;
         targetPos = targetObj.transform.position;
 
         isTargetInSight = enemyVision.CanSeeTarget(agentPos, targetPos);
         isSoundDetected = enemyHearing.CanHearPlayer(agentPos, targetPos);
-
-        Debug.Log(isTargetInSight);
 
         if (isSoundDetected)
         {
@@ -83,91 +147,6 @@ public class AgentTraining : Agent
         }
     }
 
-    public override void OnEpisodeBegin()
-    {
-        tensionMeter = 0f;
-        previousDistanceToTarget = 0f;
-        spawnerTraining.ResetStartPosition();
-        enemyStats.health = Random.Range(10, enemyStats.maxHealth);
-    }
-
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        float playerVisible = isTargetInSight ? 1f : 0f;
-        float canHear = isSoundDetected ? 1f : 0f;
-        float tensionFull = IsTensionMeterFull() ? 1f : 0f;
-        float tensionChange = tensionMeter - lastTensionMeter;
-        normalizedHealth = enemyStats.health / enemyStats.maxHealth;
-
-        Debug.Log($"Current health {normalizedHealth}");
-
-        //Position & Rotation Observations
-        sensor.AddObservation(agentPos);
-        sensor.AddObservation(transform.up.normalized);
-
-        if (isTargetInSight || hasPlayerMemory)
-        {
-            sensor.AddObservation(targetPos);
-            Vector3 targetRelativePosition = targetPos - agentPos;
-            sensor.AddObservation(targetRelativePosition.normalized);
-            sensor.AddObservation(targetRelativePosition.magnitude/5f);
-        }
-        else
-        {
-            sensor.AddObservation(Vector3.zero);
-            sensor.AddObservation(Vector3.zero);
-            sensor.AddObservation(0f);
-        }
-
-        //Status Observations
-        sensor.AddObservation(tensionChange);
-        sensor.AddObservation(tensionFull);
-        sensor.AddObservation(playerVisible);
-        sensor.AddObservation(canHear);
-        sensor.AddObservation(normalizedHealth);
-    }
-
-    public override void OnActionReceived(ActionBuffers actions)
-    {
-        Vector3 move;
-        float rotation;
-
-        var discreteActions = actions.DiscreteActions;
-        move = discreteActions[0] == 1 ? transform.up : Vector3.zero;
-        rotation = discreteActions[1] == 1 ? 1f : discreteActions[1] == 2 ? -1f : 0f;
-
-        enemyMovement.Move(move, rotation);
-        HandleTensionMeter();
-
-        if (normalizedHealth < 0.3)
-        {
-            float distToTarget = Vector2.Distance(agentPos, targetPos);
-            if (distToTarget < previousDistanceToTarget)
-            {
-                AddReward(-0.5f); // penalti karena masih mendekat padahal darah rendah
-            }
-            else
-            {
-                AddReward(0.05f); // reward karena menjauh
-            }
-        }
-
-        if (hasPlayerMemory && normalizedHealth > 0.3)
-        {
-            float distToTarget = Vector2.Distance(agentPos, targetPos);
-            if (distToTarget < previousDistanceToTarget)
-            {
-                previousDistanceToTarget = distToTarget;
-                AddReward(0.0002f);
-            }
-
-            if (distToTarget > previousDistanceToTarget)
-            {
-                AddReward(-0.002f);
-            }
-        }
-    }
-
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var cont = actionsOut.DiscreteActions;
@@ -179,14 +158,7 @@ public class AgentTraining : Agent
     {
         if (collision.gameObject.CompareTag("Player") && IsTensionMeterFull())
         {
-            if (normalizedHealth > 0.3)
-            {
-                AddReward(2f);
-            }
-            else
-            {
-                AddReward(0.01f);
-            }
+            AddReward(3f);
             EndEpisode();
         }
     }
@@ -212,7 +184,7 @@ public class AgentTraining : Agent
 
         if (isSoundDetected || isTargetInSight)
         {
-            if (distance < 3f)
+            if (distance < 5f)
                 tensionMeter = maxTensionMeter;
             else
                 tensionMeter += Time.deltaTime * fillSpeed * distanceFactor;

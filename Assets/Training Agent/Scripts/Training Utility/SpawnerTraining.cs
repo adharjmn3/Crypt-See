@@ -15,11 +15,11 @@ public class SpawnerTraining : MonoBehaviour
         ResetSpawnPositionList();
 
         int index = Random.Range(0, spawnPointsList.Count);
-        agentTransform.position = spawnPointsList[index].localPosition;
+        agentTransform.localPosition = spawnPointsList[index].localPosition;
         spawnPointsList.RemoveAt(index);
 
         index = Random.Range(0, spawnPointsList.Count);
-        targetTransform.position = spawnPointsList[index].localPosition;
+        targetTransform.localPosition = spawnPointsList[index].localPosition;
         spawnPointsList.Clear();
     }
 
