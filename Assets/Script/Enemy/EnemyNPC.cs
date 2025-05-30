@@ -33,7 +33,11 @@ public class EnemyNPC : Agent
     private EnemyHearing enemyHearing;
     private EnemyMovement enemyMovement;
     private EnemyStats enemyStats;
+    private EnemyShoot enemyShoot;
     float previousDistanceToTarget = 0f;
+    
+    // Track if chase mode is active
+    private bool isChasing = false;
 
     public override void Initialize()
     {
@@ -43,12 +47,29 @@ public class EnemyNPC : Agent
         enemyVision = GetComponent<EnemyVision>();
         enemyStats = GetComponent<EnemyStats>();
         enemyVision.SetTarget(targetObj);
+        
+        // Get the shooting component
+        enemyShoot = GetComponent<EnemyShoot>();
+        
+        // Disable shooting at the start
+        if (enemyShoot != null)
+        {
+            enemyShoot.enabled = false;
+        }
     }
 
     public override void OnEpisodeBegin()
     {
         tensionMeter = 0f;
         previousDistanceToTarget = 0f;
+        
+        // Disable shooting when episode restarts
+        if (enemyShoot != null)
+        {
+            enemyShoot.enabled = false;
+        }
+        
+        isChasing = false;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -95,6 +116,7 @@ public class EnemyNPC : Agent
 
         enemyMovement.Move(move, rotation);
         HandleTensionMeter();
+        UpdateChaseState();
     }
 
     private void StatusUpdate()
@@ -130,6 +152,34 @@ public class EnemyNPC : Agent
         }
     }
 
+    // Update chase state and toggle shooting accordingly
+    private void UpdateChaseState()
+    {
+        bool shouldChase = IsTensionMeterFull();
+        
+        // Only update if there's a state change
+        if (shouldChase != isChasing)
+        {
+            isChasing = shouldChase;
+            
+            // Toggle shooting component
+            if (enemyShoot != null)
+            {
+                enemyShoot.enabled = isChasing;
+                
+                // Log for debugging
+                if (isChasing)
+                {
+                    Debug.Log($"{gameObject.name}: <color=red>Started chasing - enabling shooting</color>");
+                }
+                else
+                {
+                    Debug.Log($"{gameObject.name}: <color=blue>Stopped chasing - disabling shooting</color>");
+                }
+            }
+        }
+    }
+
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var cont = actionsOut.DiscreteActions;
@@ -145,7 +195,7 @@ public class EnemyNPC : Agent
         }
     }
 
-    private bool IsTensionMeterFull()
+    public bool IsTensionMeterFull()
     {
         return tensionMeter >= maxTensionMeter;
     }
