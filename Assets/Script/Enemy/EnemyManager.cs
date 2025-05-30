@@ -2,18 +2,56 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Enum to define the different AI types
+public enum EnemyAIType
+{
+    FiniteStateMachine,
+    NavMeshAgent,
+    MLAgent
+}
+
 public class EnemyManager : MonoBehaviour
 {
+    [Header("AI Selection")]
+    [SerializeField] private EnemyAIType selectedAIType = EnemyAIType.FiniteStateMachine;
+    [SerializeField] private GameObject finiteStateMachinePrefab;
+    [SerializeField] private GameObject navMeshAgentPrefab;
+    [SerializeField] private GameObject mlAgentPrefab;
+    
     [Header("Enemy Settings")]
-    public GameObject enemyPrefab; // The enemy prefab to spawn
-    public List<Transform> spawnPoints = new List<Transform>(); // List of spawn points for enemies
     public int maxEnemies = 5; // Maximum number of enemies to spawn
+    public List<Transform> spawnPoints = new List<Transform>(); // List of spawn points for enemies
 
     private bool spawnPointsReady = false; // Flag to indicate if spawn points are ready
     private bool isFixedLevelSetup = false; // Flag to indicate if we've initialized based on Inspector values
 
+    // Property to get the selected enemy prefab based on AI type
+    private GameObject enemyPrefab
+    {
+        get
+        {
+            switch (selectedAIType)
+            {
+                case EnemyAIType.FiniteStateMachine:
+                    return finiteStateMachinePrefab;
+                case EnemyAIType.NavMeshAgent:
+                    return navMeshAgentPrefab;
+                case EnemyAIType.MLAgent:
+                    return mlAgentPrefab;
+                default:
+                    return finiteStateMachinePrefab;
+            }
+        }
+    }
+
     private IEnumerator Start()
     {
+        // Validate the selected prefab is assigned
+        if (enemyPrefab == null)
+        {
+            Debug.LogError($"EnemyManager: No prefab assigned for the selected AI type: {selectedAIType}");
+        }
+        
         // Wait a frame. This gives LevelGenerator (if present) a chance to call InitializeSpawnPoints
         // during its own Start/Awake lifecycle.
         yield return null;
@@ -74,7 +112,7 @@ public class EnemyManager : MonoBehaviour
 
         if (enemyPrefab == null)
         {
-            Debug.LogError("EnemyManager: Enemy prefab is not assigned in EnemyManager!");
+            Debug.LogError($"EnemyManager: No prefab assigned for the selected AI type: {selectedAIType}");
             return;
         }
 
@@ -89,7 +127,7 @@ public class EnemyManager : MonoBehaviour
         shuffledSpawnPoints.Sort((a, b) => Random.Range(-1, 2)); // Using your existing shuffle method
 
         int enemiesSpawned = 0;
-        Debug.Log($"EnemyManager: Attempting to spawn up to {maxEnemies} enemies from {shuffledSpawnPoints.Count} available spawn points.");
+        Debug.Log($"EnemyManager: Attempting to spawn up to {maxEnemies} {selectedAIType} enemies from {shuffledSpawnPoints.Count} available spawn points.");
 
         // Spawn enemies at random spawn points
         foreach (Transform spawnPoint in shuffledSpawnPoints)
@@ -109,16 +147,29 @@ public class EnemyManager : MonoBehaviour
             GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
             if (enemyInstance != null)
             {
-                Debug.Log($"EnemyManager: Enemy spawned at position: {spawnPoint.position}");
+                // Make sure each enemy has the EnemyStatistic component
+                if (enemyInstance.GetComponent<EnemyStatistic>() == null)
+                {
+                    enemyInstance.AddComponent<EnemyStatistic>();
+                }
+                
+                Debug.Log($"EnemyManager: {selectedAIType} enemy spawned at position: {spawnPoint.position}");
                 enemiesSpawned++;
             }
             else
             {
-                Debug.LogError("EnemyManager: Failed to instantiate enemy prefab!");
+                Debug.LogError($"EnemyManager: Failed to instantiate {selectedAIType} enemy prefab!");
             }
         }
 
-        Debug.Log($"EnemyManager: Actually spawned {enemiesSpawned} enemies.");
+        Debug.Log($"EnemyManager: Actually spawned {enemiesSpawned} {selectedAIType} enemies.");
+    }
+
+    // Method to change AI type at runtime (useful for debugging or game mechanics)
+    public void ChangeAIType(EnemyAIType newType)
+    {
+        selectedAIType = newType;
+        Debug.Log($"EnemyManager: AI type changed to {selectedAIType}. Note: This will only affect newly spawned enemies.");
     }
 
     public void OnEnemyKilled(GameObject enemy)
