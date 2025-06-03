@@ -621,4 +621,52 @@ public class EnemyManager : MonoBehaviour
         }
         return count;
     }
+
+    // New methods to add to your existing EnemyManager class
+
+    // Get a copy of all spawned enemies
+    public List<GameObject> GetSpawnedEnemies()
+    {
+        return new List<GameObject>(spawnedEnemies);
+    }
+
+    // Despawn a specific enemy
+    public void DespawnEnemy(GameObject enemy)
+    {
+        if (enemy == null) return;
+        
+        // Remove from tracking
+        if (spawnedEnemies.Contains(enemy))
+        {
+            spawnedEnemies.Remove(enemy);
+        }
+        
+        // Destroy the enemy GameObject
+        Destroy(enemy);
+    }
+
+    // Set enemy spawn parameters
+    public void SetEnemySpawnParameters(EnemyAIType aiType, int newMaxEnemies, int newFixedEnemiesPerType)
+    {
+        // Update AI type
+        selectedAIType = aiType;
+        
+        // Update max enemies
+        maxEnemies = newMaxEnemies;
+        
+        // Update fixed enemies per type for combined mode
+        fixedEnemiesPerType = newFixedEnemiesPerType;
+        
+        Debug.Log($"EnemyManager: Parameters updated - AI Type: {selectedAIType}, Max Enemies: {maxEnemies}, Fixed per type: {fixedEnemiesPerType}");
+    }
+
+    // Respawn enemies with current settings
+    public void RespawnEnemies()
+    {
+        // Clear any existing tracking
+        InitializeSpawnPointTracking();
+        
+        // Spawn enemies using current settings
+        SpawnEnemies();
+    }
 }
