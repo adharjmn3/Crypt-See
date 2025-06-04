@@ -12,7 +12,7 @@ public class DebugManager : MonoBehaviour
     [SerializeField] private TMP_InputField fixedCountPerTypeInputField;
     [SerializeField] private Button applyButton;
     [SerializeField] private Toggle useFixedCountToggle;
-    
+    [SerializeField] private TMP_Text enemyCountText;
     [Header("References")]
     [SerializeField] private EnemyManager enemyManager;
     
@@ -165,15 +165,13 @@ public class DebugManager : MonoBehaviour
         
         // Despawn all existing enemies
         DespawnAllEnemies();
-        
-        // Wait a frame to ensure all enemies are properly despawned
         yield return null;
         
         // Update enemy manager settings
         UpdateEnemyManagerSettings(aiType, maxEnemies, fixedCountPerType);
-        
-        // Trigger enemy respawning
         enemyManager.RespawnEnemies();
+        yield return null; // Wait a frame for spawn to complete
+        UpdateEnemyCountUI();
         
         // Re-enable the apply button
         if (applyButton != null)
@@ -197,11 +195,20 @@ public class DebugManager : MonoBehaviour
         }
         
         Debug.Log($"DebugManager: Despawned {enemiesToDespawn.Count} enemies.");
+        UpdateEnemyCountUI();
     }
     
     private void UpdateEnemyManagerSettings(EnemyAIType aiType, int maxEnemies, int fixedCountPerType)
     {
         // Update enemy manager settings
         enemyManager.SetEnemySpawnParameters(aiType, maxEnemies, fixedCountPerType);
+    }
+
+    private void UpdateEnemyCountUI()
+    {
+        if (enemyCountText != null && enemyManager != null)
+        {
+            enemyCountText.text = "Enemy Spawned: " + enemyManager.GetSpawnedEnemyCount();
+        }
     }
 }

@@ -18,17 +18,17 @@ public class EnemyManager : MonoBehaviour
     [SerializeField] private GameObject finiteStateMachinePrefab;
     [SerializeField] private GameObject navMeshAgentPrefab;
     [SerializeField] private GameObject mlAgentPrefab;
-    
+
     [Header("Enemy Settings")]
     public int maxEnemies = 5; // Maximum number of enemies to spawn
     [Tooltip("Fixed number of each enemy type to spawn in Combined mode (0 = one of each type)")]
     [SerializeField] private int fixedEnemiesPerType = 0; // Fixed number of each type to spawn in Combined mode
     public List<Transform> spawnPoints = new List<Transform>(); // List of spawn points for enemies
-    
+
     // Dictionary to track which spawn points are currently in use
     private Dictionary<Transform, bool> spawnPointUsage = new Dictionary<Transform, bool>();
     private List<GameObject> spawnedEnemies = new List<GameObject>();
-    
+
     private bool spawnPointsReady = false; // Flag to indicate if spawn points are ready
     private bool isFixedLevelSetup = false; // Flag to indicate if we've initialized based on Inspector values
 
@@ -59,7 +59,7 @@ public class EnemyManager : MonoBehaviour
     {
         // Validate the selected prefabs are assigned
         ValidatePrefabs();
-        
+
         // Wait a frame. This gives LevelGenerator (if present) a chance to call InitializeSpawnPoints
         // during its own Start/Awake lifecycle.
         yield return null;
@@ -114,7 +114,7 @@ public class EnemyManager : MonoBehaviour
         // Clear any potentially pre-assigned (Inspector) points if LevelGenerator is providing them.
         this.spawnPoints.Clear();
         this.spawnPoints.AddRange(pointsFromGenerator);
-        
+
         if (this.spawnPoints.Count > 0)
         {
             spawnPointsReady = true;
@@ -172,7 +172,7 @@ public class EnemyManager : MonoBehaviour
         // Clear any previous data
         spawnPointUsage.Clear();
         spawnedEnemies.Clear();
-        
+
         // Initialize all spawn points as unused
         foreach (Transform sp in spawnPoints)
         {
@@ -193,13 +193,13 @@ public class EnemyManager : MonoBehaviour
                 return sp;
             }
         }
-        
+
         // If all spawn points are used, reuse one (round-robin)
         if (shuffledSpawnPoints.Count > 0)
         {
             return shuffledSpawnPoints[Random.Range(0, shuffledSpawnPoints.Count)];
         }
-        
+
         return null;
     }
 
@@ -227,7 +227,7 @@ public class EnemyManager : MonoBehaviour
         while (enemiesSpawned < maxEnemies)
         {
             Transform spawnPoint = GetAvailableSpawnPoint(shuffledSpawnPoints);
-            
+
             if (spawnPoint == null)
             {
                 Debug.LogWarning("EnemyManager: No valid spawn points available.");
@@ -243,11 +243,11 @@ public class EnemyManager : MonoBehaviour
                 {
                     enemyInstance.AddComponent<EnemyStatistic>();
                 }
-                
+
                 // Mark this spawn point as used and track the enemy
                 MarkSpawnPointAsUsed(spawnPoint);
                 spawnedEnemies.Add(enemyInstance);
-                
+
                 Debug.Log($"EnemyManager: {selectedAIType} enemy spawned at position: {spawnPoint.position}");
                 enemiesSpawned++;
             }
@@ -255,7 +255,7 @@ public class EnemyManager : MonoBehaviour
             {
                 Debug.LogError($"EnemyManager: Failed to instantiate {selectedAIType} enemy prefab!");
             }
-            
+
             // If we've used all spawn points but need more enemies, reset the usage tracking to allow reuse
             if (enemiesSpawned < maxEnemies && AllSpawnPointsUsed())
             {
@@ -291,16 +291,16 @@ public class EnemyManager : MonoBehaviour
     private void SpawnCombinedEnemies(List<Transform> shuffledSpawnPoints)
     {
         int enemiesSpawned = 0;
-        
+
         if (fixedEnemiesPerType > 0)
         {
             // Fixed number mode
             int totalNeededEnemies = fixedEnemiesPerType * 3; // 3 types
             int targetEnemies = Mathf.Min(totalNeededEnemies, maxEnemies);
-            
+
             Debug.Log($"EnemyManager: Combined mode - attempting to spawn {fixedEnemiesPerType} of each AI type " +
                       $"(target: {targetEnemies}, max: {maxEnemies}) from {shuffledSpawnPoints.Count} available spawn points.");
-            
+
             // Check if we need to reuse spawn points
             bool needToReuseSpawnPoints = targetEnemies > shuffledSpawnPoints.Count;
             if (needToReuseSpawnPoints)
@@ -308,30 +308,30 @@ public class EnemyManager : MonoBehaviour
                 Debug.Log($"EnemyManager: Need to spawn {targetEnemies} enemies but only have {shuffledSpawnPoints.Count} spawn points. " +
                           $"Some spawn points will be reused.");
             }
-            
+
             // Calculate how many of each type to spawn based on available maxEnemies
             int fsm = Mathf.Min(fixedEnemiesPerType, maxEnemies / 3 + (maxEnemies % 3 > 0 ? 1 : 0));
             int nav = Mathf.Min(fixedEnemiesPerType, maxEnemies / 3 + (maxEnemies % 3 > 1 ? 1 : 0));
             int ml = Mathf.Min(fixedEnemiesPerType, maxEnemies / 3);
-            
+
             // Spawn FSM Enemies
             enemiesSpawned += SpawnFixedNumberOfEnemies(finiteStateMachinePrefab, "FSM", fsm, shuffledSpawnPoints, enemiesSpawned);
-            
+
             // Reset spawn point usage if needed before spawning next type
             if (AllSpawnPointsUsed() && enemiesSpawned < targetEnemies)
             {
                 ResetSpawnPointUsage();
             }
-            
+
             // Spawn NavMesh Enemies
             enemiesSpawned += SpawnFixedNumberOfEnemies(navMeshAgentPrefab, "NavMesh", nav, shuffledSpawnPoints, enemiesSpawned);
-            
+
             // Reset spawn point usage if needed before spawning next type
             if (AllSpawnPointsUsed() && enemiesSpawned < targetEnemies)
             {
                 ResetSpawnPointUsage();
             }
-            
+
             // Spawn ML-Agent Enemies
             enemiesSpawned += SpawnFixedNumberOfEnemies(mlAgentPrefab, "ML-Agent", ml, shuffledSpawnPoints, enemiesSpawned);
         }
@@ -339,7 +339,7 @@ public class EnemyManager : MonoBehaviour
         {
             // Original behavior - one of each type
             int spawnCount = Mathf.Min(3, maxEnemies); // Up to 3 enemies (one of each type), but respect maxEnemies
-            
+
             Debug.Log($"EnemyManager: Combined mode - attempting to spawn one of each AI type (max: {spawnCount}) from {shuffledSpawnPoints.Count} available spawn points.");
 
             // Check if we need to reuse spawn points
@@ -365,7 +365,7 @@ public class EnemyManager : MonoBehaviour
                         // Mark this spawn point as used and track the enemy
                         MarkSpawnPointAsUsed(spawnPoint);
                         spawnedEnemies.Add(enemyInstance);
-                        
+
                         Debug.Log($"EnemyManager: FSM enemy spawned at position: {spawnPoint.position}");
                         enemiesSpawned++;
                     }
@@ -394,7 +394,7 @@ public class EnemyManager : MonoBehaviour
                         // Mark this spawn point as used and track the enemy
                         MarkSpawnPointAsUsed(spawnPoint);
                         spawnedEnemies.Add(enemyInstance);
-                        
+
                         Debug.Log($"EnemyManager: NavMesh enemy spawned at position: {spawnPoint.position}");
                         enemiesSpawned++;
                     }
@@ -423,7 +423,7 @@ public class EnemyManager : MonoBehaviour
                         // Mark this spawn point as used and track the enemy
                         MarkSpawnPointAsUsed(spawnPoint);
                         spawnedEnemies.Add(enemyInstance);
-                        
+
                         Debug.Log($"EnemyManager: ML-Agent enemy spawned at position: {spawnPoint.position}");
                         enemiesSpawned++;
                     }
@@ -436,13 +436,13 @@ public class EnemyManager : MonoBehaviour
         if (additionalEnemies > 0)
         {
             Debug.Log($"EnemyManager: Combined mode - spawning {additionalEnemies} additional random enemies.");
-            
+
             // Reset spawn point usage if all points are used
             if (AllSpawnPointsUsed())
             {
                 ResetSpawnPointUsage();
             }
-            
+
             for (int i = 0; i < additionalEnemies; i++)
             {
                 Transform spawnPoint = GetAvailableSpawnPoint(shuffledSpawnPoints);
@@ -451,12 +451,12 @@ public class EnemyManager : MonoBehaviour
                     Debug.LogWarning("EnemyManager: No valid spawn points available for additional enemies.");
                     break;
                 }
-                
+
                 // Randomly select which enemy type to spawn
                 int randomType = Random.Range(0, 3);
                 GameObject prefabToSpawn = null;
                 string enemyType = "";
-                
+
                 switch (randomType)
                 {
                     case 0:
@@ -472,7 +472,7 @@ public class EnemyManager : MonoBehaviour
                         enemyType = "ML-Agent";
                         break;
                 }
-                
+
                 if (prefabToSpawn != null)
                 {
                     GameObject enemyInstance = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
@@ -485,12 +485,12 @@ public class EnemyManager : MonoBehaviour
                         // Mark this spawn point as used and track the enemy
                         MarkSpawnPointAsUsed(spawnPoint);
                         spawnedEnemies.Add(enemyInstance);
-                        
+
                         Debug.Log($"EnemyManager: Additional {enemyType} enemy spawned at position: {spawnPoint.position}");
                         enemiesSpawned++;
                     }
                 }
-                
+
                 // Reset spawn point usage if all points are used and we still need more enemies
                 if (AllSpawnPointsUsed() && i < additionalEnemies - 1)
                 {
@@ -510,17 +510,17 @@ public class EnemyManager : MonoBehaviour
     }
 
     // Helper method to spawn a fixed number of a specific enemy type
-    private int SpawnFixedNumberOfEnemies(GameObject prefab, string enemyTypeName, int count, 
+    private int SpawnFixedNumberOfEnemies(GameObject prefab, string enemyTypeName, int count,
                                          List<Transform> spawnPoints, int currentTotalSpawned)
     {
         int spawned = 0;
-        
+
         if (prefab == null)
         {
             Debug.LogError($"EnemyManager: {enemyTypeName} prefab is null. Cannot spawn {count} enemies of this type.");
             return 0;
         }
-        
+
         for (int i = 0; i < count; i++)
         {
             // Check if we've hit the max enemies limit
@@ -529,7 +529,7 @@ public class EnemyManager : MonoBehaviour
                 Debug.LogWarning($"EnemyManager: Reached max enemies limit ({maxEnemies}). Stopping spawn of {enemyTypeName}.");
                 break;
             }
-            
+
             // Get an available spawn point
             Transform spawnPoint = GetAvailableSpawnPoint(spawnPoints);
             if (spawnPoint == null)
@@ -537,9 +537,9 @@ public class EnemyManager : MonoBehaviour
                 Debug.LogWarning($"EnemyManager: No valid spawn points available for {enemyTypeName} enemy.");
                 break;
             }
-            
+
             GameObject enemyInstance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-            
+
             if (enemyInstance != null)
             {
                 if (enemyInstance.GetComponent<EnemyStatistic>() == null)
@@ -549,10 +549,10 @@ public class EnemyManager : MonoBehaviour
                 // Mark this spawn point as used and track the enemy
                 MarkSpawnPointAsUsed(spawnPoint);
                 spawnedEnemies.Add(enemyInstance);
-                
-                Debug.Log($"EnemyManager: {enemyTypeName} enemy {i+1}/{count} spawned at position: {spawnPoint.position}");
+
+                Debug.Log($"EnemyManager: {enemyTypeName} enemy {i + 1}/{count} spawned at position: {spawnPoint.position}");
                 spawned++;
-                
+
                 // If all spawn points are used but we need more enemies, reset usage
                 if (i < count - 1 && AllSpawnPointsUsed())
                 {
@@ -564,7 +564,7 @@ public class EnemyManager : MonoBehaviour
                 Debug.LogError($"EnemyManager: Failed to instantiate {enemyTypeName} enemy!");
             }
         }
-        
+
         return spawned;
     }
 
@@ -588,13 +588,13 @@ public class EnemyManager : MonoBehaviour
 
         Debug.Log("Enemy killed and removed from spawned enemies.");
     }
-    
+
     // Method to get the count of currently spawned enemies
     public int GetSpawnedEnemyCount()
     {
         return spawnedEnemies.Count;
     }
-    
+
     // Method to get the count of enemies by specific type
     public int GetSpawnedEnemyCountByType(EnemyAIType type)
     {
@@ -602,7 +602,7 @@ public class EnemyManager : MonoBehaviour
         foreach (GameObject enemy in spawnedEnemies)
         {
             if (enemy == null) continue;
-            
+
             switch (type)
             {
                 case EnemyAIType.FiniteStateMachine:
@@ -634,13 +634,13 @@ public class EnemyManager : MonoBehaviour
     public void DespawnEnemy(GameObject enemy)
     {
         if (enemy == null) return;
-        
+
         // Remove from tracking
         if (spawnedEnemies.Contains(enemy))
         {
             spawnedEnemies.Remove(enemy);
         }
-        
+
         // Destroy the enemy GameObject
         Destroy(enemy);
     }
@@ -650,13 +650,13 @@ public class EnemyManager : MonoBehaviour
     {
         // Update AI type
         selectedAIType = aiType;
-        
+
         // Update max enemies
         maxEnemies = newMaxEnemies;
-        
+
         // Update fixed enemies per type for combined mode
         fixedEnemiesPerType = newFixedEnemiesPerType;
-        
+
         Debug.Log($"EnemyManager: Parameters updated - AI Type: {selectedAIType}, Max Enemies: {maxEnemies}, Fixed per type: {fixedEnemiesPerType}");
     }
 
@@ -665,7 +665,7 @@ public class EnemyManager : MonoBehaviour
     {
         // Clear any existing tracking
         InitializeSpawnPointTracking();
-        
+
         // Spawn enemies using current settings
         SpawnEnemies();
     }
