@@ -687,7 +687,7 @@ public class EnemyNavM : MonoBehaviour
         {
             Gizmos.color = Color.white;
             string stateText = $"State: {movementState}";
-            UnityEditor.Handles.Label(transform.position + Vector3.up * 1.5f, stateText);
+            // UnityEditor.Handles.Label(transform.position + Vector3.up * 1.5f, stateText);
         }
     }
     

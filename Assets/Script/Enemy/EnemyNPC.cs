@@ -1,5 +1,4 @@
 using System;
-using Player.Stats;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -9,8 +8,6 @@ public class EnemyNPC : Agent
 {
     [Header("Target Reference")]
     [SerializeField] private GameObject targetObj;
-    [SerializeField] GameObject[] starPosition;
-    [SerializeField] GameObject[] targetPosition;
 
     [Header("Agent Settings")]
     [SerializeField] public float tensionMeter;
@@ -42,9 +39,6 @@ public class EnemyNPC : Agent
     // Track if chase mode is active
     private bool isChasing = false;
 
-    private float startTime;
-    private float episodeStartDuration;
-
     public override void Initialize()
     {
         targetObj = GameObject.FindGameObjectWithTag("Player");
@@ -53,41 +47,29 @@ public class EnemyNPC : Agent
         enemyVision = GetComponent<EnemyVision>();
         enemyStats = GetComponent<EnemyStats>();
         enemyVision.SetTarget(targetObj);
-
+        
         // Get the shooting component
         enemyShoot = GetComponent<EnemyShoot>();
-
+        
         // Disable shooting at the start
         if (enemyShoot != null)
         {
             enemyShoot.enabled = false;
         }
-
-        episodeStartDuration = Time.time;
     }
 
     public override void OnEpisodeBegin()
     {
         tensionMeter = 0f;
         previousDistanceToTarget = 0f;
-
+        
         // Disable shooting when episode restarts
         if (enemyShoot != null)
         {
             enemyShoot.enabled = false;
         }
-
+        
         isChasing = false;
-
-        targetObj.GetComponent<Health>().currentHealth = 100;
-        episodeStartDuration = Time.time;
-
-
-        int index = UnityEngine.Random.Range(0, starPosition.Length);
-        transform.position = starPosition[index].transform.position;
-
-        index = UnityEngine.Random.Range(0, targetPosition.Length);
-        targetObj.transform.position = targetPosition[index].transform.position;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -135,23 +117,6 @@ public class EnemyNPC : Agent
         enemyMovement.Move(move, rotation);
         HandleTensionMeter();
         UpdateChaseState();
-
-        if (targetObj.GetComponent<Health>().currentHealth <= 0)
-        {
-            float episodeDuration = Time.time - episodeStartDuration;
-            float captureTime = Time.time - startTime;
-            FindObjectOfType<StatisticLogger>().LogData("Yes", captureTime, episodeDuration);
-            EndEpisode();
-        }
-
-        if (Time.time - episodeStartDuration >= 60f)
-        {
-            float episodeDuration = Time.time - episodeStartDuration;
-            float captureTime = -1;
-            FindObjectOfType<StatisticLogger>().LogData("No", captureTime, episodeDuration);
-            EndEpisode();
-        }
-
     }
 
     private void StatusUpdate()
@@ -201,11 +166,10 @@ public class EnemyNPC : Agent
             if (enemyShoot != null)
             {
                 enemyShoot.enabled = isChasing;
-
+                
                 // Log for debugging
                 if (isChasing)
                 {
-                    startTime = Time.time;
                     Debug.Log($"{gameObject.name}: <color=red>Started chasing - enabling shooting</color>");
                 }
                 else

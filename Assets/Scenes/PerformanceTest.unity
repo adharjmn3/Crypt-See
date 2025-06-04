@@ -267,6 +267,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -340,7 +344,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -824,6 +828,171 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 288163814}
   m_CullTransparentMesh: 1
+--- !u!43 &291611672
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 11
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 54
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 20
+    localAABB:
+      m_Center: {x: -0.0054563954, y: 0.022109114, z: 0}
+      m_Extent: {x: 0.17494094, y: 0.09095102, z: 0}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 00000100020000000300010000000400030005000400000005000600040005000700060005000800070008000500090002000a00000000000b00050001000c00020003000d00010004000e00030006000f000400050010000900070011000600080012000700090013000800
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 20
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 28
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 880
+    _typelessdata: 5c8d2d3efcfc8cbd00000000de867f3fbaeb783d00000080000000805c8d2d3efcfc8cbd5c8d2d3efcfc8cbd2a1a263eda794f3d00000000cff7b73e55e76e3f00000080000000802a1a263eda794f3d2a1a263eda794f3dc3d3293e3c0015bc00000000de867f3fbaeb783d00000080000000802a1a263eda794f3d5c8d2d3efcfc8cbdbf3aa63d80a4a73d00000000ccf7b73e55e76e3f0000008000000080a9540239128ce73d2a1a263eda794f3da9540239128ce73d00000000cda6dfbedb48663f0000008000000080a9540239128ce73da9540239128ce73d90cbb2bb30d081bd00000000ed63ffbc25e07fbf00000000000000805c8d2d3efcfc8cbd15ba38beca466dbd1cb3a9bd8804953d00000000cea6dfbedb48663f0000008000000080b1d329befbf9043da9540239128ce73db1d329befbf9043d0000000015bf7cbf2ebd223e0000008000000080b1d329befbf9043db1d329befbf9043de34631be9e9950bc0000000015bf7cbf2ebd223e000000800000008015ba38beca466dbdb1d329befbf9043d15ba38beca466dbd00000000d663ffbc25e07fbf000000000000008015ba38beca466dbd15ba38beca466dbdc3d3293e3c0015bc00000000de867f3fbaeb783d00000080000000802a1a263eda794f3d5c8d2d3efcfc8cbd5c8d2d3efcfc8cbd00000000ed63ffbc25e07fbf00000000000000805c8d2d3efcfc8cbd5c8d2d3efcfc8cbd2a1a263eda794f3d00000000de867f3fbaeb783d00000080000000802a1a263eda794f3d2a1a263eda794f3dbf3aa63d80a4a73d00000000cff7b73e55e76e3f0000008000000080a9540239128ce73d2a1a263eda794f3da9540239128ce73d00000000ccf7b73e55e76e3f0000008000000080a9540239128ce73da9540239128ce73d1cb3a9bd8804953d00000000cda6dfbedb48663f0000008000000080b1d329befbf9043da9540239128ce73d90cbb2bb30d081bd00000000d663ffbc25e07fbf00000000000000805c8d2d3efcfc8cbd15ba38beca466dbdb1d329befbf9043d00000000cea6dfbedb48663f0000008000000080b1d329befbf9043db1d329befbf9043de34631be9e9950bc0000000015bf7cbf2ebd223e000000800000008015ba38beca466dbdb1d329befbf9043d15ba38beca466dbd0000000015bf7cbf2ebd223e000000800000008015ba38beca466dbd15ba38beca466dbd
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: -0.0054563954, y: 0.022109114, z: 0}
+    m_Extent: {x: 0.17494094, y: 0.09095102, z: 0}
+  m_MeshUsageFlags: 0
+  m_CookingOptions: 30
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  m_MeshMetrics[0]: 1
+  m_MeshMetrics[1]: 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1001 &296699331
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41522,6 +41691,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -41595,7 +41768,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -41646,6 +41819,10 @@ PrefabInstance:
       propertyPath: empSound
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
@@ -41716,7 +41893,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -42285,7 +42462,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 6
+  orthographic size: 45.36
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -42310,7 +42487,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -2.4}
+  m_LocalPosition: {x: 0, y: 29.3, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -53869,6 +54046,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -53942,7 +54123,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -54015,6 +54196,10 @@ PrefabInstance:
       propertyPath: empSound
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
@@ -54089,7 +54274,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -65555,6 +65740,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -65624,7 +65813,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -65765,171 +65954,6 @@ Transform:
   - {fileID: 554832896}
   m_Father: {fileID: 449591973}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!43 &872036099
-Mesh:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 11
-  m_SubMeshes:
-  - serializedVersion: 2
-    firstByte: 0
-    indexCount: 54
-    topology: 0
-    baseVertex: 0
-    firstVertex: 0
-    vertexCount: 20
-    localAABB:
-      m_Center: {x: -0.0054563954, y: 0.022109114, z: 0}
-      m_Extent: {x: 0.17494094, y: 0.09095102, z: 0}
-  m_Shapes:
-    vertices: []
-    shapes: []
-    channels: []
-    fullWeights: []
-  m_BindPose: []
-  m_BoneNameHashes: 
-  m_RootBoneNameHash: 0
-  m_BonesAABB: []
-  m_VariableBoneCountWeights:
-    m_Data: 
-  m_MeshCompression: 0
-  m_IsReadable: 1
-  m_KeepVertices: 1
-  m_KeepIndices: 1
-  m_IndexFormat: 0
-  m_IndexBuffer: 00000100020000000300010000000400030005000400000005000600040005000700060005000800070008000500090002000a00000000000b00050001000c00020003000d00010004000e00030006000f000400050010000900070011000600080012000700090013000800
-  m_VertexData:
-    serializedVersion: 3
-    m_VertexCount: 20
-    m_Channels:
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 12
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 28
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    m_DataSize: 880
-    _typelessdata: 5c8d2d3efcfc8cbd00000000de867f3fbaeb783d00000080000000805c8d2d3efcfc8cbd5c8d2d3efcfc8cbd2a1a263eda794f3d00000000cff7b73e55e76e3f00000080000000802a1a263eda794f3d2a1a263eda794f3dc3d3293e3c0015bc00000000de867f3fbaeb783d00000080000000802a1a263eda794f3d5c8d2d3efcfc8cbdbf3aa63d80a4a73d00000000ccf7b73e55e76e3f0000008000000080a9540239128ce73d2a1a263eda794f3da9540239128ce73d00000000cda6dfbedb48663f0000008000000080a9540239128ce73da9540239128ce73d90cbb2bb30d081bd00000000ed63ffbc25e07fbf00000000000000805c8d2d3efcfc8cbd15ba38beca466dbd1cb3a9bd8804953d00000000cea6dfbedb48663f0000008000000080b1d329befbf9043da9540239128ce73db1d329befbf9043d0000000015bf7cbf2ebd223e0000008000000080b1d329befbf9043db1d329befbf9043de34631be9e9950bc0000000015bf7cbf2ebd223e000000800000008015ba38beca466dbdb1d329befbf9043d15ba38beca466dbd00000000d663ffbc25e07fbf000000000000008015ba38beca466dbd15ba38beca466dbdc3d3293e3c0015bc00000000de867f3fbaeb783d00000080000000802a1a263eda794f3d5c8d2d3efcfc8cbd5c8d2d3efcfc8cbd00000000ed63ffbc25e07fbf00000000000000805c8d2d3efcfc8cbd5c8d2d3efcfc8cbd2a1a263eda794f3d00000000de867f3fbaeb783d00000080000000802a1a263eda794f3d2a1a263eda794f3dbf3aa63d80a4a73d00000000cff7b73e55e76e3f0000008000000080a9540239128ce73d2a1a263eda794f3da9540239128ce73d00000000ccf7b73e55e76e3f0000008000000080a9540239128ce73da9540239128ce73d1cb3a9bd8804953d00000000cda6dfbedb48663f0000008000000080b1d329befbf9043da9540239128ce73d90cbb2bb30d081bd00000000d663ffbc25e07fbf00000000000000805c8d2d3efcfc8cbd15ba38beca466dbdb1d329befbf9043d00000000cea6dfbedb48663f0000008000000080b1d329befbf9043db1d329befbf9043de34631be9e9950bc0000000015bf7cbf2ebd223e000000800000008015ba38beca466dbdb1d329befbf9043d15ba38beca466dbd0000000015bf7cbf2ebd223e000000800000008015ba38beca466dbd15ba38beca466dbd
-  m_CompressedMesh:
-    m_Vertices:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UV:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Normals:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Tangents:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Weights:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_NormalSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_TangentSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_FloatColors:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_BoneIndices:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Triangles:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UVInfo: 0
-  m_LocalAABB:
-    m_Center: {x: -0.0054563954, y: 0.022109114, z: 0}
-    m_Extent: {x: 0.17494094, y: 0.09095102, z: 0}
-  m_MeshUsageFlags: 0
-  m_CookingOptions: 30
-  m_BakedConvexCollisionMesh: 
-  m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
-  m_MeshMetrics[1]: 1
-  m_MeshOptimizationFlags: 1
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1001 &891885983
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -65946,6 +65970,10 @@ PrefabInstance:
       propertyPath: empSound
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
@@ -66016,7 +66044,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -66781,6 +66809,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -66854,7 +66886,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -67331,6 +67363,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -67400,7 +67436,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -67442,6 +67478,10 @@ PrefabInstance:
       propertyPath: empSound
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
@@ -67516,7 +67556,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightOuterRadius
@@ -67555,6 +67595,10 @@ PrefabInstance:
       propertyPath: empSound
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
@@ -67625,7 +67669,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -67672,6 +67716,10 @@ PrefabInstance:
       propertyPath: empSound
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
@@ -67746,7 +67794,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -68850,6 +68898,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -68919,7 +68971,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightOuterRadius
@@ -69039,6 +69091,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -69112,7 +69168,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightOuterRadius
@@ -69248,6 +69304,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -69317,7 +69377,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -69492,6 +69552,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -69565,7 +69629,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -69723,6 +69787,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -69792,7 +69860,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -70734,6 +70802,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -70803,7 +70875,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_LightVolumeIntensityEnabled
@@ -71779,6 +71851,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -71848,7 +71924,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -72220,6 +72296,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -72293,7 +72373,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -72441,6 +72521,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 73ef20a8d17f72c47ac065611c5e07e8, type: 3}
     - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2234766922046844152, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 942732641}
@@ -72510,7 +72594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_NormalMapDistance
-      value: 3
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7890092218837800307, guid: 989b948dd520bcb44b5f9eb8ea0f9a63, type: 3}
       propertyPath: m_PointLightInnerAngle
@@ -72799,15 +72883,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3866139173460296434, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 21.21
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 3866139173460296434, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.47
+      value: 24.8
       objectReference: {fileID: 0}
     - target: {fileID: 4015147591807891405, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
       propertyPath: m_Name
       value: PlayerManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 4930615828967746557, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
+      propertyPath: maxHealth
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 4930615828967746557, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
       propertyPath: uiManager
@@ -72817,10 +72905,18 @@ PrefabInstance:
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 1720941044}
+    - target: {fileID: 4930615828967746557, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
+      propertyPath: currentHealth
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 5099257236079343176, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
       propertyPath: minimapCamera
       value: 
       objectReference: {fileID: 3088528}
+    - target: {fileID: 7223837747455418587, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7409222396382832621, guid: 43f6d6c855012ac41b2d72559b6998e8, type: 3}
       propertyPath: linePrefab
       value: 
@@ -73291,6 +73387,10 @@ PrefabInstance:
     - target: {fileID: 7360544450587872451, guid: d28a99c0d151dbc4d9d5fca753b753e3, type: 3}
       propertyPath: m_Name
       value: MissionManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 7360544450587872451, guid: d28a99c0d151dbc4d9d5fca753b753e3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
