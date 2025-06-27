@@ -42,6 +42,43 @@ public class RoomLayout : MonoBehaviour
         }
     }
 
+    public void ApplyRandomRotation()
+    {
+        // Store original rotations of spawn points
+        Dictionary<Transform, Quaternion> originalRotations = new Dictionary<Transform, Quaternion>();
+        foreach (Transform spawnPoint in EnemySpawnPosition)
+        {
+            if (spawnPoint != null)
+            {
+                originalRotations[spawnPoint] = spawnPoint.rotation;
+            }
+        }
+        foreach (Transform spawnPoint in ObjectiveSpawnPosition)
+        {
+            if (spawnPoint != null)
+            {
+                originalRotations[spawnPoint] = spawnPoint.rotation;
+            }
+        }
+
+        // Randomly choose a rotation: 0, 90, 180, or 270 degrees around the Z-axis
+        int rotationAngle = Random.Range(0, 4) * 90;
+        if (rotationAngle == 0)
+        {
+            return;
+        }
+
+        // Rotate the room
+        transform.Rotate(0, 0, rotationAngle);
+        Debug.Log($"Room {gameObject.name} rotated by {rotationAngle} degrees.");
+
+        // Restore original rotations
+        foreach (var entry in originalRotations)
+        {
+            entry.Key.rotation = entry.Value;
+        }
+    }
+
     public void GenerateWalls()
     {
         if (middle == null)
