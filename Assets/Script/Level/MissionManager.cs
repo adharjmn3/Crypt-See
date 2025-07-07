@@ -232,18 +232,6 @@ public class MissionManager : MonoBehaviour
 
     public void CompleteObjective(GameObject completedObjective, ObjectiveData objectiveData)
     {
-        Debug.Log($"Completed Objective: {objectiveData.objectiveName}");
-
-        // Show dialog for the completed objective only if LevelGenerator is not referenced
-        if (uiManager != null && levelGenerator == null)
-        {
-            uiManager.UpdateDialog(
-                objectiveData.dialogSpeakerName,
-                objectiveData.dialogContent,
-                true,
-                objectiveData.typingSpeed
-            );
-        }
 
         // Handle mandatory objectives
         if (objectiveData.isMandatory)
