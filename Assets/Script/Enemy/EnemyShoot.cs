@@ -5,105 +5,74 @@ using UnityEngine;
 public class EnemyShoot : MonoBehaviour
 {
     [Header("Shooting Settings")]
-    public GameObject bulletPrefab; // Prefab for the bullet
-    public Transform bulletSpawnPoint; // Transform for bullet spawn
-    public float bulletSpeed = 10f; // Speed of the bullet
-    public float shootingRange = 10f; // Maximum range to shoot the player
-    public int bulletDamage = 10; // Damage dealt by the bullet
+    public GameObject bulletPrefab;
+    public Transform bulletSpawnPoint;
+    public float bulletSpeed = 10f;
+    public float shootingRange = 15f;
+    public int bulletDamage = 10;
 
     [Header("Effects")]
-    public ParticleSystem muzzleFlash; // Muzzle flash effect
-    public AudioSource audioSource; // Audio source for shooting sound
-    public AudioClip shootSound; // Sound effect for shooting
+    public ParticleSystem muzzleFlash;
+    public AudioSource audioSource;
+    public AudioClip shootSound;
 
-    private Transform playerTransform; // Reference to the player's transform
-    private float nextFireTime = 0f; // Time until the next shot can be fired
-    private EnemyStats enemyStats; // Reference to the EnemyStats script
+    private Transform playerTransform;
+    private float nextFireTime = 0f;
+    private EnemyStats enemyStats;
 
-    void Start()
+    void Awake()
     {
-        // Find the player in the scene
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            playerTransform = player.transform;
-        }
-        else
-        {
-            Debug.LogError("Player not found! Make sure the player has the 'Player' tag.");
-        }
-
-        // Get the EnemyStats component
+        playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
         enemyStats = GetComponent<EnemyStats>();
-        if (enemyStats == null)
-        {
-            Debug.LogError("EnemyStats component is missing on this GameObject!");
-        }
     }
 
-    void Update()
+    /// <summary>
+    /// Returns true if the agent is allowed to fire a shot right now.
+    /// </summary>
+    public bool CanShoot()
     {
-        if (playerTransform == null || enemyStats == null) return;
-
-        // Check if the player is within shooting range
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-        if (distanceToPlayer <= shootingRange && Time.time >= nextFireTime)
-        {
-            // Shoot at the player
-            ShootAtPlayer();
-            nextFireTime = Time.time + 1f / enemyStats.rateOfFire; // Use rateOfFire from EnemyStats
-        }
+        return Time.time >= nextFireTime;
     }
 
-    private void ShootAtPlayer()
+    /// <summary>
+    /// Called by the ML-Agent to attempt a shot. Returns true if successful.
+    /// </summary>
+    public bool TryShoot()
     {
-        // Simulate accuracy
-        if (Random.value > enemyStats.accuracy) // Use accuracy from EnemyStats
-        {
-            Debug.Log($"{gameObject.name} missed the shot!");
-            return; // Miss the shot
-        }
+        if (playerTransform == null || enemyStats == null) return false;
 
-        // Play muzzle flash effect
-        if (muzzleFlash != null)
-        {
-            muzzleFlash.Play();
-        }
+        // Check cooldown, range, and accuracy
+        if (Time.time < nextFireTime) return false;
+        if (Vector3.Distance(transform.position, playerTransform.position) > shootingRange) return false;
+        if (Random.value > enemyStats.accuracy) return false; // Missed shot based on accuracy
 
-        // Play shooting sound
-        if (audioSource != null && shootSound != null)
-        {
-            audioSource.PlayOneShot(shootSound);
-        }
+        // If all checks pass, fire the shot
+        nextFireTime = Time.time + 1f / enemyStats.rateOfFire;
+        FireBullet();
+        return true;
+    }
+
+    private void FireBullet()
+    {
+        // Play effects
+        if (muzzleFlash != null) muzzleFlash.Play();
+        if (audioSource != null && shootSound != null) audioSource.PlayOneShot(shootSound);
 
         // Spawn the bullet
         if (bulletPrefab != null && bulletSpawnPoint != null)
         {
-            // Calculate the direction to the player
-            Vector2 direction = (playerTransform.position - bulletSpawnPoint.position).normalized;
+            Vector3 direction = (playerTransform.position - bulletSpawnPoint.position).normalized;
+            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.LookRotation(direction));
 
-            // Offset the bullet's spawn position slightly forward to avoid collision with the enemy
-            Vector3 spawnPosition = bulletSpawnPoint.position + (Vector3)(direction * 0.5f); // Adjust the offset as needed
-
-            GameObject bullet = Instantiate(bulletPrefab, spawnPosition, bulletSpawnPoint.rotation);
-
-            // Get the Bullet script and initialize it
-            Bullet bulletScript = bullet.GetComponent<Bullet>();
-            if (bulletScript != null)
-            {
-                bulletScript.Initialize(shootingRange, bulletDamage, Weapon.AmmoType.Kinetic, gameObject); // Pass the enemy as the shooter
-            }
-
-            // Set the bullet's velocity
-            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+            // Assuming a Rigidbody on the bullet
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
             if (rb != null)
             {
                 rb.velocity = direction * bulletSpeed;
             }
-            else
-            {
-                Debug.LogWarning("Rigidbody2D is missing on the bullet prefab.");
-            }
+
+            // Initialize bullet damage etc. if your bullet has a script for it
         }
     }
+
 }
