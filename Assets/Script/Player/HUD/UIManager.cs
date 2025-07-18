@@ -22,6 +22,11 @@ public class UIManager : MonoBehaviour
     public TMP_Text dialogText; // Text for the dialog content
     public GameObject dialogBackground; // Background for the dialog
 
+    [Header("Finish Story UI")]
+    public GameObject finishStoryPanel; // Panel for the finish story UI
+    public Button nextLevelButton; // Button to go to the next level
+    public Button exitButtonFinish; // Button to exit the game from finish panel
+
     [Header("End Story UI")]
     public GameObject endStoryPanel; // Panel for the end story UI
     public Button restartButton; // Button to restart the level
@@ -191,6 +196,60 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // Method to show the Finish Story UI
+    public void ShowFinishStoryUI(bool show)
+    {
+        if (finishStoryPanel != null)
+        {
+            Debug.Log($"Finish Story UI visibility set to: {show}");
+            finishStoryPanel.SetActive(show);
+
+            // Disable the minimap when showing the finish screen
+            ToggleMinimap(!show);
+
+            if (show)
+            {
+                Time.timeScale = 0f; // Pause the game
+                Cursor.lockState = CursorLockMode.None; // Unlock the cursor
+                Cursor.visible = true; // Show the cursor
+            }
+        }
+        else
+        {
+            Debug.LogError("Finish Story Panel is not assigned in the UIManager.");
+        }
+    }
+
+    // Method to set up finish story button actions
+    public void SetupFinishStoryButton(System.Action onNextLevel, System.Action onExit)
+    {
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.onClick.RemoveAllListeners();
+            if (onNextLevel != null)
+            {
+                nextLevelButton.onClick.AddListener(() => onNextLevel.Invoke());
+            }
+        }
+        else
+        {
+            Debug.LogError("nextLevelButton is not assigned in the UIManager.");
+        }
+
+        if (exitButtonFinish != null)
+        {
+            exitButtonFinish.onClick.RemoveAllListeners();
+            if (onExit != null)
+            {
+                exitButtonFinish.onClick.AddListener(() => onExit.Invoke());
+            }
+        }
+        else
+        {
+            Debug.LogError("exitButtonFinish is not assigned in the UIManager.");
+        }
+    }
+
     // Method to show the End Story UI
     public void ShowEndStoryUI(bool show)
     {
@@ -201,6 +260,13 @@ public class UIManager : MonoBehaviour
 
             // Disable the minimap when showing the end screen
             ToggleMinimap(!show);
+
+            if (show)
+            {
+                Time.timeScale = 0f; // Pause the game
+                Cursor.lockState = CursorLockMode.None; // Unlock the cursor
+                Cursor.visible = true; // Show the cursor
+            }
         }
         else
         {
@@ -258,11 +324,28 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log("UIManager: RestartGame() method called. Attempting to reload scene.");
         // If you pause the game by setting Time.timeScale to 0, reset it here.
-        // Time.timeScale = 1f; 
+        Time.timeScale = 1f; 
 
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         Debug.Log($"UIManager: Reloading scene: {sceneName}");
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+    }
+
+    public void LoadNextScene()
+    {
+        Time.timeScale = 1f; // Unpause the game before loading next scene
+        int currentSceneIndex = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = currentSceneIndex + 1;
+        if (nextSceneIndex < UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings)
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneIndex);
+        }
+        else
+        {
+            Debug.LogWarning("No more scenes in build settings. Can't load next scene.");
+            // Optionally, load the main menu or a credits scene
+            // UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
     }
 
     public void ExitGame()

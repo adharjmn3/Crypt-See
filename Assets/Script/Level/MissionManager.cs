@@ -199,15 +199,8 @@ public class MissionManager : MonoBehaviour
             Debug.Log($"Using predefined finish trigger position at {finishTrigger.transform.position}");
         }
 
-        // Initialize the finish trigger behavior
-        FinishTriggerBehavior finishBehavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
-        if (finishBehavior == null)
-        {
-            finishBehavior = finishTrigger.AddComponent<FinishTriggerBehavior>();
-            Debug.LogWarning("FinishTriggerBehavior was missing and has been added automatically.");
-        }
-        
-        finishBehavior.Initialize(this);
+        // The finish trigger should have an ObjectiveBehavior component to handle the finish logic.
+        // We no longer need to manage FinishTriggerBehavior from here.
         
         // Hide the trigger initially until all objectives are completed
         finishTrigger.SetActive(false);
@@ -276,19 +269,26 @@ public class MissionManager : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void VerifyFinishTrigger()
     {
-        if (other.CompareTag("Player") && allObjectivesCompleted)
+        if (finishTrigger == null)
         {
-            Debug.Log("Player reached the finish point. Showing End Story UI...");
-
-            if (uiManager != null)
-            {
-                // Show the End Story UI
-                uiManager.ShowEndStoryUI(true);
-
-                // Set up button actions
-                uiManager.SetupEndStoryButtons(
+            Debug.LogError("Finish trigger is null! Please assign a finish trigger prefab in the inspector.");
+            return;
+        }
+        
+        // Log the current state of the finish trigger
+        Debug.Log($"Finish trigger state: Active={finishTrigger.activeSelf}, Position={finishTrigger.transform.position}");
+        
+        // Ensure it has the necessary component
+        ObjectiveBehavior behavior = finishTrigger.GetComponent<ObjectiveBehavior>();
+        if (behavior == null)
+        {
+            Debug.LogError("Finish trigger doesn't have an ObjectiveBehavior component!");
+        }
+        else if (behavior.objectiveData == null || behavior.objectiveData.type != ObjectiveData.ObjectiveType.Finish)
+        {
+            Debug.LogError("The ObjectiveBehavior on the finish trigger must have an ObjectiveData asset of type 'Finish'.");
                     onRestart: ReloadScene,
                     onExit: ExitGame
                 );
