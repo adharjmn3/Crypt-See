@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -225,7 +225,6 @@ public class MissionManager : MonoBehaviour
 
     public void CompleteObjective(GameObject completedObjective, ObjectiveData objectiveData)
     {
-
         // Handle mandatory objectives
         if (objectiveData.isMandatory)
         {
@@ -269,31 +268,25 @@ public class MissionManager : MonoBehaviour
         }
     }
 
-    private void VerifyFinishTrigger()
+    private IEnumerator PulseFinishTrigger()
     {
-        if (finishTrigger == null)
+        SpriteRenderer renderer = finishTrigger.GetComponent<SpriteRenderer>();
+        if (renderer == null) yield break;
+        
+        float duration = 3.0f;
+        float elapsed = 0f;
+        Color baseColor = renderer.color;
+        Color brightColor = new Color(1f, 1f, 0.5f, 1f); // Bright yellow-ish
+        
+        while (elapsed < duration)
         {
-            Debug.LogError("Finish trigger is null! Please assign a finish trigger prefab in the inspector.");
-            return;
+            float t = Mathf.PingPong(elapsed * 4f, 1.0f);
+            renderer.color = Color.Lerp(baseColor, brightColor, t);
+            elapsed += Time.deltaTime;
+            yield return null;
         }
         
-        // Log the current state of the finish trigger
-        Debug.Log($"Finish trigger state: Active={finishTrigger.activeSelf}, Position={finishTrigger.transform.position}");
-        
-        // Ensure it has the necessary component
-        ObjectiveBehavior behavior = finishTrigger.GetComponent<ObjectiveBehavior>();
-        if (behavior == null)
-        {
-            Debug.LogError("Finish trigger doesn't have an ObjectiveBehavior component!");
-        }
-        else if (behavior.objectiveData == null || behavior.objectiveData.type != ObjectiveData.ObjectiveType.Finish)
-        {
-            Debug.LogError("The ObjectiveBehavior on the finish trigger must have an ObjectiveData asset of type 'Finish'.");
-                    onRestart: ReloadScene,
-                    onExit: ExitGame
-                );
-            }
-        }
+        renderer.color = baseColor;
     }
 
     public bool AreAllObjectivesCompleted()
@@ -302,42 +295,10 @@ public class MissionManager : MonoBehaviour
         return allObjectivesCompleted && activeMandatoryObjectives.Count == 0;
     }
 
-    public void FinishGame()
-    {
-        if (uiManager != null)
-        {
-            // Show the End Story UI
-            uiManager.ShowEndStoryUI(true);
-
-            // Set up button actions
-            uiManager.SetupEndStoryButtons(
-                onRestart: ReloadScene,
-                onExit: ExitGame
-            );
-        }
-        else
-        {
-            Debug.LogError("UIManager is not assigned in MissionManager.");
-        }
-    }
-
-    // Method to exit the game
-    private void ExitGame()
-    {
-        Debug.Log("Exiting the game...");
-        Application.Quit();
-    }
-
     private void ReloadScene()
     {
         // Reload the current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public List<Transform> GetObjectiveSpawnPoints()
-    {
-        Debug.Log($"Returning {this.spawnPoints.Count} objective spawn points used by MissionManager.");
-        return this.spawnPoints;
     }
 
     // NEW: Add a method to verify the finish trigger setup
@@ -379,27 +340,5 @@ public class MissionManager : MonoBehaviour
             // Ensure it's set as a trigger
             collider.isTrigger = true;
         }
-    }
-
-    // NEW: Add a visual pulse effect to make the finish trigger more noticeable
-    private IEnumerator PulseFinishTrigger()
-    {
-        SpriteRenderer renderer = finishTrigger.GetComponent<SpriteRenderer>();
-        if (renderer == null) yield break;
-        
-        float duration = 3.0f;
-        float elapsed = 0f;
-        Color baseColor = renderer.color;
-        Color brightColor = new Color(1f, 1f, 0.5f, 1f); // Bright yellow-ish
-        
-        while (elapsed < duration)
-        {
-            float t = Mathf.PingPong(elapsed * 4f, 1.0f);
-            renderer.color = Color.Lerp(baseColor, brightColor, t);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-        
-        renderer.color = baseColor;
     }
 }
