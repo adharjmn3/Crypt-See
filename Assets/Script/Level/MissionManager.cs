@@ -47,8 +47,8 @@ public class MissionManager : MonoBehaviour
         // Generate objectives and place the finish trigger
         GenerateObjectives();
         
-        // NEW: Verify the finish trigger was placed and initialized correctly
-        VerifyFinishTrigger();
+        finishTrigger.SetActive(false); // Hide the finish trigger initially
+
     }
 
     private void CollectSpawnPointsFromLevelGenerator()
@@ -199,8 +199,7 @@ public class MissionManager : MonoBehaviour
             Debug.Log($"Using predefined finish trigger position at {finishTrigger.transform.position}");
         }
 
-        // The finish trigger should have an ObjectiveBehavior component to handle the finish logic.
-        // We no longer need to manage FinishTriggerBehavior from here.
+        // The finish trigger GameObject should have the NextLevelTrigger script attached to handle changing levels.
         
         // Hide the trigger initially until all objectives are completed
         finishTrigger.SetActive(false);
@@ -264,7 +263,7 @@ public class MissionManager : MonoBehaviour
             else
             {
                 Debug.LogError("Tried to activate finish trigger but it's null!");
-            }
+    }
         }
     }
 
@@ -302,43 +301,5 @@ public class MissionManager : MonoBehaviour
     }
 
     // NEW: Add a method to verify the finish trigger setup
-    private void VerifyFinishTrigger()
-    {
-        if (finishTrigger == null)
-        {
-            Debug.LogError("Finish trigger is null! Please assign a finish trigger prefab in the inspector.");
-            return;
-        }
-        
-        // Log the current state of the finish trigger
-        Debug.Log($"Finish trigger state: Active={finishTrigger.activeSelf}, Position={finishTrigger.transform.position}");
-        
-        // Ensure it has the necessary component
-        FinishTriggerBehavior behavior = finishTrigger.GetComponent<FinishTriggerBehavior>();
-        if (behavior == null)
-        {
-            Debug.LogError("Finish trigger doesn't have a FinishTriggerBehavior component!");
-        }
-        
-        // Initially hide it (regardless of whether objectives are complete)
-        finishTrigger.SetActive(false);
-        
-        // Make sure it has a collider
-        Collider2D collider = finishTrigger.GetComponent<Collider2D>();
-        if (collider == null)
-        {
-            Debug.LogWarning("Finish trigger doesn't have a Collider2D component. Adding one...");
-            collider = finishTrigger.AddComponent<BoxCollider2D>();
-            if (collider is BoxCollider2D boxCollider)
-            {
-                boxCollider.size = new Vector2(2f, 2f); // Set a reasonable size
-                boxCollider.isTrigger = true;
-            }
-        }
-        else
-        {
-            // Ensure it's set as a trigger
-            collider.isTrigger = true;
-        }
-    }
+   
 }
