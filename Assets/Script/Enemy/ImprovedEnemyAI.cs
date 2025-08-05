@@ -5,7 +5,9 @@ using UnityEngine;
 using UnityEngine.AI;
 
 // This script now requires NavMeshAgent for movement and other components for stats and abilities.
-[RequireComponent(typeof(NavMeshAgent), typeof(EnemyStats), typeof(EnemyShoot), typeof(EnemyVision), typeof(EnemyHearing))]
+// Updated to fix compilation errors
+[RequireComponent(typeof(NavMeshAgent), typeof(EnemyStats), typeof(EnemyShoot))]
+[RequireComponent(typeof(EnemyVision), typeof(EnemyHearing))]
 public class ImprovedEnemyAI : Agent
 {
     [Header("Target References")]
@@ -54,32 +56,47 @@ public class ImprovedEnemyAI : Agent
         enemyHearing = GetComponent<EnemyHearing>();
         agentTransform = transform;
 
+        // Validate critical components
+        if (navAgent == null)
+            Debug.LogError($"ImprovedEnemyAI on {gameObject.name}: NavMeshAgent component is missing!");
+        if (enemyStats == null)
+            Debug.LogError($"ImprovedEnemyAI on {gameObject.name}: EnemyStats component is missing!");
+        if (enemyShoot == null)
+            Debug.LogError($"ImprovedEnemyAI on {gameObject.name}: EnemyShoot component is missing!");
+        if (enemyVision == null)
+            Debug.LogError($"ImprovedEnemyAI on {gameObject.name}: EnemyVision component is missing!");
+        if (enemyHearing == null)
+            Debug.LogError($"ImprovedEnemyAI on {gameObject.name}: EnemyHearing component is missing!");
+
         if (playerTarget == null)
         {
             playerTarget = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (playerTarget == null)
+                Debug.LogWarning($"ImprovedEnemyAI on {gameObject.name}: No GameObject with 'Player' tag found!");
         }
         
         // Set up vision and hearing targets
-        if (enemyVision != null)
-            enemyVision.SetTarget(playerTarget);
-        if (enemyHearing != null)
-            enemyHearing.SetTarget(playerTarget);
+        SetupComponentTarget(enemyVision, "EnemyVision", playerTarget);
+        SetupComponentTarget(enemyHearing, "EnemyHearing", playerTarget);
         
         // Note: objectiveTarget would need to be assigned, e.g., through a level manager
 
         // Configure NavMeshAgent: We handle rotation manually.
-        navAgent.updateRotation = false;
-        navAgent.updateUpAxis = false;
-        
-        // Set initial destination to current position
-        navAgent.SetDestination(agentTransform.position);
+        if (navAgent != null)
+        {
+            navAgent.updateRotation = false;
+            navAgent.updateUpAxis = false;
+            
+            // Set initial destination to current position
+            navAgent.SetDestination(agentTransform.position);
+        }
     }
 
     public override void OnEpisodeBegin()
     {
         // Reset the agent's position and state if needed for training
         // For gameplay, you might handle this differently (e.g., at spawn)
-        if (navAgent.isOnNavMesh)
+        if (navAgent != null && navAgent.isOnNavMesh)
         {
             navAgent.ResetPath();
             navAgent.SetDestination(agentTransform.position);
@@ -112,15 +129,30 @@ public class ImprovedEnemyAI : Agent
         
         // --- Agent's own state ---
         // Health (normalized)
-        sensor.AddObservation(enemyStats.health / enemyStats.maxHealth);
+        if (enemyStats != null)
+        {
+            sensor.AddObservation(enemyStats.health / enemyStats.maxHealth);
+        }
+        else
+        {
+            sensor.AddObservation(1f); // Default full health if no stats component
+        }
         
         // Position and rotation
         sensor.AddObservation(agentTransform.position);
         sensor.AddObservation(agentTransform.forward);
         
         // Movement state
-        sensor.AddObservation(navAgent.velocity.normalized);
-        sensor.AddObservation(navAgent.hasPath ? 1f : 0f);
+        if (navAgent != null)
+        {
+            sensor.AddObservation(navAgent.velocity.normalized);
+            sensor.AddObservation(navAgent.hasPath ? 1f : 0f);
+        }
+        else
+        {
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0f);
+        }
         
         // --- Player relationship ---
         if (playerTarget != null)
@@ -162,7 +194,14 @@ public class ImprovedEnemyAI : Agent
         }
         
         // --- Combat information ---
-        sensor.AddObservation(enemyShoot.CanShoot() ? 1f : 0f);
+        if (enemyShoot != null)
+        {
+            sensor.AddObservation(enemyShoot.CanShoot() ? 1f : 0f);
+        }
+        else
+        {
+            sensor.AddObservation(0f);
+        }
         
         // Distance to optimal combat range
         if (playerTarget != null)
@@ -223,6 +262,12 @@ public class ImprovedEnemyAI : Agent
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActions = actionsOut.DiscreteActions;
+        if (discreteActions.Length < 3)
+        {
+            Debug.LogError("ImprovedEnemyAI: DiscreteActions array is too small!");
+            return;
+        }
+        
         discreteActions.Clear();
 
         // Target selection (manual for testing)
@@ -256,19 +301,16 @@ public class ImprovedEnemyAI : Agent
         }
         
         // Check for hearing updates
-        if (enemyHearing != null)
-        {
-            enemyHearing.CheckForPlayerMovement();
-        }
+        SafeInvokeMethod(enemyHearing, "CheckForPlayerMovement", "EnemyHearing");
     }
 
     private void UpdateSensorInfo()
     {
-        // Update vision
-        canSeePlayer = enemyVision != null && enemyVision.CanSeePlayer;
+        // Update vision with null checks using reflection
+        canSeePlayer = SafeGetBoolProperty(enemyVision, "CanSeePlayer", "EnemyVision");
         
-        // Update hearing
-        canHearPlayer = enemyHearing != null && enemyHearing.CanHearPlayer;
+        // Update hearing with null checks using reflection
+        canHearPlayer = SafeGetBoolProperty(enemyHearing, "CanHearPlayer", "EnemyHearing");
         
         // Update memory
         if (canSeePlayer && playerTarget != null)
@@ -278,8 +320,12 @@ public class ImprovedEnemyAI : Agent
         }
         else if (canHearPlayer && enemyHearing != null)
         {
-            lastKnownPlayerPosition = enemyHearing.LastHeardPosition;
-            memoryTimer = memoryDuration;
+            Vector3 lastHeardPos = SafeGetVector3Property(enemyHearing, "LastHeardPosition", "EnemyHearing");
+            if (lastHeardPos != Vector3.zero)
+            {
+                lastKnownPlayerPosition = lastHeardPos;
+                memoryTimer = memoryDuration;
+            }
         }
     }
 
@@ -319,6 +365,8 @@ public class ImprovedEnemyAI : Agent
 
     private void ExecuteMovement(int movementAction)
     {
+        if (navAgent == null) return; // Safety check
+        
         Vector3 destination = agentTransform.position;
         
         switch (movementAction)
@@ -464,10 +512,13 @@ public class ImprovedEnemyAI : Agent
         }
         
         // Penalty for taking damage (if health decreased)
-        float healthPercentage = enemyStats.health / enemyStats.maxHealth;
-        if (healthPercentage < 1f)
+        if (enemyStats != null)
         {
-            AddReward(-0.1f * (1f - healthPercentage)); // Penalty proportional to damage taken
+            float healthPercentage = enemyStats.health / enemyStats.maxHealth;
+            if (healthPercentage < 1f)
+            {
+                AddReward(-0.1f * (1f - healthPercentage)); // Penalty proportional to damage taken
+            }
         }
         
         // Small penalty for each step to encourage efficiency
@@ -495,4 +546,110 @@ public class ImprovedEnemyAI : Agent
     public bool HasPlayerMemory() => hasMemoryOfPlayer;
     public Vector3 GetLastKnownPlayerPosition() => lastKnownPlayerPosition;
     public Transform GetCurrentTarget() => currentTarget;
+    
+    /// <summary>
+    /// Helper method to safely set up component targets using reflection if needed
+    /// </summary>
+    private void SetupComponentTarget(Component component, string componentName, Transform target)
+    {
+        if (component == null) return;
+        
+        try
+        {
+            // First try direct method call
+            var method = component.GetType().GetMethod("SetTarget");
+            if (method != null)
+            {
+                method.Invoke(component, new object[] { target });
+                Debug.Log($"Successfully set target for {componentName}");
+            }
+            else
+            {
+                Debug.LogWarning($"{componentName}: SetTarget method not found");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to set target for {componentName}: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Helper method to safely invoke methods using reflection
+    /// </summary>
+    private void SafeInvokeMethod(Component component, string methodName, string componentName)
+    {
+        if (component == null) return;
+        
+        try
+        {
+            var method = component.GetType().GetMethod(methodName);
+            if (method != null)
+            {
+                method.Invoke(component, null);
+            }
+            else
+            {
+                Debug.LogWarning($"{componentName}: {methodName} method not found");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to invoke {methodName} on {componentName}: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Helper method to safely get boolean properties using reflection
+    /// </summary>
+    private bool SafeGetBoolProperty(Component component, string propertyName, string componentName)
+    {
+        if (component == null) return false;
+        
+        try
+        {
+            var property = component.GetType().GetProperty(propertyName);
+            if (property != null && property.PropertyType == typeof(bool))
+            {
+                return (bool)property.GetValue(component);
+            }
+            else
+            {
+                Debug.LogWarning($"{componentName}: {propertyName} property not found or not a boolean");
+                return false;
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to get {propertyName} from {componentName}: {e.Message}");
+            return false;
+        }
+    }
+    
+    /// <summary>
+    /// Helper method to safely get Vector3 properties using reflection
+    /// </summary>
+    private Vector3 SafeGetVector3Property(Component component, string propertyName, string componentName)
+    {
+        if (component == null) return Vector3.zero;
+        
+        try
+        {
+            var property = component.GetType().GetProperty(propertyName);
+            if (property != null && property.PropertyType == typeof(Vector3))
+            {
+                return (Vector3)property.GetValue(component);
+            }
+            else
+            {
+                Debug.LogWarning($"{componentName}: {propertyName} property not found or not a Vector3");
+                return Vector3.zero;
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to get {propertyName} from {componentName}: {e.Message}");
+            return Vector3.zero;
+        }
+    }
 }

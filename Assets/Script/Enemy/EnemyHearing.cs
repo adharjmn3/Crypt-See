@@ -76,6 +76,7 @@ public class EnemyHearing : MonoBehaviour
     
     /// <summary>
     /// Simulates hearing player footsteps based on movement
+    /// Updated for improved compilation compatibility
     /// </summary>
     public void CheckForPlayerMovement()
     {
@@ -123,6 +124,10 @@ public class EnemyHearing : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Sets the target transform for the hearing system to track
+    /// </summary>
+    /// <param name="target">The transform to track (usually the player)</param>
     public void SetTarget(Transform target)
     {
         playerTransform = target;

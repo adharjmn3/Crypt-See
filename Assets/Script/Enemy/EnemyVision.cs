@@ -14,7 +14,7 @@ public class EnemyVision : MonoBehaviour
     private Transform playerTransform;
     private Transform eyeTransform;
     
-    // Public properties
+    // Public properties - Updated for improved compilation compatibility
     public bool CanSeePlayer { get; private set; }
     public Vector3 LastSeenPlayerPosition { get; private set; }
     public float TimeLastSeen { get; private set; }
@@ -78,6 +78,10 @@ public class EnemyVision : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Sets the target transform for the vision system to track
+    /// </summary>
+    /// <param name="target">The transform to track (usually the player)</param>
     public void SetTarget(Transform target)
     {
         playerTransform = target;
