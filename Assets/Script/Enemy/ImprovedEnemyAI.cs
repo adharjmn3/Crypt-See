@@ -28,12 +28,25 @@ public class ImprovedEnemyAI : Agent
     [Tooltip("How long the agent remembers the player's last known position.")]
     [SerializeField] private float memoryDuration = 10f;
 
+    [Header("Detection System")]
+    [Tooltip("How fast the detection level increases when seeing player.")]
+    [SerializeField] private float detectionSpeed = 2f;
+    [Tooltip("How fast the detection level decreases when not seeing player.")]
+    [SerializeField] private float detectionDecaySpeed = 1f;
+    [Tooltip("Maximum detection level (100 = fully detected).")]
+    [SerializeField] private float maxDetectionLevel = 100f;
+    [Tooltip("Detection level threshold to start combat.")]
+    [SerializeField] private float combatThreshold = 80f;
+    [Tooltip("Detection level threshold to start investigating.")]
+    [SerializeField] private float investigateThreshold = 30f;
+
     // --- Component References ---
     private NavMeshAgent navAgent;
     private EnemyStats enemyStats;
     private EnemyShoot enemyShoot;
     private EnemyVision enemyVision;
     private EnemyHearing enemyHearing;
+    private Awareness awarenessSystem;
     private Transform agentTransform;
 
     // --- State Tracking ---
@@ -43,8 +56,21 @@ public class ImprovedEnemyAI : Agent
     private float memoryTimer;
     private bool hasMemoryOfPlayer => memoryTimer > 0;
 
+    // --- Detection System ---
+    private float currentDetectionLevel = 0f;
+    private DetectionState detectionState = DetectionState.Unaware;
+
     // --- Target Management ---
     private Transform currentTarget;
+
+    // Detection states for better AI behavior
+    public enum DetectionState
+    {
+        Unaware,        // Green light - not detected
+        Investigating,  // Yellow light - suspicious
+        Detected,       // Red light - player spotted
+        Combat          // Flashing red - attacking
+    }
 
     public override void Initialize()
     {
@@ -54,6 +80,7 @@ public class ImprovedEnemyAI : Agent
         enemyShoot = GetComponent<EnemyShoot>();
         enemyVision = GetComponent<EnemyVision>();
         enemyHearing = GetComponent<EnemyHearing>();
+        awarenessSystem = GetComponent<Awareness>();
         agentTransform = transform;
 
         // Validate critical components
@@ -112,10 +139,35 @@ public class ImprovedEnemyAI : Agent
         lastKnownPlayerPosition = Vector3.zero;
         currentTarget = null;
         
+        // Reset detection system
+        currentDetectionLevel = 0f;
+        detectionState = DetectionState.Unaware;
+        
         // Disable shooting initially
         if (enemyShoot != null)
         {
             enemyShoot.enabled = false;
+        }
+        
+        // Training-specific resets
+        ResetTrainingState();
+    }
+
+    /// <summary>
+    /// Reset training-specific state
+    /// </summary>
+    private void ResetTrainingState()
+    {
+        // Reset cumulative reward for this episode
+        SetReward(0f);
+        
+        // Reset step count for this episode
+        StepCount = 0;
+        
+        // Log episode start for debugging
+        if (Academy.Instance.IsCommunicatorOn)
+        {
+            Debug.Log($"{gameObject.name}: Episode {CompletedEpisodes + 1} started");
         }
     }
 
@@ -176,6 +228,10 @@ public class ImprovedEnemyAI : Agent
         sensor.AddObservation(canSeePlayer ? 1f : 0f);
         sensor.AddObservation(canHearPlayer ? 1f : 0f);
         sensor.AddObservation(hasMemoryOfPlayer ? 1f : 0f);
+        
+        // --- Detection system information ---
+        sensor.AddObservation(currentDetectionLevel / maxDetectionLevel); // Normalized detection level
+        sensor.AddObservation((int)detectionState / 3f); // Normalized detection state
         
         // Memory information
         if (hasMemoryOfPlayer)
@@ -294,6 +350,9 @@ public class ImprovedEnemyAI : Agent
         // Update sensor information
         UpdateSensorInfo();
         
+        // Update detection system
+        UpdateDetectionSystem();
+        
         // Handle rotation towards current target
         if (currentTarget != null)
         {
@@ -326,6 +385,114 @@ public class ImprovedEnemyAI : Agent
                 lastKnownPlayerPosition = lastHeardPos;
                 memoryTimer = memoryDuration;
             }
+        }
+    }
+
+    private void UpdateDetectionSystem()
+    {
+        float previousDetectionLevel = currentDetectionLevel;
+        
+        // Increase detection when seeing or hearing player
+        if (canSeePlayer)
+        {
+            // Direct line of sight - fastest detection
+            currentDetectionLevel += detectionSpeed * Time.deltaTime * 2f;
+        }
+        else if (canHearPlayer)
+        {
+            // Sound detection - slower than visual
+            currentDetectionLevel += detectionSpeed * Time.deltaTime * 0.5f;
+        }
+        else if (hasMemoryOfPlayer)
+        {
+            // Investigating based on memory - very slow increase
+            currentDetectionLevel += detectionSpeed * Time.deltaTime * 0.2f;
+        }
+        else
+        {
+            // Decay detection when no stimulus
+            currentDetectionLevel -= detectionDecaySpeed * Time.deltaTime;
+        }
+        
+        // Clamp detection level
+        currentDetectionLevel = Mathf.Clamp(currentDetectionLevel, 0f, maxDetectionLevel);
+        
+        // Update detection state based on level
+        DetectionState previousState = detectionState;
+        UpdateDetectionState();
+        
+        // Update awareness system if available
+        UpdateAwarenessSystem();
+        
+        // Trigger state change events
+        if (previousState != detectionState)
+        {
+            OnDetectionStateChanged(previousState, detectionState);
+        }
+    }
+
+    private void UpdateDetectionState()
+    {
+        if (currentDetectionLevel >= combatThreshold)
+        {
+            detectionState = DetectionState.Combat;
+        }
+        else if (currentDetectionLevel >= investigateThreshold && (canSeePlayer || canHearPlayer))
+        {
+            detectionState = DetectionState.Detected;
+        }
+        else if (currentDetectionLevel > 0f || hasMemoryOfPlayer)
+        {
+            detectionState = DetectionState.Investigating;
+        }
+        else
+        {
+            detectionState = DetectionState.Unaware;
+        }
+    }
+
+    private void UpdateAwarenessSystem()
+    {
+        if (awarenessSystem != null && awarenessSystem.enemyNPC != null)
+        {
+            // Map our detection level to the EnemyNPC tension system
+            awarenessSystem.enemyNPC.tensionMeter = currentDetectionLevel;
+            
+            // Update max tension if needed
+            if (awarenessSystem.enemyNPC.maxTensionMeter < maxDetectionLevel)
+            {
+                awarenessSystem.enemyNPC.maxTensionMeter = maxDetectionLevel;
+            }
+        }
+    }
+
+    private void OnDetectionStateChanged(DetectionState previousState, DetectionState newState)
+    {
+        switch (newState)
+        {
+            case DetectionState.Unaware:
+                Debug.Log($"{gameObject.name}: Lost interest in player");
+                break;
+            case DetectionState.Investigating:
+                Debug.Log($"{gameObject.name}: Something seems suspicious...");
+                break;
+            case DetectionState.Detected:
+                Debug.Log($"{gameObject.name}: Player spotted!");
+                break;
+            case DetectionState.Combat:
+                Debug.Log($"{gameObject.name}: Engaging target!");
+                break;
+        }
+        
+        // Reward/penalty for detection state changes
+        switch (newState)
+        {
+            case DetectionState.Detected:
+                AddReward(0.1f); // Reward for spotting player
+                break;
+            case DetectionState.Combat:
+                AddReward(0.2f); // Larger reward for full detection
+                break;
         }
     }
 
@@ -416,19 +583,27 @@ public class ImprovedEnemyAI : Agent
                 break;
                 
             case 1: // Shoot
-                if (enemyShoot != null && canSeePlayer)
+                // Only allow shooting if detection level is high enough
+                if (enemyShoot != null && detectionState >= DetectionState.Detected && canSeePlayer)
                 {
                     enemyShoot.enabled = true;
                     bool shotFired = enemyShoot.TryShoot();
                     if (shotFired)
                     {
                         AddReward(0.2f); // Reward for successful shot
+                        // Shooting maintains high detection level
+                        currentDetectionLevel = Mathf.Max(currentDetectionLevel, combatThreshold);
                     }
+                }
+                else
+                {
+                    if (enemyShoot != null)
+                        enemyShoot.enabled = false;
                 }
                 break;
                 
             case 2: // Aim only (prepare to shoot)
-                if (enemyShoot != null)
+                if (enemyShoot != null && detectionState >= DetectionState.Investigating)
                 {
                     enemyShoot.enabled = true;
                     // Don't actually shoot, just prepare
@@ -487,8 +662,8 @@ public class ImprovedEnemyAI : Agent
         
         float distanceToPlayer = Vector3.Distance(agentTransform.position, playerTarget.position);
         
-        // Reward for maintaining optimal combat distance
-        if (canSeePlayer)
+        // Reward for maintaining optimal combat distance when in combat
+        if (detectionState == DetectionState.Combat)
         {
             float distanceFromOptimal = Mathf.Abs(distanceToPlayer - optimalCombatDistance);
             if (distanceFromOptimal <= distanceTolerance)
@@ -501,14 +676,32 @@ public class ImprovedEnemyAI : Agent
             }
         }
         
-        // Reward for keeping track of player
+        // Reward for detection system progression
+        switch (detectionState)
+        {
+            case DetectionState.Investigating:
+                AddReward(0.002f); // Small reward for being alert
+                break;
+            case DetectionState.Detected:
+                AddReward(0.005f); // Medium reward for spotting player
+                break;
+            case DetectionState.Combat:
+                AddReward(0.008f); // High reward for combat readiness
+                break;
+        }
+        
+        // Reward for keeping track of player based on detection method
         if (canSeePlayer)
         {
-            AddReward(0.005f); // Small reward for maintaining sight
+            AddReward(0.005f); // Reward for visual contact
+        }
+        else if (canHearPlayer)
+        {
+            AddReward(0.003f); // Smaller reward for audio contact
         }
         else if (hasMemoryOfPlayer)
         {
-            AddReward(0.002f); // Smaller reward for having memory
+            AddReward(0.001f); // Smallest reward for memory
         }
         
         // Penalty for taking damage (if health decreased)
@@ -546,6 +739,19 @@ public class ImprovedEnemyAI : Agent
     public bool HasPlayerMemory() => hasMemoryOfPlayer;
     public Vector3 GetLastKnownPlayerPosition() => lastKnownPlayerPosition;
     public Transform GetCurrentTarget() => currentTarget;
+    
+    // Detection system accessors
+    public float GetDetectionLevel() => currentDetectionLevel;
+    public float GetDetectionPercentage() => currentDetectionLevel / maxDetectionLevel;
+    public DetectionState GetDetectionState() => detectionState;
+    public bool IsInCombat() => detectionState == DetectionState.Combat;
+    public bool IsAlerted() => detectionState >= DetectionState.Investigating;
+
+    // Training-specific methods
+    public void SetDetectionLevel(float level) => currentDetectionLevel = Mathf.Clamp(level, 0f, maxDetectionLevel);
+    public void ForceDetectionState(DetectionState state) => detectionState = state;
+    public int GetEpisodeCount() => CompletedEpisodes;
+    public float GetEpisodeReward() => GetCumulativeReward();
     
     /// <summary>
     /// Helper method to safely set up component targets using reflection if needed
