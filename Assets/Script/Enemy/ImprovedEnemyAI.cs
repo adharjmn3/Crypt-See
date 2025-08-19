@@ -161,8 +161,8 @@ public class ImprovedEnemyAI : Agent
         // Reset cumulative reward for this episode
         SetReward(0f);
         
-        // Reset step count for this episode
-        StepCount = 0;
+        // Note: StepCount is automatically managed by ML-Agents
+        // It will reset to 0 when OnEpisodeBegin() is called
         
         // Log episode start for debugging
         if (Academy.Instance.IsCommunicatorOn)
