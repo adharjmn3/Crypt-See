@@ -44,10 +44,10 @@ public class LightBehaviour : MonoBehaviour
             initialFalloffIntensity = light2D.falloffIntensity;
             initialInnerSpotAngle = light2D.pointLightInnerAngle;
             initialOuterSpotAngle = light2D.pointLightOuterAngle;
+            // Disable the light at start for optimization
+            light2D.enabled = false;
         }
-
-        // Start the subtle flicker effect
-        StartCoroutine(SubtleFlicker());
+        // Subtle flicker will be started when the light is enabled by the player.
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -156,8 +156,7 @@ public class LightBehaviour : MonoBehaviour
 
         isFlickering = false;
 
-        // Restart the subtle flicker effect
-        StartCoroutine(SubtleFlicker());
+    // Subtle flicker will be started when the light is enabled by the player.
     }
 
     private void RestoreLightProperties()
@@ -226,7 +225,9 @@ public class LightBehaviour : MonoBehaviour
         {
             light2D.enabled = false;
         }
-        Debug.Log($"Light {gameObject.name} has been disabled.");
+    // Stop subtle flicker when disabled
+    StopAllCoroutines();
+    Debug.Log($"Light {gameObject.name} has been disabled.");
     }
 
     // Method to enable the light
@@ -236,6 +237,9 @@ public class LightBehaviour : MonoBehaviour
         {
             light2D.enabled = true;
         }
+        // Start subtle flicker when enabled
+        if (!isFlickering && !isBroken)
+            StartCoroutine(SubtleFlicker());
         Debug.Log($"Light {gameObject.name} has been enabled.");
     }
 }
